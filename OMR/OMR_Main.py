@@ -6,8 +6,8 @@ import utlis
 ########################################################################
 webCamFeed = True
 pathImage = "5.jpg"
-cap = cv2.VideoCapture(1)
-cap.set(10,160)
+# cap = cv2.VideoCapture(1)
+# cap.set(10,160)
 heightImg = 700
 widthImg  = 700
 questions=5
@@ -20,8 +20,7 @@ count=0
 
 while True:
 
-    if webCamFeed:success, img = cap.read()
-    else:img = cv2.imread(pathImage)
+    img = cv2.imread(pathImage)
     img = cv2.resize(img, (widthImg, heightImg)) # RESIZE IMAGE
     imgFinal = img.copy()
     imgBlank = np.zeros((heightImg,widthImg, 3), np.uint8) # CREATE A BLANK IMAGE FOR TESTING DEBUGGING IF REQUIRED
