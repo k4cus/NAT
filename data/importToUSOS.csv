@@ -1,0 +1,4 @@
+os_id;imie;nazwisko;zerówka;komentarz;komentarz dla studenta;pierwszy termin;kolejny komentarz
+123456;Jan;Kowalski;4;;;;
+123457;Józef;Kowalski;;nie dopuszczony;"""cudzysłów""";3;
+123458;Jerzy;Kowalski;2;;"a;b;c";2;
