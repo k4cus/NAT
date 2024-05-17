@@ -41,10 +41,15 @@ with open("../data/exportFromUSOS.csv") as csv_file:
 
 print(data)
 
+export_csv = ""
 # os_id;imie;nazwisko;zerówka;komentarz;komentarz dla studenta;pierwszy termin;kolejny komentarz
 for student in data:
     if student[1] in results.keys():
         # print("match")
-        line = ','.join([student[0], student[2], student[3]])  # TODO add more
+        line = ';'.join([student[0], student[2], student[3], "", "", "", "", ""])  # TODO add more
+    export_csv += (line + "\n")
 
+print(export_csv)
 
+with open("../data/test_results.csv", "w") as csv_file:
+    csv_file.write(export_csv)
