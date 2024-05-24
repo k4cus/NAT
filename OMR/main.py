@@ -4,8 +4,11 @@ import utlis
 import USOS_utils as usos_utils
 
 # TODO ###################
-# usos integration
-# rewrite latex
+# 1. Fix latex
+# 2. Find empty responses
+# 3. Number of questions
+# 4. Video capture
+# 5. wybór grupy
 
 ########################################################################
 webcam_feed = False
@@ -37,6 +40,7 @@ def load_image(path, webcam_feed):
         img = cv2.imread(path)
     return img
 
+
 def remove_shadows(img):
     rgb_planes = cv2.split(img)
 
@@ -53,6 +57,7 @@ def remove_shadows(img):
     result = cv2.merge(result_planes)
     result_norm = cv2.merge(result_norm_planes)
     return result_norm
+
 
 def preprocess_image(img):
     img = cv2.resize(img, (widthImg, heightImg))
@@ -146,6 +151,7 @@ def get_answers(img, img_answers_data, is_index=False):
 
 
 def omr_read_correct_answers():
+    # function reads correct answers from an answer sheet
     img = load_image(path_to_image, webcam_feed)
     img_no_shadows = remove_shadows(img)
     img_preprocessed = preprocess_image(img_no_shadows)
@@ -166,7 +172,7 @@ def omr_read_correct_answers():
             images_grid.append(draw_grid(threshold_image, is_index=True))
             i = 0
         else:
-            images_grid.append(draw_grid(threshold_image, is_index=False)) # TODO delete unnecessary data
+            images_grid.append(draw_grid(threshold_image, is_index=False))  # TODO delete unnecessary data
             i += 1
 
     images_answers = []
@@ -199,13 +205,13 @@ def omr_read_correct_answers():
         index_answers.append(str(char.index(max(char))-2))
     index_txt = "".join(index_answers)
 
-
     cv2.waitKey(0)
 
     return index_txt, full_answers
 
 
 def omr_grade(correct_answers):
+    # function grades answers based on the correct answers in the argument
     img = load_image(path_to_image, webcam_feed)
     img_no_shadows = remove_shadows(img)
     img_preprocessed = preprocess_image(img_no_shadows)
@@ -226,7 +232,7 @@ def omr_grade(correct_answers):
             images_grid.append(draw_grid(threshold_image, is_index=True))
             i = 0
         else:
-            images_grid.append(draw_grid(threshold_image, is_index=False)) # TODO delete unnecessary data
+            images_grid.append(draw_grid(threshold_image, is_index=False))  # TODO delete unnecessary data
             i += 1
 
     images_answers = []
@@ -251,7 +257,7 @@ def omr_grade(correct_answers):
         for a in l:
             full_answers.append(a)
     points, score = utlis.score(correct_answers, full_answers)
-    print("\nOdpowiedzi:         ",full_answers)
+    print("\nOdpowiedzi:         ", full_answers)
 
     # read the index
     index_answer = images_answers[-1]
@@ -266,8 +272,9 @@ def omr_grade(correct_answers):
     return index_txt, score
 
 
-index, answers = omr_read_correct_answers()
+_, answers = omr_read_correct_answers()
 print("\nPoprawne odpowiedzi:", answers)
+
 index, score = omr_grade(answers)
 print("\nIndeks:", index, "\nWynik:", score)
 
