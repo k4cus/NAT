@@ -3,5 +3,7 @@
     "menu-test": "Test",
     "menu-keys": "Answer keys",
     "menu-answers": "Student answers",
+    "menu-results": "Results",
+    "menu-settings": "Settings",
     "get-drink": "Get drink!"
 }
