@@ -70,4 +70,5 @@ class mainModel:
         for item in os.listdir(examsFolder):
             if os.path.isdir(examsFolder + "/" + item):
                 folderList.append(item)
+        folderList.sort(reverse=True) # newest exams on top
         return folderList

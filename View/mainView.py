@@ -32,7 +32,7 @@ class mainView:
             settingsTab(controller, self.t),
             grayedTab(controller, self.t)
         ]
-        self.currentlyDisplayedTab = self.tabs[self.currentlyDisplayedTabIndex].main()
+        self.currentlyDisplayedTab = self.tabs[self.currentlyDisplayedTabIndex]
 
     def run(self):
         ft.app(self.main)
@@ -46,7 +46,7 @@ class mainView:
         print("WIDOK - aktualizuję okno")
         t = self.t
         self.page.title = self.t('title') + " - " + self.controller.getExamName() if self.controller.getExamName() is not None else self.t('title')
-        self.page.clean()
+        tabContent = self.currentlyDisplayedTab.main() # moved here to prevent visible rendering
         rail = ft.NavigationRail(
             selected_index=self.currentlyDisplayedTabIndex,
             width=100,
@@ -86,13 +86,13 @@ class mainView:
             on_change=self.onTabChange,
             # expand=True,
         )
-
+        self.page.clean()
         self.page.add(
             ft.Row(
                 [
                     rail,
                     ft.VerticalDivider(width=1),
-                    self.currentlyDisplayedTab
+                    tabContent
                 ],
                 alignment=ft.MainAxisAlignment.START,
                 expand=True,
@@ -103,9 +103,9 @@ class mainView:
     def onTabChange(self, e):
         self.currentlyDisplayedTabIndex = e.control.selected_index
         if (self.currentlyDisplayedTabIndex > 0) and self.controller.getExamName() is None:
-            self.currentlyDisplayedTab = self.tabs[5].main()
+            self.currentlyDisplayedTab = self.tabs[5]
         else:
-            self.currentlyDisplayedTab = self.tabs[self.currentlyDisplayedTabIndex].main()
+            self.currentlyDisplayedTab = self.tabs[self.currentlyDisplayedTabIndex]
         self.Update()
 
 
