@@ -27,3 +27,12 @@ class mainController:
 
     def run(self):
         self.view.run()  # main program loop
+
+    def getExamName(self):
+        return self.model.getExamName()
+
+    def onExamOpened(self):
+        return self.view.onExamOpened()
+
+    def UpdateView(self):
+        self.view.Update()

@@ -39,12 +39,13 @@ class mainView:
 
     def main(self, page: ft.Page):
         self.page = page  # widget root
-        self.page.title = self.t('title')
         self.page.vertical_alignment = ft.MainAxisAlignment.CENTER
-        self.drawMainWindow()
+        self.Update()
 
-    def drawMainWindow(self):
+    def Update(self):
+        print("WIDOK - aktualizuję okno")
         t = self.t
+        self.page.title = self.t('title') + " - " + self.controller.getExamName() if self.controller.getExamName() is not None else self.t('title')
         self.page.clean()
         rail = ft.NavigationRail(
             selected_index=self.currentlyDisplayedTabIndex,
@@ -97,17 +98,14 @@ class mainView:
                 expand=True,
             )
         )
+        self.page.update()
 
     def onTabChange(self, e):
         self.currentlyDisplayedTabIndex = e.control.selected_index
-        examOpenedOrCreated = False
-        if (self.currentlyDisplayedTabIndex > 0) and not examOpenedOrCreated:
+        if (self.currentlyDisplayedTabIndex > 0) and self.controller.getExamName() is None:
             self.currentlyDisplayedTab = self.tabs[5].main()
         else:
             self.currentlyDisplayedTab = self.tabs[self.currentlyDisplayedTabIndex].main()
+        self.Update()
 
-        self.drawMainWindow()
 
-    def Update(self):
-        print("WIDOK - aktualizuję okno")
-        self.page.update()

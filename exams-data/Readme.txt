@@ -1,0 +1,1 @@
+In this folder exams data is stored.
