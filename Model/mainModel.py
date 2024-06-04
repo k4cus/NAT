@@ -21,3 +21,9 @@ class mainModel:
         time.sleep(2)  # simulate long task
         print("MODEL - Loteria zakończona, przekazuje wynik do kontrolera")
         self.controller.onDrinkSuggested(drink)
+
+    def createNewExam(self, name):
+        print("MODEL - Tworzę nowy folder z egzaminem o nazwie: " + name)
+
+    def openExistingExam(self, name):
+        print("MODEL - Otwieram folder z egzaminem o nazwie: " + name)

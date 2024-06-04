@@ -3,10 +3,11 @@ from flet_core import TextAlign
 import i18n
 
 from View.tabs.answers import answersTab
+from View.tabs.grayed import grayedTab
 from View.tabs.keys import keysTab
 from View.tabs.results import resultsTab
 from View.tabs.settings import settingsTab
-from View.tabs.test import testTab
+from View.tabs.exam import examTab
 
 
 class mainView:
@@ -24,11 +25,12 @@ class mainView:
 
         self.currentlyDisplayedTabIndex = 0
         self.tabs = [
-            testTab(controller, self.t),
+            examTab(controller, self.t),
             keysTab(controller, self.t),
             answersTab(controller, self.t),
             resultsTab(controller, self.t),
-            settingsTab(controller, self.t)
+            settingsTab(controller, self.t),
+            grayedTab(controller, self.t)
         ]
         self.currentlyDisplayedTab = self.tabs[self.currentlyDisplayedTabIndex].main()
 
@@ -37,7 +39,7 @@ class mainView:
 
     def main(self, page: ft.Page):
         self.page = page  # widget root
-        self.page.title = "NAT - PWr grading tool"
+        self.page.title = self.t('title')
         self.page.vertical_alignment = ft.MainAxisAlignment.CENTER
         self.drawMainWindow()
 
@@ -55,27 +57,27 @@ class mainView:
             group_alignment=-0.9,
             destinations=[
                 ft.NavigationRailDestination(
-                    icon=ft.icons.ADD_CARD,
-                    selected_icon=ft.icons.ADD,
-                    label_content=ft.Text(t('menu-test'), text_align=TextAlign.CENTER),
+                    icon=ft.icons.START,
+                    selected_icon=ft.icons.START,
+                    label_content=ft.Text(t('menu-exam'), text_align=TextAlign.CENTER),
                 ),
                 ft.NavigationRailDestination(
-                    icon_content=ft.Icon(ft.icons.BOOKMARK_BORDER),
-                    selected_icon_content=ft.Icon(ft.icons.BOOKMARK),
+                    icon_content=ft.Icon(ft.icons.KEY),
+                    selected_icon_content=ft.Icon(ft.icons.KEY),
                     label_content=ft.Text(t('menu-keys'), text_align=TextAlign.CENTER),
                 ),
                 ft.NavigationRailDestination(
-                    icon_content=ft.Icon(ft.icons.BOOKMARK_BORDER),
-                    selected_icon_content=ft.Icon(ft.icons.BOOKMARK),
+                    icon_content=ft.Icon(ft.icons.QUESTION_ANSWER),
+                    selected_icon_content=ft.Icon(ft.icons.QUESTION_ANSWER),
                     label_content=ft.Text(t('menu-answers'), text_align=TextAlign.CENTER),
                 ),
                 ft.NavigationRailDestination(
-                    icon_content=ft.Icon(ft.icons.BOOKMARK_BORDER),
-                    selected_icon_content=ft.Icon(ft.icons.BOOKMARK),
+                    icon_content=ft.Icon(ft.icons.FACT_CHECK_ROUNDED),
+                    selected_icon_content=ft.Icon(ft.icons.FACT_CHECK_ROUNDED),
                     label_content=ft.Text(t("menu-results"), text_align=TextAlign.CENTER),
                 ),
                 ft.NavigationRailDestination(
-                    icon=ft.icons.SETTINGS_OUTLINED,
+                    icon=ft.icons.SETTINGS,
                     selected_icon_content=ft.Icon(ft.icons.SETTINGS),
                     label_content=ft.Text(t('menu-settings'), text_align=TextAlign.CENTER),
                 ),
@@ -98,8 +100,12 @@ class mainView:
 
     def onTabChange(self, e):
         self.currentlyDisplayedTabIndex = e.control.selected_index
-        self.currentlyDisplayedTab = self.tabs[self.currentlyDisplayedTabIndex].main()
-        print("Current tab: ", self.currentlyDisplayedTabIndex)
+        examOpenedOrCreated = False
+        if (self.currentlyDisplayedTabIndex > 0) and not examOpenedOrCreated:
+            self.currentlyDisplayedTab = self.tabs[5].main()
+        else:
+            self.currentlyDisplayedTab = self.tabs[self.currentlyDisplayedTabIndex].main()
+
         self.drawMainWindow()
 
     def Update(self):
