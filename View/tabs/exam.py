@@ -28,17 +28,23 @@ class examTab:
             [
                 ft.Row(
                     [
-                        ft.ElevatedButton(text=t("new-exam"), on_click=self.controller.createNewExam, data="nazwa_egzaminu"),
-                        # ft.ElevatedButton(text=t("open-existing-exam"), on_click=self.controller.openExistingExam, data="nazwa_egzaminu"),
+                        ft.Column(
+                            [
+                                ft.Row(
+                                    [
+                                        ft.Text("Lista egzaminów:", theme_style=ft.TextThemeStyle.TITLE_SMALL),
+                                        ft.ElevatedButton(text=t("new-exam"), on_click=self.controller.createNewExam, data="nazwa_egzaminu"),
+                                    ],
+                                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                                    expand=False
+                                ),
+                                lv
+                            ],
+                            alignment=ft.MainAxisAlignment.START,
+                            expand=True
+                        )
                     ],
-                    # alignment=ft.MainAxisAlignment.CENTER,
-                    expand=True
-                ),
-                ft.Row(
-                    [
-                        lv,
-                    ],
-                    alignment=ft.MainAxisAlignment.START,
+                    alignment=ft.MainAxisAlignment.CENTER,
                     expand=True
                 ),
             ],
