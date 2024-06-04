@@ -49,7 +49,12 @@ class mainModel:
         self.notifyObservers()
 
     def openExistingExam(self, name):
-        print("MODEL - Otwieram folder z egzaminem o nazwie: " + name)
+        folderToOpen = examsFolder + "/" + name + "/"
+        if os.path.exists(folderToOpen):
+            print("MODEL - Otwieram folder z egzaminem o nazwie: " + name)
+            self.data = examData(folderToOpen)
+        else:
+            print("MODEL - Nie ma takiego folderu z egzaminem: " + name)
         self.notifyObservers()
 
     def getExamName(self):
@@ -59,3 +64,10 @@ class mainModel:
 
     def notifyObservers(self):
         self.controller.UpdateView()
+
+    def getExamsList(self):
+        folderList = []
+        for item in os.listdir(examsFolder):
+            if os.path.isdir(examsFolder + "/" + item):
+                folderList.append(item)
+        return folderList

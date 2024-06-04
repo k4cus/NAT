@@ -31,6 +31,9 @@ class mainController:
     def getExamName(self):
         return self.model.getExamName()
 
+    def getExamsList(self):
+        return self.model.getExamsList()
+
     def onExamOpened(self):
         return self.view.onExamOpened()
 
