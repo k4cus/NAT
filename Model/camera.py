@@ -8,7 +8,7 @@ class camera:
         self.cameraInputIndex = 0
 
     def initialize(self):
-        self.cameraInputIndex = self.controller.getSettings()['cameraIndex']
+        self.cameraInputIndex = self.controller.getSettings()['cameraIndex']  # this must be executed after model is initialized
 
     def getCameraInputIndex(self):
         print("get " + str(self.cameraInputIndex))
