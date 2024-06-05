@@ -1,0 +1,14 @@
+{
+    "title": "NAT - PWr grading tool",
+    "menu-exam": "Exam",
+    "menu-keys": "Answer keys",
+    "menu-answers": "Student answers",
+    "menu-results": "Results",
+    "menu-settings": "Settings",
+    "exam-not-selected": "First, create a new exam or open an existing one",
+    "new-exam": "New exam",
+    "open-existing-exam": "Open existing exam",
+    "open": "Open: ",
+    "opened": "Currently opened: ",
+    "get-drink": "Get drink!"
+}
