@@ -131,3 +131,36 @@ def score(correct, answers):
     score = 100 * points/num_of_questions
     return points, score
 
+
+def find_contours(img, num_rectangles):
+    img_canny = cv2.Canny(img, 10, 170)
+
+    img_contours = img.copy()
+    contours, hierarchy = cv2.findContours(img_canny, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    cv2.drawContours(img_contours, contours, -1, (0, 255, 0), 10)
+    rect_con = rectContour(contours)
+
+    biggest_contours = []
+    if num_rectangles > len(rect_con):
+        num_rectangles = len(rect_con)
+    if len(rect_con) > 0:
+        for i in range(num_rectangles):
+            #print(i)
+            biggest_contours.append(getCornerPoints(rect_con[i]))
+
+    return biggest_contours
+
+
+def image_warping(img_contours, img, widthImg, heightImg):
+    if img_contours.size == 0:
+        print("Contour size is zero.")
+        return 0
+    else:
+        img_contours = reorder(img_contours)
+        pts1 = np.float32(img_contours)
+        pts2 = np.float32([[0, 0], [widthImg, 0], [0, heightImg], [widthImg, heightImg]])
+        matrix = cv2.getPerspectiveTransform(pts1, pts2)
+        image_warped = cv2.warpPerspective(img, matrix, (widthImg, heightImg))
+
+        return image_warped
+
