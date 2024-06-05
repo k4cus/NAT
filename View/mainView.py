@@ -15,13 +15,14 @@ class mainView:
         self.controller = controller
         self.page = None
         self.textField = None
-        i18n.set('locale', 'pl')
-        i18n.set('fallback', 'en')
-        i18n.set('file_format', 'json')
-        i18n.set('filename_format', '{locale}.{format}')
-        i18n.set('skip_locale_root_data', True)
-        i18n.load_path.append('lang/')
-        self.t = i18n.t
+        self.i18n = i18n
+        self.i18n.set('locale', 'pl')
+        self.i18n.set('fallback', 'en')
+        self.i18n.set('file_format', 'json')
+        self.i18n.set('filename_format', '{locale}.{format}')
+        self.i18n.set('skip_locale_root_data', True)
+        self.i18n.load_path.append('lang/')
+        self.t = self.i18n.t
 
         self.currentlyDisplayedTabIndex = 0
         self.tabs = [
@@ -29,13 +30,13 @@ class mainView:
             keysTab(controller, self.t),
             answersTab(controller, self.t),
             resultsTab(controller, self.t),
-            settingsTab(controller, self.t),
+            settingsTab(controller, self.t, self),
             grayedTab(controller, self.t)
         ]
         self.currentlyDisplayedTab = self.tabs[self.currentlyDisplayedTabIndex]
 
     def run(self):
-        ft.app(self.main)
+        ft.app(self.main, assets_dir="assets")
 
     def main(self, page: ft.Page):
         self.page = page  # widget root
@@ -103,10 +104,14 @@ class mainView:
 
     def onTabChange(self, e):
         self.currentlyDisplayedTabIndex = e.control.selected_index
-        if (self.currentlyDisplayedTabIndex > 0) and self.controller.getExamName() is None:
+        if (self.currentlyDisplayedTabIndex > 0) and self.currentlyDisplayedTabIndex != 4 and self.controller.getExamName() is None:
             self.currentlyDisplayedTab = self.tabs[5]
         else:
             self.currentlyDisplayedTab = self.tabs[self.currentlyDisplayedTabIndex]
+        self.Update()
+
+    def setLanguage(self, lang):
+        self.i18n.set('locale', lang)
         self.Update()
 
 
