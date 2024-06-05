@@ -10,5 +10,7 @@
     "open-existing-exam": "Otwórz istniejący egzamin",
     "open": "Otwórz: ",
     "opened": "Obecnie otwarty: ",
-    "language" : "Język:"
+    "language" : "Język:",
+    "camera" : "Numer kamery:",
+    "camera-input": "Kamera nr "
 }

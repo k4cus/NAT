@@ -27,9 +27,30 @@ class settingsTab:
             alignment=ft.MainAxisAlignment.START,
             expand=False
         )
+
+        cameraIndexDropdown = ft.Dropdown(
+            on_change=self.setCameraIndex,
+            options=[
+                ft.dropdown.Option(text=self.t('camera-input') + " 0", key=0),
+                ft.dropdown.Option(text=self.t('camera-input') + " 1", key=1),
+                ft.dropdown.Option(text=self.t('camera-input') + " 2", key=2),
+                ft.dropdown.Option(text=self.t('camera-input') + " 3", key=3),
+            ],
+            value=self.getCameraIndex(),
+            width=200,
+        )
+        cameraRow = ft.Row(
+            [
+                ft.Text(self.t('camera')),
+                cameraIndexDropdown,
+            ],
+            alignment=ft.MainAxisAlignment.START,
+            expand=False
+        )
         content = ft.Column(
             [
                 languageRow,
+                cameraRow
             ],
             alignment=ft.MainAxisAlignment.START,
             expand=True
@@ -39,3 +60,10 @@ class settingsTab:
     def setLanguage(self, e):
         self.mainView.setLanguage(e.control.data)
 
+    def setCameraIndex(self, e):
+        isInputValid = self.controller.setCameraInputIndex(e.control._Control__attrs.get('value')[0])
+        if not isInputValid:
+            self.mainView.openAlertDialog()
+
+    def getCameraIndex(self):
+        return self.controller.getCameraInputIndex()

@@ -49,7 +49,7 @@ class mainView:
         print("WIDOK - aktualizuję okno")
         t = self.t
         self.page.title = self.t('title') + " - " + self.controller.getExamName() if self.controller.getExamName() is not None else self.t('title')
-        tabContent = self.currentlyDisplayedTab.main() # moved here to prevent visible rendering
+        tabContent = self.currentlyDisplayedTab.main()  # moved here to prevent visible rendering
         rail = ft.NavigationRail(
             selected_index=self.currentlyDisplayedTabIndex,
             width=100,
@@ -115,4 +115,22 @@ class mainView:
         self.i18n.set('locale', lang)
         self.Update()
 
+    def openAlertDialog(self):
+        self.alertDialog = ft.AlertDialog(
+            modal=True,
+            title=ft.Text("Please confirm"),
+            content=ft.Text("Do you really want to delete all those files?"),
+            actions=[
+                ft.TextButton("Yes", on_click=self.closeAlertDialog),
+                ft.TextButton("No", on_click=self.closeAlertDialog),
+            ],
+            actions_alignment=ft.MainAxisAlignment.END,
+            on_dismiss=lambda e: print("Modal dialog dismissed!"),
+        )
+        self.page.dialog = self.alertDialog
+        self.alertDialog.open = True
+        self.page.update()
 
+    def closeAlertDialog(self, a):
+        self.alertDialog.open = False
+        self.page.update()

@@ -10,5 +10,7 @@
     "open-existing-exam": "Open existing exam",
     "open": "Open: ",
     "opened": "Currently opened: ",
-    "language" : "Language:"
+    "language" : "Language:",
+    "camera" : "Video input:",
+    "camera-input": "Camera no "
 }

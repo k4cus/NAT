@@ -20,6 +20,7 @@ def checkAvaliableCameras():
     for i in range(2):
         print(i)
         vid = cv2.VideoCapture(i)
+        print("isOpened: ", vid.isOpened())
         ret, frame = vid.read()
         vid.release()
         if ret:

@@ -39,3 +39,9 @@ class mainController:
 
     def UpdateView(self):
         self.view.Update()
+
+    def setCameraInputIndex(self, index):
+        return self.model.camera.setCameraInputIndex(index)
+
+    def getCameraInputIndex(self):
+        return self.model.camera.getCameraInputIndex()
