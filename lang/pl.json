@@ -12,5 +12,7 @@
     "opened": "Obecnie otwarty: ",
     "language" : "Język:",
     "camera" : "Numer kamery:",
-    "camera-input": "Kamera nr "
+    "camera-input": "Kamera nr ",
+    "camera-error":  "Błąd kamery.",
+    "camera-error-message": "Kamera nie znaleziona."
 }

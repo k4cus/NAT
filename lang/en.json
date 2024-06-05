@@ -12,5 +12,7 @@
     "opened": "Currently opened: ",
     "language" : "Language:",
     "camera" : "Video input:",
-    "camera-input": "Camera no "
+    "camera-input": "Camera no ",
+    "camera-error":  "Camera error.",
+    "camera-error-message": "Camera not found."
 }

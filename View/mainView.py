@@ -115,17 +115,16 @@ class mainView:
         self.i18n.set('locale', lang)
         self.Update()
 
-    def openAlertDialog(self):
+    def openAlertDialog(self, title, message):
         self.alertDialog = ft.AlertDialog(
             modal=True,
-            title=ft.Text("Please confirm"),
-            content=ft.Text("Do you really want to delete all those files?"),
+            title=ft.Text(self.t(title)),
+            content=ft.Text(self.t(message)),
             actions=[
-                ft.TextButton("Yes", on_click=self.closeAlertDialog),
-                ft.TextButton("No", on_click=self.closeAlertDialog),
+                ft.TextButton("OK", on_click=self.closeAlertDialog),
             ],
             actions_alignment=ft.MainAxisAlignment.END,
-            on_dismiss=lambda e: print("Modal dialog dismissed!"),
+            on_dismiss=self.dismissAlertDialog,
         )
         self.page.dialog = self.alertDialog
         self.alertDialog.open = True
@@ -134,3 +133,6 @@ class mainView:
     def closeAlertDialog(self, a):
         self.alertDialog.open = False
         self.page.update()
+
+    def dismissAlertDialog(self, e):
+        self.Update()

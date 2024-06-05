@@ -61,9 +61,10 @@ class settingsTab:
         self.mainView.setLanguage(e.control.data)
 
     def setCameraIndex(self, e):
-        isInputValid = self.controller.setCameraInputIndex(e.control._Control__attrs.get('value')[0])
+        isInputValid = self.controller.setCameraInputIndex(int(e.control._Control__attrs.get('value')[0]))
         if not isInputValid:
-            self.mainView.openAlertDialog()
+            self.mainView.openAlertDialog('camera-error', 'camera-error-message')
+
 
     def getCameraIndex(self):
         return self.controller.getCameraInputIndex()
