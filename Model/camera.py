@@ -3,9 +3,12 @@ import cv2
 
 class camera:
 
-    def __init__(self):
+    def __init__(self, controller):
+        self.controller = controller
         self.cameraInputIndex = 0
 
+    def initialize(self):
+        self.cameraInputIndex = self.controller.getSettings()['cameraIndex']
 
     def getCameraInputIndex(self):
         print("get " + str(self.cameraInputIndex))
@@ -16,6 +19,7 @@ class camera:
         isInputValid = self.checkCameraIndex(index)
         if isInputValid:
             self.cameraInputIndex = index
+            self.controller.setSetting('cameraIndex', int(index))
         return isInputValid  # message to display in view
 
     def checkCameraIndex(self, index):

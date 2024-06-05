@@ -16,7 +16,7 @@ class mainView:
         self.page = None
         self.textField = None
         self.i18n = i18n
-        self.i18n.set('locale', 'pl')
+        self.i18n.set('locale', self.controller.getSettings()['language'])
         self.i18n.set('fallback', 'en')
         self.i18n.set('file_format', 'json')
         self.i18n.set('filename_format', '{locale}.{format}')
@@ -112,6 +112,7 @@ class mainView:
         self.Update()
 
     def setLanguage(self, lang):
+        self.controller.setSetting("language", lang)
         self.i18n.set('locale', lang)
         self.Update()
 

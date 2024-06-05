@@ -65,6 +65,5 @@ class settingsTab:
         if not isInputValid:
             self.mainView.openAlertDialog('camera-error', 'camera-error-message')
 
-
     def getCameraIndex(self):
         return self.controller.getCameraInputIndex()
