@@ -10,5 +10,9 @@
     "open-existing-exam": "Open existing exam",
     "open": "Open: ",
     "opened": "Currently opened: ",
-    "get-drink": "Get drink!"
+    "language" : "Language:",
+    "camera" : "Video input:",
+    "camera-input": "Camera no ",
+    "camera-error":  "Camera error.",
+    "camera-error-message": "Camera not found."
 }

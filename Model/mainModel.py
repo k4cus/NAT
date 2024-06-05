@@ -3,15 +3,20 @@ import random
 import threading
 import time
 
+from Model.camera import camera
 from Model.config import examsFolder, directories
 from Model.examData import examData
+from Model.storage import storage
 
 
 class mainModel:
 
     def __init__(self, controller):
+        self.storage = storage(controller)
         self.controller = controller
         self.data = None
+        self.camera = camera(self.controller)
+
 
     # def suggestDrink(self):
     #     print("MODEL - Dostałem polecenie od kontrolera - uruchamiam losowanie w osobnym wątku")
@@ -70,5 +75,5 @@ class mainModel:
         for item in os.listdir(examsFolder):
             if os.path.isdir(examsFolder + "/" + item):
                 folderList.append(item)
-        folderList.sort(reverse=True) # newest exams on top
+        folderList.sort(reverse=True)  # newest exams on top
         return folderList
