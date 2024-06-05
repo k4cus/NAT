@@ -1,0 +1,14 @@
+{
+    "title": "NAT - PWr narzędzie do oceniania",
+    "menu-exam": "Egzamin",
+    "menu-keys": "Klucze odpowiedzi",
+    "menu-answers": "Odpowiedzi studentów",
+    "menu-results": "Wyniki",
+    "menu-settings": "Ustawienia",
+    "exam-not-selected": "Najpierw utwórz nowy egzamin lub otwórz istniejący",
+    "new-exam": "Nowy egzamin",
+    "open-existing-exam": "Otwórz istniejący egzamin",
+    "open": "Otwórz: ",
+    "opened": "Obecnie otwarty: ",
+    "get-drink": "Wybierz napój!"
+}
