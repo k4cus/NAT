@@ -40,6 +40,7 @@ class mainView:
     def main(self, page: ft.Page):
         self.page = page  # widget root
         self.page.vertical_alignment = ft.MainAxisAlignment.CENTER
+        self.page.theme_mode = ft.ThemeMode.LIGHT  # prevent dark mode as background colors are not themed properly yet
         self.Update()
 
     def Update(self):
