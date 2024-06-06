@@ -5,13 +5,12 @@ class keysTab:
     def __init__(self, controller, t):
         self.t = t
         self.controller = controller
-        self.textField = ft.TextField(value='keyTab', text_align=ft.TextAlign.CENTER, width=150)
 
     def main(self):
+        t = self.t
         content = ft.Column(
             [
-                self.textField,
-                ft.ElevatedButton(text="AAA!", on_click=self.controller.suggestDrink),
+                ft.ElevatedButton(text=t("keys-reading-mode"), on_click=self.controller.enterReadingMode, data="keys"),
             ],
             alignment=ft.MainAxisAlignment.START,
             expand=True

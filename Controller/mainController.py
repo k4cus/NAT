@@ -55,3 +55,12 @@ class mainController:
         settings = self.model.storage.settings
         settings[key] = value
         self.model.storage.settings = settings
+
+    def enterReadingMode(self, e):
+        data = str(e.control.data)
+        if data == "keys":
+            self.model.enterKeysReadingMode()
+        elif data == "answers":
+            self.model.enterAnswersReadingMode()
+        else:
+            print("KONTROLLER - enterReadingMode unknown data: " + data)
