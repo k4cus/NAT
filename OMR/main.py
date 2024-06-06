@@ -8,15 +8,10 @@ import time
 # TODO ###################
 # 3. Number of questions
 # 4. Video capture
-# 5. wybór grupy
-# 6. flip the answers if the right one is bigger
 
 ########################################################################
 webcam_feed = False
 path_to_image = "../data/answer_sheets/answer_sheet_5_3.png"
-
-cap = cv2.VideoCapture(0)
-cap.set(10, 160)
 
 heightImg = 2339
 widthImg = 1654
@@ -29,7 +24,6 @@ columns = 6
 num_answer_fields = 2
 
 ans_array = ["A", "B", "C", "D", "E", "F"]
-#correct_answers = ['C', 'B', 'B', 'D', 'E', 'F', 'B', 'A', 'B', 'A', 'C', 'E', 'E', 'C', 'F', 'A', 'B', 'C', 'D', 'E', 'F', 'D', 'D', 'B', 'C', 'D', 'E', 'A', 'A', 'C']
 
 points_to_check = [[15,11], [15,489], [685,11], [693,489], [15,22], [25,11]]
 white_thresh = 200
@@ -73,46 +67,41 @@ def preprocess_image(img):
 def find_page(img):
     img_copy = img
     # finds biggest contour in image
-    contour = utlis.find_contours(img, 1)
-    # print(len(contour))
-
-    # transform
-    if contour != []:
-        image_warped = utlis.image_warping(contour[0], img, 500, 700)
-    else:
-        print("No contour found")
-    # points to check
-    '''
-    image_warped[15][11] = 255
-
-    image_warped[25][11] = 255
-    image_warped[15][489] = 255
-    image_warped[685][489] = 255
-    image_warped[685][11] = 255
-    '''
-    # print(image_warped[7][5])
-    # print(image_warped[-10][-10])
-
-    wrong_format = False
-    # check if the found contour is the answer sheet and if the orientation is correct
-    i = -1
-    for point in points_to_check:
-        i += 1
-        #print(image_warped[point[0], point[1]])
-        if image_warped[point[0], point[1]] < white_thresh:
-            #print("Correct format")
-            continue
+    contour = utlis.find_contours(img, 3)
+    print(len(contour))
+    for cnt in contour:
+        print("OOOOOOOOOOOOOOOOO")
+        # transform
+        if contour != []:
+            image_warped = utlis.image_warping(cnt, img, 500, 700)
         else:
-            wrong_format = True
-            if i == 4 or i == 5:
-                #print("Wrong orientation")
-                break
-            #print("Not an answer sheet. Quitting", point)
-            break
+            print("No contour found")
+            return None
 
+        wrong_format = False
+        # check if the found contour is the answer sheet and if the orientation is correct
+        i = -1
+        for point in points_to_check:
+            i += 1
+            #print(image_warped[point[0], point[1]])
+            if image_warped[point[0], point[1]] < white_thresh:
+                #print("Correct format")
+                continue
+            else:
+                wrong_format = True
+                if i == 4 or i == 5:
+                    #print("Wrong orientation")
+                    break
+                #print("Not an answer sheet. Quitting", point)
+                break
+
+        if wrong_format:
+            continue
+        if not wrong_format:
+            break
     if wrong_format:
-        return image_warped
-        print("AAAA")
+        return None
+
     return image_warped[5:-5,5:-5]
 
 
@@ -175,13 +164,26 @@ def get_answers(img, img_answers_data, is_index=False):
 
 def omr_read_correct_answers():
     # function reads correct answers from an answer sheet
+    skip_shadows = False
     img = load_image(path_to_image, webcam_feed)
-    img = find_page(img)
+    img_preprocessed = preprocess_image(img)
+    img = find_page(img_preprocessed)
+    if img is None:
+        skip_shadows = True
+        img = remove_shadows(img_preprocessed)
+        img = find_page(img)
+        if img is None:
+            return None, None, None
     #cv2.imshow("label", img)
-    img_no_shadows = remove_shadows(img)
-    img_preprocessed = preprocess_image(img_no_shadows)
+    cv2.imshow("label", img)
+    if not skip_shadows:
+        img_preprocessed = remove_shadows(img)
 
     img_contours = utlis.find_contours(img_preprocessed, num_answer_fields + 1)
+
+    if img_contours[0][0][0][0] > img_contours[1][0][0][0]:
+        img_contours[0],img_contours[1] = img_contours[1],img_contours[0]
+
 
     images_warped = []
     for contour in img_contours:
@@ -247,13 +249,25 @@ def omr_read_correct_answers():
 
 def omr_grade(correct_answers):
     # function grades answers based on the correct answers in the argument
+    skip_shadows = False
     img = load_image(path_to_image, webcam_feed)
-    img = find_page(img)
+    img_preprocessed = preprocess_image(img)
+    img = find_page(img_preprocessed)
+    if img is None:
+        skip_shadows = True
+        img = remove_shadows(img_preprocessed)
+        img = find_page(img)
+        if img is None:
+            return None, None, None
     #cv2.imshow("label", img)
-    img_no_shadows = remove_shadows(img)
-    img_preprocessed = preprocess_image(img_no_shadows)
+    cv2.imshow("label", img)
+    if not skip_shadows:
+        img_preprocessed = remove_shadows(img)
 
     img_contours = utlis.find_contours(img_preprocessed, num_answer_fields + 1)
+
+    if img_contours[0][0][0][0] > img_contours[1][0][0][0]:
+        img_contours[0],img_contours[1] = img_contours[1],img_contours[0]
 
     images_warped = []
     for contour in img_contours:
@@ -318,11 +332,22 @@ def omr_grade(correct_answers):
     return index_txt, score, group
 
 
-_, answers, group_answers = omr_read_correct_answers()
-print("\nPoprawne odpowiedzi:", answers)
+graded = False
+type = 1 # TODO loadning correct answers
+while graded == False:
+    if type == 0:
+        _, answers, group_answers = omr_read_correct_answers()
+        print("\nPoprawne odpowiedzi:", answers)
+        if answers is not None:
+            graded = True
+    if type == 1:
+        _, answers, group_answers = omr_read_correct_answers()
+        print("\nPoprawne odpowiedzi:", answers)
 
-index, score, group = omr_grade(answers)
-print("\nIndeks:", index, "\nWynik:", score, "\nGrupa:", group)
+        index, score, group = omr_grade(answers)
+        print("\nIndeks:", index, "\nWynik:", score, "\nGrupa:", group)
+        if answers is not None and score is not None:
+            graded = True
 
 data = usos_utils.import_data()
 export_csv = usos_utils.export_data({index: score}, data, score)
