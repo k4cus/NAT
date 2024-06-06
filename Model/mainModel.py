@@ -77,3 +77,11 @@ class mainModel:
                 folderList.append(item)
         folderList.sort(reverse=True)  # newest exams on top
         return folderList
+
+    def enterKeysReadingMode(self):
+        print("MODEL - Entering keys reading mode")
+        pass  # start reading keys from camera
+
+    def enterAnswersReadingMode(self):
+        print("MODEL - Entering answers reading mode")
+        pass  # start reading exam from camera

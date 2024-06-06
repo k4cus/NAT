@@ -5,13 +5,12 @@ class answersTab:
     def __init__(self, controller, t):
         self.t = t
         self.controller = controller
-        self.textField = ft.TextField(value='answersTab', text_align=ft.TextAlign.CENTER, width=150)
 
     def main(self):
+        t = self.t
         content = ft.Column(
             [
-                self.textField,
-                ft.ElevatedButton(text="BBBB!", on_click=self.controller.suggestDrink),
+                ft.ElevatedButton(text=t("answers-reading-mode"), on_click=self.controller.enterReadingMode, data="answers"),
             ],
             alignment=ft.MainAxisAlignment.START,
             expand=True
