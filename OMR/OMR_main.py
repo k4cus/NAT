@@ -24,11 +24,11 @@ scale = 2
 heightImg = int(heightImg / scale)
 widthImg = int(widthImg / scale)
 
-rows = 15
-columns = 6
-num_answer_fields = 2
+rows = 20
+columns = 5
+num_answer_fields = 3
 
-ans_array = ["A", "B", "C", "D", "E", "F"]
+ans_array = ["A", "B", "C", "D", "E"]
 
 points_to_check = [[15,11], [15,489], [685,11], [693,489], [15,22], [25,11]]
 white_thresh = 200
@@ -64,11 +64,11 @@ def remove_shadows(img):
 
 
 def preprocess_image(img):
-    img = cv2.resize(img, (widthImg, heightImg))
-    img = cv2.GaussianBlur(img, (3, 3), 0)
+    #img = cv2.resize(img, (widthImg, heightImg))
+    #img = cv2.GaussianBlur(img, (3, 3), 0)
     normalized_img = np.zeros((800, 800))
     img = cv2.normalize(img, normalized_img, 0, 255, cv2.NORM_MINMAX)
-    img_blur = cv2.GaussianBlur(img, (5, 5), 1)
+    img_blur = cv2.GaussianBlur(img, (3, 3), 1)
     return img_blur
 
 
@@ -79,14 +79,14 @@ def find_page(img):
     img_copy = img
     # finds biggest contour in image
     contour = utlis.find_contours(img, 3)
-    print(len(contour))
+    #print(len(contour))
     for cnt in contour:
-        print("OOOOOOOOOOOOOOOOO")
+        #print("OOOOOOOOOOOOOOOOO")
         # transform
-        if contour != []:
+        if contour != [] and cv2.contourArea(cnt) > 100000:
             image_warped = utlis.image_warping(cnt, img, 500, 700)
         else:
-            print("No contour found")
+            #print("No contour found")
             return None
 
         wrong_format = False
@@ -94,7 +94,7 @@ def find_page(img):
         i = -1
         for point in points_to_check:
             i += 1
-            print(image_warped[point[0], point[1]])
+            #print(image_warped[point[0], point[1]])
             if image_warped[point[0], point[1]] < white_thresh:
                 #print("Correct format")
                 continue
@@ -112,7 +112,7 @@ def find_page(img):
             break
 
     if wrong_format:
-        print("Wrong format")
+        #print("Wrong format")
         return None
 
     if image_warped is not None:
@@ -179,34 +179,45 @@ def get_answers(img, img_answers_data, is_index=False):
 
 
 def omr_read_correct_answers(img):
-    print("Reading correct answers from image")
+    #print("Reading correct answers from image")
     # function reads correct answers from an answer sheet
     skip_shadows = False
     img_preprocessed = preprocess_image(img)
     cv2.imwrite("debugging-opencv/camera-preprocessed.png", img_preprocessed)
     img = find_page(img_preprocessed)
-    cv2.imwrite("debugging-opencv/found-page-1.png", img)
+    page_img = img
+    #cv2.imwrite("debugging-opencv/found-page-1.png", img)
     if img is None:
         skip_shadows = True
         img = remove_shadows(img_preprocessed)
-        cv2.imwrite("debugging-opencv/no-shadows-1.png", img)
+        #cv2.imwrite("debugging-opencv/no-shadows-1.png", img)
         img_preprocessed = find_page(img)
-        cv2.imwrite("debugging-opencv/found-page-2.png", img_preprocessed)
+        #cv2.imwrite("debugging-opencv/found-page-2.png", img_preprocessed)
+        page_img = img_preprocessed
         if img_preprocessed is None:
-            return None, None, None
+            return None, None, None, None
     #cv2.imshow("label", img)
     if not skip_shadows:
         img_preprocessed = remove_shadows(img)
-        cv2.imwrite("debugging-opencv/no-shadows-2.png", img_preprocessed)
+        #cv2.imwrite("debugging-opencv/no-shadows-2.png", img_preprocessed)
 
     img_contours = utlis.find_contours(img_preprocessed, num_answer_fields + 1)
+    img_contours = utlis.find_contours2(img_preprocessed, num_answer_fields + 1)
 
     if len(img_contours) < num_answer_fields + 1:
-        return None, None, None
+        return None, None, None, None
+    '''
+    #make sure that the index contour is last
+    for j in range(num_answer_fields + 1):
+        i = j
+        i2 = (j + 1) % (num_answer_fields + 1)
+        #print(i, i2)
+        if img_contours[i][0][0][1] > img_contours[i2][0][0][1]:
+            img_contours[i],img_contours[i2] = img_contours[i2],img_contours[i]
 
     if img_contours[0][0][0][0] > img_contours[1][0][0][0]:
         img_contours[0],img_contours[1] = img_contours[1],img_contours[0]
-
+    '''
 
     images_warped = []
     for contour in img_contours:
@@ -219,7 +230,7 @@ def omr_read_correct_answers(img):
 
     images_threshold = []
     for warped_image in images_warped:
-        print("contour", contour)
+        #print("contour", contour)
         images_threshold.append(apply_threshold(warped_image))
 
     images_grid = []
@@ -261,7 +272,7 @@ def omr_read_correct_answers(img):
 
     # read the index
     index_answer = images_answers[-1][:-2]
-    print(index_answer)
+    #print(index_answer)
     index_answers = []
     for char in index_answer:
         index_answers.append(str(char.index(max(char))-2))
@@ -269,36 +280,63 @@ def omr_read_correct_answers(img):
 
     group_answer = images_answers[-1][-1]
     group = group_answer.index(max(group_answer))
-    print("Grupa:",group)
+    #print("Grupa:",group)
 
-    return index_txt, full_answers, group
+    return index_txt, full_answers, group, page_img
 
 
 def omr_grade(correct_answers, img):
-    print("Reading student's answers from image")
+    #print("Reading student's answers from image")
     # function grades answers based on the correct answers in the argument
     skip_shadows = False
-    #cv2.imshow("label", img)
     img_preprocessed = preprocess_image(img)
+    cv2.imwrite("debugging-opencv/camera-preprocessed.png", img_preprocessed)
     img = find_page(img_preprocessed)
+    if img is not None:
+        cv2.imwrite("debugging-opencv/found-page-1.png", img)
     if img is None:
         skip_shadows = True
         img = remove_shadows(img_preprocessed)
-        img = find_page(img)
-        if img is None:
+        cv2.imwrite("debugging-opencv/no-shadows-1.png", img)
+        img_preprocessed = find_page(img)
+        if img_preprocessed is not None:
+            cv2.imwrite("debugging-opencv/found-page-2.png", img_preprocessed)
+        if img_preprocessed is None:
             return None, None, None
-
+    #cv2.imshow("label", img)
     if not skip_shadows:
         img_preprocessed = remove_shadows(img)
+        cv2.imwrite("debugging-opencv/no-shadows-2.png", img_preprocessed)
 
     img_contours = utlis.find_contours(img_preprocessed, num_answer_fields + 1)
+    img_contours = utlis.find_contours2(img_preprocessed, num_answer_fields + 1)
+    print("cnt found")
+    if len(img_contours) < 3:
+        return None, None, None
+
+    '''
+    #make sure that the index contour is last
+    for j in range(num_answer_fields + 1):
+        i = j
+        i2 = (j + 1) % (num_answer_fields + 1)
+        #print(i, i2)
+        if img_contours[i][0][0][1] > img_contours[i2][0][0][1]:
+            img_contours[i],img_contours[i2] = img_contours[i2],img_contours[i]
+    '''
 
     if img_contours[0][0][0][0] > img_contours[1][0][0][0]:
         img_contours[0],img_contours[1] = img_contours[1],img_contours[0]
 
+
     images_warped = []
     for contour in img_contours:
         images_warped.append(utlis.image_warping(contour, img_preprocessed, widthImg, heightImg))
+
+    im_i = 0
+    for im in images_warped:
+        print("updated warped")
+        cv2.imwrite("debugging-opencv/warped" + str(im_i) + ".png", im)
+        im_i += 1
 
     images_threshold = []
     for warped_image in images_warped:
@@ -340,7 +378,7 @@ def omr_grade(correct_answers, img):
         for a in l:
             full_answers.append(a)
     points, score = utlis.score(correct_answers, full_answers)
-    print("\nOdpowiedzi:         ", full_answers)
+    #print("\nOdpowiedzi:         ", full_answers)
 
     # read the index
     index_answer = images_answers[-1][:-2]
@@ -351,7 +389,7 @@ def omr_grade(correct_answers, img):
 
     group_answer = images_answers[-1][-1]
     group = group_answer.index(max(group_answer))
-    print("Grupa:",group)
+    #print("Grupa:",group)
 
     return index_txt, score, group
 
@@ -375,7 +413,8 @@ if __name__ == '__main__':
             print("\nPoprawne odpowiedzi:", answers)
 
             index, score, group = omr_grade(answers, path_to_image)
-            print("\nIndeks:", index, "\nWynik:", score, "\nGrupa:", group)
+            if index is not None:
+                print("\nIndeks:", index, "\nWynik:", score, "\nGrupa:", group)
             if answers is not None and score is not None:
                 graded = True
 
