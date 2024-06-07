@@ -9,6 +9,7 @@ from Model.camera import camera
 from Model.config import examsFolder, directories
 from Model.examData import examData
 from Model.storage import storage
+from Model.load import loadAnswers
 
 
 class mainModel:
@@ -18,6 +19,7 @@ class mainModel:
         self.controller = controller
         self.data = None
         self.camera = camera(self.controller)
+        self.loadAnswers = loadAnswers
 
 
     # def suggestDrink(self):
@@ -97,6 +99,7 @@ class mainModel:
 
     def enterAnswersReadingMode(self):
         print("MODEL - Entering answers reading mode")
+        self.loadAnswers.loadAnswers(self, 1)
         pass  # start reading exam from camera
 
     def readKeysFromFile(self):
