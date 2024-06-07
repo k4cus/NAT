@@ -14,5 +14,7 @@
     "camera" : "Numer kamery:",
     "camera-input": "Kamera nr ",
     "camera-error":  "Błąd kamery.",
-    "camera-error-message": "Kamera nie znaleziona."
+    "camera-error-message": "Kamera nie znaleziona.",
+    "keys-reading-mode": "Wczytaj klucze odpowiedzi z kamerya",
+    "keys-reading-file": "Wczytaj klucze odpowiedzi z pliku"
 }

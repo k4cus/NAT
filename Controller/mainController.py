@@ -62,5 +62,9 @@ class mainController:
             self.model.enterKeysReadingMode()
         elif data == "answers":
             self.model.enterAnswersReadingMode()
+        elif data == "keys-file":
+            self.model.readKeysFromFile()
+        elif data == "keys-answers":
+            self.model.readAnswersFromFile()
         else:
             print("KONTROLLER - enterReadingMode unknown data: " + data)

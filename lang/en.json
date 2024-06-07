@@ -14,5 +14,7 @@
     "camera" : "Video input:",
     "camera-input": "Camera no ",
     "camera-error":  "Camera error.",
-    "camera-error-message": "Camera not found."
+    "camera-error-message": "Camera not found.",
+    "keys-reading-mode": "Read cards with answer keys from camera",
+    "keys-reading-file": "Read cards with answer keys from file"
 }
