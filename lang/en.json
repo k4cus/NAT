@@ -16,5 +16,7 @@
     "camera-error":  "Camera error.",
     "camera-error-message": "Camera not found.",
     "keys-reading-mode": "Read cards with answer keys from camera",
-    "keys-reading-file": "Read cards with answer keys from file"
+    "keys-reading-file": "Read cards with answer keys from file",
+    "answers-reading-mode": "Read answers"
+
 }

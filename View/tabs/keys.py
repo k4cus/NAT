@@ -10,8 +10,8 @@ class keysTab:
         t = self.t
         content = ft.Column(
             [
-                ft.ElevatedButton(text=t("keys-reading-mode"), on_click=self.controller.enterReadingMode, data="keys"),
-                ft.ElevatedButton(text=t("keys-reading-file"), on_click=self.controller.enterReadingMode, data="keys-file"),
+                ft.ElevatedButton(text=t("keys-reading-mode"), on_click=self.controller.enterReadingMode, data=["keys", self.controller.getExamName()]),
+                ft.ElevatedButton(text=t("keys-reading-file"), on_click=self.controller.enterReadingMode, data=["keys-file", self.controller.getExamName()]),
             ],
             alignment=ft.MainAxisAlignment.START,
             expand=True

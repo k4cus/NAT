@@ -57,14 +57,20 @@ class mainController:
         self.model.storage.settings = settings
 
     def enterReadingMode(self, e):
-        data = str(e.control.data)
-        if data == "keys":
-            self.model.enterKeysReadingMode()
-        elif data == "answers":
-            self.model.enterAnswersReadingMode()
-        elif data == "keys-file":
-            self.model.readKeysFromFile()
-        elif data == "keys-answers":
-            self.model.readAnswersFromFile()
+        data = e.control.data
+        if data[0] == "keys":
+            self.model.enterKeysReadingMode(data[1])
+        elif data[0] == "answers":
+            self.model.enterAnswersReadingMode(data[1])
+        elif data[0] == "keys-file":
+            self.model.readKeysFromFile(data[1])
+        elif data[0] == "keys-answers":
+            self.model.readAnswersFromFile(data[1])
         else:
-            print("KONTROLLER - enterReadingMode unknown data: " + data)
+            print("KONTROLLER - enterReadingMode unknown data: " + data[0])
+
+    def getResultsImg(self, exam_name):
+        print("img path")
+        print(exam_name)
+        return self.model.getResultsImgPath(exam_name)
+

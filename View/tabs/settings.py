@@ -35,6 +35,7 @@ class settingsTab:
                 ft.dropdown.Option(text=self.t('camera-input') + " 1", key=1),
                 ft.dropdown.Option(text=self.t('camera-input') + " 2", key=2),
                 ft.dropdown.Option(text=self.t('camera-input') + " 3", key=3),
+                ft.dropdown.Option(text=self.t('camera-input') + " DEBUG", key="http://http://192.168.1.108:4747/video"),
             ],
             value=self.getCameraIndex(),
             width=200,

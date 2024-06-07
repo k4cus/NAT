@@ -82,7 +82,8 @@ class mainModel:
         folderList.sort(reverse=True)  # newest exams on top
         return folderList
 
-    def enterKeysReadingMode(self):
+    '''
+    def enterKeysReadingMode(self, exam_name):
         self.camera.openCamera()
         if self.camera.isCameraOpen():
             for i in range(10):
@@ -96,16 +97,28 @@ class mainModel:
         # here we need to process the image and store good results in mainModel
         print("MODEL - Entering keys reading mode")
         pass  # start reading keys from camera
+        '''
 
-    def enterAnswersReadingMode(self):
+
+    def enterKeysReadingMode(self, exam_name):
         print("MODEL - Entering answers reading mode")
-        self.loadAnswers.loadAnswers(self, 1)
+        self.loadAnswers.loadAnswers(self, 0, exam_name)
+        pass
+
+    def enterAnswersReadingMode(self, exam_name):
+        print("MODEL - Entering answers reading mode")
+        self.loadAnswers.loadAnswers(self, 1, exam_name)
         pass  # start reading exam from camera
 
-    def readKeysFromFile(self):
+    def readKeysFromFile(self, exam_name):
         print("MODEL - Reading keys from file")
+        self.loadAnswers.loadCorrectAnswersFromFile(self, exam_name)
         pass
 
-    def readAnswersFromFile(self):
+    def readAnswersFromFile(self, exam_name):
         print("MODEL - Reading answers from file")
         pass
+
+    def getResultsImgPath(self, exam_name):
+        r = str("../exams-data/" + exam_name + "/student_answers/")  # TODO
+        return r

@@ -135,7 +135,7 @@ def score(correct, answers):
 
 
 def find_contours(img, num_rectangles):
-    img_canny = cv2.Canny(img, 10, 170)
+    img_canny = cv2.Canny(img, 10, 230)
     cv2.imwrite("debugging-opencv/canny.png", img_canny)
     img_contours = img.copy()
     contours, hierarchy = cv2.findContours(img_canny, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
@@ -149,8 +149,42 @@ def find_contours(img, num_rectangles):
         for i in range(num_rectangles):
             #print(i)
             biggest_contours.append(getCornerPoints(rect_con[i]))
-
+            #print("aaaaa", biggest_contours[0])
     return biggest_contours
+
+def find_contours2(img, num_rectangles):
+    hardcoded_values = [
+        [
+            [[42, 308]],
+            [[164, 308]],
+            [[42, 655]],
+            [[164, 655]]
+
+        ],
+        [
+            [[199, 308]],
+            [[320, 345]],
+            [[199, 308]],
+            [[320, 655]]
+
+        ],
+        [
+            [[355, 308]],
+            [[474, 308]],
+            [[355, 655]],
+            [[474, 655]]
+
+        ],
+        [
+            [[142, 24]],
+            [[335, 24]],
+            [[142, 213]],
+            [[335, 213]]
+
+        ]
+    ]
+    hardcoded_values = np.array(hardcoded_values)
+    return hardcoded_values
 
 
 def image_warping(img_contours, img, widthImg, heightImg):

@@ -8,9 +8,11 @@ class answersTab:
 
     def main(self):
         t = self.t
+        #print(self.controller.getExamName())
         content = ft.Column(
             [
-                ft.ElevatedButton(text=t("answers-reading-mode"), on_click=self.controller.enterReadingMode, data="answers"),
+                ft.ElevatedButton(text=t("answers-reading-mode"), on_click=self.controller.enterReadingMode, data=["answers", self.controller.getExamName()]),
+
             ],
             alignment=ft.MainAxisAlignment.START,
             expand=True
