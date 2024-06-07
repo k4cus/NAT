@@ -3,10 +3,13 @@ import random
 import threading
 import time
 
+import cv2
+
 from Model.camera import camera
 from Model.config import examsFolder, directories
 from Model.examData import examData
 from Model.storage import storage
+from Model.load import loadAnswers
 
 
 class mainModel:
@@ -16,6 +19,7 @@ class mainModel:
         self.controller = controller
         self.data = None
         self.camera = camera(self.controller)
+        self.loadAnswers = loadAnswers
 
 
     # def suggestDrink(self):
@@ -79,9 +83,29 @@ class mainModel:
         return folderList
 
     def enterKeysReadingMode(self):
+        self.camera.openCamera()
+        if self.camera.isCameraOpen():
+            for i in range(10):
+                img = self.camera.getFrame()
+                # cv2.imshow("Sheep", img)
+                # cv2.waitKey(1)
+
+                print(img)
+        self.camera.closeCamera()
+        # cv2.destroyAllWindows()
+        # here we need to process the image and store good results in mainModel
         print("MODEL - Entering keys reading mode")
         pass  # start reading keys from camera
 
     def enterAnswersReadingMode(self):
         print("MODEL - Entering answers reading mode")
+        self.loadAnswers.loadAnswers(self, 1)
         pass  # start reading exam from camera
+
+    def readKeysFromFile(self):
+        print("MODEL - Reading keys from file")
+        pass
+
+    def readAnswersFromFile(self):
+        print("MODEL - Reading answers from file")
+        pass

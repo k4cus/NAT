@@ -11,6 +11,7 @@ class keysTab:
         content = ft.Column(
             [
                 ft.ElevatedButton(text=t("keys-reading-mode"), on_click=self.controller.enterReadingMode, data="keys"),
+                ft.ElevatedButton(text=t("keys-reading-file"), on_click=self.controller.enterReadingMode, data="keys-file"),
             ],
             alignment=ft.MainAxisAlignment.START,
             expand=True

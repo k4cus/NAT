@@ -1,5 +1,7 @@
 import cv2
 import numpy as np
+import sys
+sys.path.append("..")
 
 
 def stackImages(imgArray,scale,lables=[]):
@@ -134,7 +136,7 @@ def score(correct, answers):
 
 def find_contours(img, num_rectangles):
     img_canny = cv2.Canny(img, 10, 170)
-
+    cv2.imwrite("debugging-opencv/canny.png", img_canny)
     img_contours = img.copy()
     contours, hierarchy = cv2.findContours(img_canny, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     cv2.drawContours(img_contours, contours, -1, (0, 255, 0), 10)
@@ -163,4 +165,3 @@ def image_warping(img_contours, img, widthImg, heightImg):
         image_warped = cv2.warpPerspective(img, matrix, (widthImg, heightImg))
 
         return image_warped
-
