@@ -30,8 +30,9 @@ num_answer_fields = 3
 
 ans_array = ["A", "B", "C", "D", "E"]
 
-points_to_check = [[15,11], [15,489], [685,11], [693,489], [15,22], [25,11]]
-white_thresh = 200
+#points_to_check = [[15,11], [15,489], [685,11], [693,489], [15,22], [25,11]]
+points_to_check = [[10,10], [10,484], [681,11], [681,484], [10,20], [18,10]]
+white_thresh = 120
 
 
 ########################################################################
@@ -64,7 +65,6 @@ def remove_shadows(img):
 
 
 def preprocess_image(img):
-    #img = cv2.resize(img, (widthImg, heightImg))
     #img = cv2.GaussianBlur(img, (3, 3), 0)
     normalized_img = np.zeros((800, 800))
     img = cv2.normalize(img, normalized_img, 0, 255, cv2.NORM_MINMAX)
@@ -75,15 +75,14 @@ def preprocess_image(img):
 def find_page(img):
     image_warped = None
     wrong_format = False
-    points_to_check = [[15,11], [15,489], [685,11], [693,489], [15,22], [25,11]]
+    points_to_check = [[10,10], [10,484], [681,11], [681,484], [10,20], [18,10]]
     img_copy = img
     # finds biggest contour in image
     contour = utlis.find_contours(img, 3)
     #print(len(contour))
     for cnt in contour:
-        #print("OOOOOOOOOOOOOOOOO")
         # transform
-        if contour != [] and cv2.contourArea(cnt) > 100000:
+        if contour != [] and cv2.contourArea(cnt) > 90000:
             image_warped = utlis.image_warping(cnt, img, 500, 700)
         else:
             #print("No contour found")
@@ -195,7 +194,7 @@ def omr_read_correct_answers(img):
         #cv2.imwrite("debugging-opencv/found-page-2.png", img_preprocessed)
         page_img = img_preprocessed
         if img_preprocessed is None:
-            return None, None, None, None
+            return None, None, None, None, None
     #cv2.imshow("label", img)
     if not skip_shadows:
         img_preprocessed = remove_shadows(img)
@@ -205,7 +204,7 @@ def omr_read_correct_answers(img):
     img_contours = utlis.find_contours2(img_preprocessed, num_answer_fields + 1)
 
     if len(img_contours) < num_answer_fields + 1:
-        return None, None, None, None
+        return None, None, None, None, None
     '''
     #make sure that the index contour is last
     for j in range(num_answer_fields + 1):
@@ -226,7 +225,16 @@ def omr_read_correct_answers(img):
     im_i = 0
     for im in images_warped:
         cv2.imwrite("debugging-opencv/warped" + str(im_i) + ".png", im)
+        if im_i == 1:
+            print("im 1:", im)
+        if im_i != 3:
+            im_grid = utlis.drawGrid(im)
+            cv2.imwrite("debugging-opencv/warped_grid" + str(im_i) + ".png", im_grid[0])
+        else:
+            im_grid = utlis.drawGrid(im, questions=8, choices=11)
+            cv2.imwrite("debugging-opencv/warped_grid" + str(im_i) + ".png", im_grid[0])
         im_i += 1
+
 
     images_threshold = []
     for warped_image in images_warped:
@@ -275,14 +283,16 @@ def omr_read_correct_answers(img):
     #print(index_answer)
     index_answers = []
     for char in index_answer:
-        index_answers.append(str(char.index(max(char))-2))
+        index_answers.append(str(char.index(max(char))-1))
     index_txt = "".join(index_answers)
 
     group_answer = images_answers[-1][-1]
     group = group_answer.index(max(group_answer))
     #print("Grupa:",group)
-
-    return index_txt, full_answers, group, page_img
+    warped_imgs_grid = [1]
+    #print(index_txt, full_answers, group, page_img, warped_imgs_grid)
+    #cv2.imshow("label", page_img)
+    return index_txt, full_answers, group, page_img, warped_imgs_grid
 
 
 def omr_grade(correct_answers, img):
@@ -292,6 +302,7 @@ def omr_grade(correct_answers, img):
     img_preprocessed = preprocess_image(img)
     cv2.imwrite("debugging-opencv/camera-preprocessed.png", img_preprocessed)
     img = find_page(img_preprocessed)
+    page_img = img
     if img is not None:
         cv2.imwrite("debugging-opencv/found-page-1.png", img)
     if img is None:
@@ -299,10 +310,11 @@ def omr_grade(correct_answers, img):
         img = remove_shadows(img_preprocessed)
         cv2.imwrite("debugging-opencv/no-shadows-1.png", img)
         img_preprocessed = find_page(img)
+        page_img = img_preprocessed
         if img_preprocessed is not None:
             cv2.imwrite("debugging-opencv/found-page-2.png", img_preprocessed)
         if img_preprocessed is None:
-            return None, None, None
+            return None, None, None, None, None
     #cv2.imshow("label", img)
     if not skip_shadows:
         img_preprocessed = remove_shadows(img)
@@ -312,7 +324,7 @@ def omr_grade(correct_answers, img):
     img_contours = utlis.find_contours2(img_preprocessed, num_answer_fields + 1)
     print("cnt found")
     if len(img_contours) < 3:
-        return None, None, None
+        return None, None, None, None, None
 
     '''
     #make sure that the index contour is last
@@ -334,8 +346,15 @@ def omr_grade(correct_answers, img):
 
     im_i = 0
     for im in images_warped:
-        print("updated warped")
         cv2.imwrite("debugging-opencv/warped" + str(im_i) + ".png", im)
+        if im_i == 1:
+            print("im 1:", im)
+        if im_i != 3:
+            im_grid = utlis.drawGrid(im)
+            cv2.imwrite("debugging-opencv/warped_grid" + str(im_i) + ".png", im_grid[0])
+        else:
+            im_grid = utlis.drawGrid(im, questions=8, choices=11)
+            cv2.imwrite("debugging-opencv/warped_grid" + str(im_i) + ".png", im_grid[0])
         im_i += 1
 
     images_threshold = []
@@ -377,21 +396,23 @@ def omr_grade(correct_answers, img):
     for l in all_answers:
         for a in l:
             full_answers.append(a)
-    points, score = utlis.score(correct_answers, full_answers)
     #print("\nOdpowiedzi:         ", full_answers)
 
     # read the index
     index_answer = images_answers[-1][:-2]
     index_answers = []
     for char in index_answer:
-        index_answers.append(str(char.index(max(char))-2))
+        index_answers.append(str(char.index(max(char))-1))
     index_txt = "".join(index_answers)
 
     group_answer = images_answers[-1][-1]
     group = group_answer.index(max(group_answer))
     #print("Grupa:",group)
+    warped_imgs_grid = []
+    return index_txt, full_answers, group, page_img, warped_imgs_grid
 
-    return index_txt, score, group
+def score(correct, answers):
+    return utlis.score((correct, answers))
 
 def test():
     print("TESTING IMPORT")
@@ -422,4 +443,3 @@ if __name__ == '__main__':
     export_csv = usos_utils.export_data({index: score}, data, score)
     print(export_csv)
 
-cap.release()

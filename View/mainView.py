@@ -104,6 +104,7 @@ class mainView:
         self.page.update()
 
     def onTabChange(self, e):
+        self.Update()
         self.currentlyDisplayedTabIndex = e.control.selected_index
         if (self.currentlyDisplayedTabIndex > 0) and self.currentlyDisplayedTabIndex != 4 and self.controller.getExamName() is None:
             self.currentlyDisplayedTab = self.tabs[5]
