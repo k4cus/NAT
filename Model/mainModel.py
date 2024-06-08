@@ -102,12 +102,14 @@ class mainModel:
 
     def enterKeysReadingMode(self, exam_name):
         print("MODEL - Entering answers reading mode")
-        self.loadAnswers.loadAnswers(self, 0, exam_name)
+        cam_index = self.camera.getCameraInputIndex()
+        self.loadAnswers.loadAnswers(self, 0, exam_name, cam_index)
         pass
 
     def enterAnswersReadingMode(self, exam_name):
         print("MODEL - Entering answers reading mode")
-        self.loadAnswers.loadAnswers(self, 1, exam_name)
+        cam_index = self.camera.getCameraInputIndex()
+        self.loadAnswers.loadAnswers(self, 1, exam_name, cam_index)
         pass  # start reading exam from camera
 
     def readKeysFromFile(self, exam_name):

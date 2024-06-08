@@ -85,11 +85,11 @@ def splitBoxes(img):
     return boxes
 
 
-def drawGrid(img,questions=6,choices=15):
+def drawGrid(img,questions=5,choices=20):
     secW = int(img.shape[1]/questions)
     secH = int(img.shape[0]/choices)
     data = [secW, secH]
-    for i in range (0,16):
+    for i in range (0,choices+1):
         pt1 = (0,secH*i)
         pt2 = (img.shape[1],secH*i)
         pt3 = (secW * i, 0)
@@ -155,31 +155,31 @@ def find_contours(img, num_rectangles):
 def find_contours2(img, num_rectangles):
     hardcoded_values = [
         [
-            [[42, 308]],
-            [[164, 308]],
-            [[42, 655]],
-            [[164, 655]]
+            [[39, 314]],
+            [[160, 314]],
+            [[39, 655]],
+            [[160, 655]]
 
         ],
         [
-            [[199, 308]],
-            [[320, 345]],
-            [[199, 308]],
-            [[320, 655]]
+            [[194, 314]],
+            [[316, 314]],
+            [[194, 655]],
+            [[316, 655]]
 
         ],
         [
-            [[355, 308]],
-            [[474, 308]],
+            [[355, 314]],
+            [[471, 314]],
             [[355, 655]],
-            [[474, 655]]
+            [[471, 655]]
 
         ],
         [
-            [[142, 24]],
-            [[335, 24]],
-            [[142, 213]],
-            [[335, 213]]
+            [[137, 31]],
+            [[329, 31]],
+            [[137, 221]],
+            [[329, 221]]
 
         ]
     ]

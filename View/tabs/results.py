@@ -13,7 +13,7 @@ class resultsTab:
                 ft.Text("Last scanned page:"),
                 ft.Image(
                     #src=self.controller.getResultsImg(self.controller.getExamName()),
-                    src="page_img.png",
+                    src="page.png",
                     width=490,
                     height=690,
                     fit=ft.ImageFit.CONTAIN,
