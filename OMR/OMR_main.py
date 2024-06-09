@@ -120,6 +120,25 @@ def find_page(img):
         return None
 
 
+def draw_grids(img, warped_imgs):
+    contours = utlis.find_contours2(img, num_answer_fields+1)
+    for warped_img in warped_imgs:
+        back = img
+        overlay = warped_img
+        h, w = back.shape[:2]
+        print(h, w)
+        h1, w1 = overlay.shape[:2]
+        print(h1, w1)
+        # let store center coordinate as cx,cy
+        cx, cy = (h - h1) // 2, (w - w1) // 2
+        # use numpy indexing to place the resized image in the center of
+        # background image
+
+        back[cy:cy + h1, cx:cx + w1] = overlay
+
+        # view result
+    return img
+
 def apply_threshold(img):
     img_thresh = cv2.threshold(img, 170, 255, cv2.THRESH_BINARY_INV)[1]
 
@@ -225,8 +244,6 @@ def omr_read_correct_answers(img):
     im_i = 0
     for im in images_warped:
         cv2.imwrite("debugging-opencv/warped" + str(im_i) + ".png", im)
-        if im_i == 1:
-            print("im 1:", im)
         if im_i != 3:
             im_grid = utlis.drawGrid(im)
             cv2.imwrite("debugging-opencv/warped_grid" + str(im_i) + ".png", im_grid[0])
@@ -290,9 +307,10 @@ def omr_read_correct_answers(img):
     group = group_answer.index(max(group_answer))
     #print("Grupa:",group)
     warped_imgs_grid = [1]
+    #page_img_grid = draw_grids(page_img, images_warped)
     #print(index_txt, full_answers, group, page_img, warped_imgs_grid)
     #cv2.imshow("label", page_img)
-    return index_txt, full_answers, group, page_img, warped_imgs_grid
+    return index_txt, full_answers, group, page_img, images_warped
 
 
 def omr_grade(correct_answers, img):
@@ -347,8 +365,6 @@ def omr_grade(correct_answers, img):
     im_i = 0
     for im in images_warped:
         cv2.imwrite("debugging-opencv/warped" + str(im_i) + ".png", im)
-        if im_i == 1:
-            print("im 1:", im)
         if im_i != 3:
             im_grid = utlis.drawGrid(im)
             cv2.imwrite("debugging-opencv/warped_grid" + str(im_i) + ".png", im_grid[0])
@@ -409,10 +425,10 @@ def omr_grade(correct_answers, img):
     group = group_answer.index(max(group_answer))
     #print("Grupa:",group)
     warped_imgs_grid = []
-    return index_txt, full_answers, group, page_img, warped_imgs_grid
+    return index_txt, full_answers, group, page_img, images_warped
 
 def score(correct, answers):
-    return utlis.score((correct, answers))
+    return utlis.score(correct, answers)
 
 def test():
     print("TESTING IMPORT")
