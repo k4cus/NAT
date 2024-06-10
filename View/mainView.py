@@ -27,7 +27,7 @@ class mainView:
         self.currentlyDisplayedTabIndex = 0
         self.tabs = [
             examTab(controller, self.t),
-            keysTab(controller, self.t),
+            keysTab(controller, self),
             answersTab(controller, self.t),
             resultsTab(controller, self.t),
             settingsTab(controller, self.t, self),
