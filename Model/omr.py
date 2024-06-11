@@ -15,11 +15,11 @@ path_to_image = "../data/answer_sheets/answer_sheet_5_3.png"
 cap = cv2.VideoCapture(0)
 cap.set(10, 160)
 
-heightImg = 2339
-widthImg = 1654
-scale = 2
-heightImg = int(heightImg / scale)
-widthImg = int(widthImg / scale)
+heightImg = 3508
+widthImg = 2480
+
+heightImg = int(heightImg)
+widthImg = int(widthImg)
 
 rows = 20
 columns = 5
@@ -28,11 +28,81 @@ num_answer_fields = 3
 ans_array = ["A", "B", "C", "D", "E"]
 
 #points_to_check = [[15,11], [15,489], [685,11], [693,489], [15,22], [25,11]]
-points_to_check = [[10,10], [10,484], [681,11], [681,484], [10,20], [18,10]]
+points_to_check = [[10, 10], [10, 484], [681, 11], [681, 484], [10, 20], [18, 10]]
 white_thresh = 120
 
 
 ########################################################################
+
+def processOneSheet(img):
+    #img = cv2.resize(img, (widthImg, heightImg))
+    imgGray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    imgBlur = cv2.GaussianBlur(imgGray, (5, 5), 1)  # ADD GAUSSIAN BLUR
+    imgCanny = cv2.Canny(imgBlur, 10, 70)  # APPLY CANNY
+
+    # FIND ALL COUNTOURS
+    imgContours = img.copy()  # COPY IMAGE FOR DISPLAY PURPOSES
+    imgBigContour = img.copy()  # COPY IMAGE FOR DISPLAY PURPOSES
+    contours, hierarchy = cv2.findContours(imgCanny, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)  # FIND ALL CONTOURS
+    rectCon = utils.rectContour(contours)  # FILTER FOR RECTANGLE CONTOURS
+    biggestPoints = utils.getCornerPoints(rectCon[0])  # GET CORNER POINTS OF THE BIGGEST RECTANGLE
+    biggestPoints = utils.reorder(biggestPoints)  # REORDER FOR WARPING
+    thickness = 20
+    cv2.drawContours(imgBigContour, biggestPoints, -1, (0, 255, 0), thickness)  # DRAW THE BIGGEST CONTOUR
+    pts1 = np.float32(biggestPoints)  # PREPARE POINTS FOR WARP
+    pts2 = np.float32([[0, 0], [widthImg, 0], [0, heightImg], [widthImg, heightImg]])  # PREPARE POINTS FOR WARP
+    matrix = cv2.getPerspectiveTransform(pts1, pts2)  # GET TRANSFORMATION MATRIX
+    imgWarpColored = cv2.warpPerspective(imgCanny, matrix, (widthImg, heightImg))  # APPLY WARP PERSPECTIVE
+
+    # Crop image to remove the biggest contour
+    margin = thickness
+    imgCropped = imgWarpColored[margin:-margin, margin:-margin]
+    imgContours = imgWarpColored.copy()
+    cv2.imshow("contour", imgCropped)
+    cv2.waitKey(5000)
+
+    contours, hierarchy = cv2.findContours(imgWarpColored, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)  # FIND ALL CONTOURS
+    rectCon = utils.rectContour(contours)
+    biggestPoints = utils.getCornerPoints(rectCon[0])  # GET CORNER POINTS OF THE BIGGEST RECTANGLE
+    biggestPoints = utils.reorder(biggestPoints)  # REORDER FOR WARPING
+    cv2.drawContours(imgContours, biggestPoints, -1, (0, 255, 0), 10)  # DRAW ALL DETECTED CONTOURS
+
+
+    gradePoints = utils.getCornerPoints(rectCon[1])  # GET CORNER POINTS OF THE SECOND BIGGEST RECTANGLE
+    if biggestPoints.size != 0 and gradePoints.size != 0:
+        # BIGGEST RECTANGLE WARPING
+        biggestPoints = utils.reorder(biggestPoints)  # REORDER FOR WARPING
+        cv2.drawContours(imgBigContour, biggestPoints, -1, (0, 255, 0), 20)  # DRAW THE BIGGEST CONTOUR
+
+
+        pts1 = np.float32(biggestPoints)  # PREPARE POINTS FOR WARP
+        pts2 = np.float32([[0, 0], [widthImg, 0], [0, heightImg], [widthImg, heightImg]])  # PREPARE POINTS FOR WARP
+        matrix = cv2.getPerspectiveTransform(pts1, pts2)  # GET TRANSFORMATION MATRIX
+        imgWarpColored = cv2.warpPerspective(img, matrix, (widthImg, heightImg))  # APPLY WARP PERSPECTIVE
+
+        # SECOND BIGGEST RECTANGLE WARPING
+        cv2.drawContours(imgBigContour, gradePoints, -1, (255, 0, 0), 20)  # DRAW THE BIGGEST CONTOUR
+        gradePoints = utils.reorder(gradePoints)  # REORDER FOR WARPING
+        ptsG1 = np.float32(gradePoints)  # PREPARE POINTS FOR WARP
+        ptsG2 = np.float32([[0, 0], [325, 0], [0, 150], [325, 150]])  # PREPARE POINTS FOR WARP
+        matrixG = cv2.getPerspectiveTransform(ptsG1, ptsG2)  # GET TRANSFORMATION MATRIX
+        imgGradeDisplay = cv2.warpPerspective(img, matrixG, (325, 150))  # APPLY WARP PERSPECTIVE
+
+        # APPLY THRESHOLD
+        imgWarpGray = cv2.cvtColor(imgWarpColored, cv2.COLOR_BGR2GRAY)  # CONVERT TO GRAYSCALE
+        imgThresh = cv2.threshold(imgWarpGray, 170, 255, cv2.THRESH_BINARY_INV)[1]  # APPLY THRESHOLD AND INVERSE
+
+        boxes = utils.splitBoxes(imgThresh)  # GET INDIVIDUAL BOXES
+        cv2.imshow("Split Test ", boxes[3])
+        cv2.waitKey(500)
+
+    # index, answers, group_answers, page_img, images_warped = omr_read_correct_answers(img)
+    # return index, answers, group_answers, page_img, images_warped
+
+
+def loadImageFromFile(path):
+    img = cv2.imread(path)
+    return img
 
 
 def load_image(path, webcam_feed):
@@ -72,17 +142,17 @@ def preprocess_image(img):
 def find_page(img):
     image_warped = None
     wrong_format = False
-    points_to_check = [[10,10], [10,484], [681,11], [681,484], [10,20], [18,10]]
+    points_to_check = [[10, 10], [10, 484], [681, 11], [681, 484], [10, 20], [18, 10]]
     img_copy = img
     # finds biggest contour in image
     contour = utils.find_contours(img, 3)
-    #print(len(contour))
+    print(len(contour))
     for cnt in contour:
         # transform
         if contour != [] and cv2.contourArea(cnt) > 90000:
             image_warped = utils.image_warping(cnt, img, 500, 700)
         else:
-            #print("No contour found")
+            print("No contour found")
             return None
 
         wrong_format = False
@@ -92,14 +162,14 @@ def find_page(img):
             i += 1
             #print(image_warped[point[0], point[1]])
             if image_warped[point[0], point[1]] < white_thresh:
-                #print("Correct format")
+                print("Correct format")
                 continue
             else:
                 wrong_format = True
                 if i == 4 or i == 5:
-                    #print("Wrong orientation")
+                    print("Wrong orientation")
                     break
-                #print("Not an answer sheet. Quitting", point)
+                print("Not an answer sheet. Quitting", point)
                 break
 
         if wrong_format:
@@ -108,11 +178,11 @@ def find_page(img):
             break
 
     if wrong_format:
-        #print("Wrong format")
+        print("Wrong format")
         return None
 
     if image_warped is not None:
-        return image_warped[5:-5,5:-5]
+        return image_warped[5:-5, 5:-5]
     else:
         return None
 
@@ -135,6 +205,7 @@ def draw_grids(img, warped_imgs):
 
         # view result
     return img
+
 
 def apply_threshold(img):
     img_thresh = cv2.threshold(img, 170, 255, cv2.THRESH_BINARY_INV)[1]
@@ -199,22 +270,23 @@ def omr_read_correct_answers(img):
     skip_shadows = False
     img_preprocessed = preprocess_image(img)
     cv2.imwrite("debugging-opencv/camera-preprocessed.png", img_preprocessed)
+    img = img_preprocessed
     img = find_page(img_preprocessed)
     page_img = img
-    #cv2.imwrite("debugging-opencv/found-page-1.png", img)
+    cv2.imwrite("debugging-opencv/found-page-1.png", img)
     if img is None:
         skip_shadows = True
         img = remove_shadows(img_preprocessed)
-        #cv2.imwrite("debugging-opencv/no-shadows-1.png", img)
+        cv2.imwrite("debugging-opencv/no-shadows-1.png", img)
         img_preprocessed = find_page(img)
-        #cv2.imwrite("debugging-opencv/found-page-2.png", img_preprocessed)
+        cv2.imwrite("debugging-opencv/found-page-2.png", img_preprocessed)
         page_img = img_preprocessed
         if img_preprocessed is None:
             return None, None, None, None, None
     #cv2.imshow("label", img)
     if not skip_shadows:
         img_preprocessed = remove_shadows(img)
-        #cv2.imwrite("debugging-opencv/no-shadows-2.png", img_preprocessed)
+        cv2.imwrite("debugging-opencv/no-shadows-2.png", img_preprocessed)
 
     img_contours = utils.find_contours(img_preprocessed, num_answer_fields + 1)
     img_contours = utils.find_contours2(img_preprocessed, num_answer_fields + 1)
@@ -248,7 +320,6 @@ def omr_read_correct_answers(img):
             im_grid = utils.drawGrid(im, questions=8, choices=11)
             cv2.imwrite("debugging-opencv/warped_grid" + str(im_i) + ".png", im_grid[0])
         im_i += 1
-
 
     images_threshold = []
     for warped_image in images_warped:
@@ -297,7 +368,7 @@ def omr_read_correct_answers(img):
     #print(index_answer)
     index_answers = []
     for char in index_answer:
-        index_answers.append(str(char.index(max(char))-1))
+        index_answers.append(str(char.index(max(char)) - 1))
     index_txt = "".join(index_answers)
 
     group_answer = images_answers[-1][-1]
@@ -352,8 +423,7 @@ def omr_grade(correct_answers, img):
     '''
 
     if img_contours[0][0][0][0] > img_contours[1][0][0][0]:
-        img_contours[0],img_contours[1] = img_contours[1],img_contours[0]
-
+        img_contours[0], img_contours[1] = img_contours[1], img_contours[0]
 
     images_warped = []
     for contour in img_contours:
@@ -415,7 +485,7 @@ def omr_grade(correct_answers, img):
     index_answer = images_answers[-1][:-2]
     index_answers = []
     for char in index_answer:
-        index_answers.append(str(char.index(max(char))-1))
+        index_answers.append(str(char.index(max(char)) - 1))
     index_txt = "".join(index_answers)
 
     group_answer = images_answers[-1][-1]
@@ -423,6 +493,7 @@ def omr_grade(correct_answers, img):
     #print("Grupa:",group)
     warped_imgs_grid = []
     return index_txt, full_answers, group, page_img, images_warped
+
 
 def score(correct, answers):
     return utils.score(correct, answers)

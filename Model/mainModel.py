@@ -8,6 +8,7 @@ import cv2
 from Model.camera import camera
 from Model.config import examsFolder, directories
 from Model.examData import examData
+from Model.omr import processOneSheet, loadImageFromFile
 from Model.storage import storage
 from Model.load import loadAnswers
 
@@ -114,6 +115,9 @@ class mainModel:
     def readKeysFromFile(self, filePathList):
         print("MODEL - Reading keys from file")
         print(filePathList)
+        img = loadImageFromFile(filePathList[0])
+        index, answers, group_answers, page_img, images_warped = processOneSheet(img)
+        print(index, answers, group_answers, page_img, images_warped)
         # self.loadAnswers.loadCorrectAnswersFromFile(self, exam_name)
         pass
 

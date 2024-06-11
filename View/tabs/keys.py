@@ -49,5 +49,6 @@ class keysTab:
         for file in filePath:
             if os.path.splitext(file)[1][1:] in self.fileExtensions:
                 filePathFiltered.append(file)
-        data = ["keys-file", filePathFiltered]
-        self.controller.enterReadingMode(data)
+        if len(filePathFiltered) > 0:
+            data = ["keys-file", filePathFiltered]
+            self.controller.enterReadingMode(data)
