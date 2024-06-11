@@ -1,11 +1,8 @@
 import cv2
 import numpy as np
-import sys
-sys.path.append("..")
-from OMR import utlis
-from OMR import USOS_utils as usos_utils
 import statistics
-import time
+
+from Model import utils
 
 # TODO ###################
 # 3. Number of questions
@@ -78,12 +75,12 @@ def find_page(img):
     points_to_check = [[10,10], [10,484], [681,11], [681,484], [10,20], [18,10]]
     img_copy = img
     # finds biggest contour in image
-    contour = utlis.find_contours(img, 3)
+    contour = utils.find_contours(img, 3)
     #print(len(contour))
     for cnt in contour:
         # transform
         if contour != [] and cv2.contourArea(cnt) > 90000:
-            image_warped = utlis.image_warping(cnt, img, 500, 700)
+            image_warped = utils.image_warping(cnt, img, 500, 700)
         else:
             #print("No contour found")
             return None
@@ -121,7 +118,7 @@ def find_page(img):
 
 
 def draw_grids(img, warped_imgs):
-    contours = utlis.find_contours2(img, num_answer_fields+1)
+    contours = utils.find_contours2(img, num_answer_fields + 1)
     for warped_img in warped_imgs:
         back = img
         overlay = warped_img
@@ -147,9 +144,9 @@ def apply_threshold(img):
 
 def draw_grid(img, is_index):
     if not is_index:
-        return utlis.drawGrid(img)
+        return utils.drawGrid(img)
     else:
-        return utlis.drawGrid(img, questions=8, choices=11)
+        return utils.drawGrid(img, questions=8, choices=11)
 
 
 def get_answers(img, img_answers_data, is_index=False):
@@ -219,8 +216,8 @@ def omr_read_correct_answers(img):
         img_preprocessed = remove_shadows(img)
         #cv2.imwrite("debugging-opencv/no-shadows-2.png", img_preprocessed)
 
-    img_contours = utlis.find_contours(img_preprocessed, num_answer_fields + 1)
-    img_contours = utlis.find_contours2(img_preprocessed, num_answer_fields + 1)
+    img_contours = utils.find_contours(img_preprocessed, num_answer_fields + 1)
+    img_contours = utils.find_contours2(img_preprocessed, num_answer_fields + 1)
 
     if len(img_contours) < num_answer_fields + 1:
         return None, None, None, None, None
@@ -239,16 +236,16 @@ def omr_read_correct_answers(img):
 
     images_warped = []
     for contour in img_contours:
-        images_warped.append(utlis.image_warping(contour, img_preprocessed, widthImg, heightImg))
+        images_warped.append(utils.image_warping(contour, img_preprocessed, widthImg, heightImg))
 
     im_i = 0
     for im in images_warped:
         cv2.imwrite("debugging-opencv/warped" + str(im_i) + ".png", im)
         if im_i != 3:
-            im_grid = utlis.drawGrid(im)
+            im_grid = utils.drawGrid(im)
             cv2.imwrite("debugging-opencv/warped_grid" + str(im_i) + ".png", im_grid[0])
         else:
-            im_grid = utlis.drawGrid(im, questions=8, choices=11)
+            im_grid = utils.drawGrid(im, questions=8, choices=11)
             cv2.imwrite("debugging-opencv/warped_grid" + str(im_i) + ".png", im_grid[0])
         im_i += 1
 
@@ -338,8 +335,8 @@ def omr_grade(correct_answers, img):
         img_preprocessed = remove_shadows(img)
         cv2.imwrite("debugging-opencv/no-shadows-2.png", img_preprocessed)
 
-    img_contours = utlis.find_contours(img_preprocessed, num_answer_fields + 1)
-    img_contours = utlis.find_contours2(img_preprocessed, num_answer_fields + 1)
+    img_contours = utils.find_contours(img_preprocessed, num_answer_fields + 1)
+    img_contours = utils.find_contours2(img_preprocessed, num_answer_fields + 1)
     print("cnt found")
     if len(img_contours) < 3:
         return None, None, None, None, None
@@ -360,16 +357,16 @@ def omr_grade(correct_answers, img):
 
     images_warped = []
     for contour in img_contours:
-        images_warped.append(utlis.image_warping(contour, img_preprocessed, widthImg, heightImg))
+        images_warped.append(utils.image_warping(contour, img_preprocessed, widthImg, heightImg))
 
     im_i = 0
     for im in images_warped:
         cv2.imwrite("debugging-opencv/warped" + str(im_i) + ".png", im)
         if im_i != 3:
-            im_grid = utlis.drawGrid(im)
+            im_grid = utils.drawGrid(im)
             cv2.imwrite("debugging-opencv/warped_grid" + str(im_i) + ".png", im_grid[0])
         else:
-            im_grid = utlis.drawGrid(im, questions=8, choices=11)
+            im_grid = utils.drawGrid(im, questions=8, choices=11)
             cv2.imwrite("debugging-opencv/warped_grid" + str(im_i) + ".png", im_grid[0])
         im_i += 1
 
@@ -428,34 +425,29 @@ def omr_grade(correct_answers, img):
     return index_txt, full_answers, group, page_img, images_warped
 
 def score(correct, answers):
-    return utlis.score(correct, answers)
+    return utils.score(correct, answers)
 
-def test():
-    print("TESTING IMPORT")
-    return None
-
-    return index_txt, score, group
-
-if __name__ == '__main__':
-    graded = False
-    type = 1 # TODO loadning correct answers
-    while graded == False:
-        if type == 0:
-            _, answers, group_answers = omr_read_correct_answers()
-            print("\nPoprawne odpowiedzi:", answers)
-            if answers is not None:
-                graded = True
-        if type == 1:
-            _, answers, group_answers = omr_read_correct_answers()
-            print("\nPoprawne odpowiedzi:", answers)
-
-            index, score, group = omr_grade(answers, path_to_image)
-            if index is not None:
-                print("\nIndeks:", index, "\nWynik:", score, "\nGrupa:", group)
-            if answers is not None and score is not None:
-                graded = True
-
-    data = usos_utils.import_data()
-    export_csv = usos_utils.export_data({index: score}, data, score)
-    print(export_csv)
-
+#
+# if __name__ == '__main__':
+#     graded = False
+#     type = 1 # TODO loadning correct answers
+#     while graded == False:
+#         if type == 0:
+#             _, answers, group_answers = omr_read_correct_answers()
+#             print("\nPoprawne odpowiedzi:", answers)
+#             if answers is not None:
+#                 graded = True
+#         if type == 1:
+#             _, answers, group_answers = omr_read_correct_answers()
+#             print("\nPoprawne odpowiedzi:", answers)
+#
+#             index, score, group = omr_grade(answers, path_to_image)
+#             if index is not None:
+#                 print("\nIndeks:", index, "\nWynik:", score, "\nGrupa:", group)
+#             if answers is not None and score is not None:
+#                 graded = True
+#
+#     data = usos_utils.import_data()
+#     export_csv = usos_utils.export_data({index: score}, data, score)
+#     print(export_csv)
+#

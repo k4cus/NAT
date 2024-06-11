@@ -1,8 +1,6 @@
 import cv2
 import numpy as np
 import sys
-sys.path.append("..")
-
 
 def stackImages(imgArray,scale,lables=[]):
     rows = len(imgArray)

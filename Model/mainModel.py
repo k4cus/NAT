@@ -20,7 +20,7 @@ class mainModel:
         self.data = None
         self.camera = camera(self.controller)
         self.loadAnswers = loadAnswers
-
+        self.readFromFileExtensions = ["pdf", "png", "jpg"]
 
     # def suggestDrink(self):
     #     print("MODEL - Dostałem polecenie od kontrolera - uruchamiam losowanie w osobnym wątku")
@@ -77,7 +77,7 @@ class mainModel:
     def getExamsList(self):
         folderList = []
         for item in os.listdir(examsFolder):
-            if os.path.isdir(examsFolder + "/" + item):
+            if os.path.isdir(os.path.join(examsFolder, item)):
                 folderList.append(item)
         folderList.sort(reverse=True)  # newest exams on top
         return folderList
@@ -99,7 +99,6 @@ class mainModel:
         pass  # start reading keys from camera
         '''
 
-
     def enterKeysReadingMode(self, exam_name):
         print("MODEL - Entering answers reading mode")
         cam_index = self.camera.getCameraInputIndex()
@@ -112,9 +111,10 @@ class mainModel:
         self.loadAnswers.loadAnswers(self, 1, exam_name, cam_index)
         pass  # start reading exam from camera
 
-    def readKeysFromFile(self, exam_name):
+    def readKeysFromFile(self, filePathList):
         print("MODEL - Reading keys from file")
-        self.loadAnswers.loadCorrectAnswersFromFile(self, exam_name)
+        print(filePathList)
+        # self.loadAnswers.loadCorrectAnswersFromFile(self, exam_name)
         pass
 
     def readAnswersFromFile(self, exam_name):

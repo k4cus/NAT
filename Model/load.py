@@ -1,9 +1,8 @@
 import cv2
-import sys
 import os
-sys.path.append("..")
-from OMR import OMR_main as omr
 import numpy as np
+from Model import omr
+
 
 class loadAnswers:
 
@@ -32,7 +31,7 @@ class loadAnswers:
         #img = omr.load_image(path_to_image, False)
 
         cap = cv2.VideoCapture(cam_index)
-        cap.set(10, 160)
+        # cap.set(10, 160)
 
         testing = True
         while testing:
@@ -40,6 +39,8 @@ class loadAnswers:
             while graded < 1:
                 success, img = cap.read()
                 cv2.imwrite("debugging-opencv/camera-test.png", img)
+                # plt.imshow(img)
+                # plt.show()
                 img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
                 if type == 0:  # Only scan correct answers
