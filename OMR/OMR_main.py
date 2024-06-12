@@ -1,3 +1,5 @@
+import math
+
 import cv2
 import numpy as np
 import sys
@@ -65,45 +67,40 @@ def remove_shadows(img):
 
 
 def preprocess_image(img):
-    #img = cv2.GaussianBlur(img, (3, 3), 0)
+
+    img = cv2.GaussianBlur(img, (11, 11), 2)
     normalized_img = np.zeros((800, 800))
-    img = cv2.normalize(img, normalized_img, 0, 255, cv2.NORM_MINMAX)
+    img = cv2.normalize(img, normalized_img, 0, 250, cv2.NORM_MINMAX)
     img_blur = cv2.GaussianBlur(img, (3, 3), 1)
     return img_blur
 
 
-def find_page(img):
+def find_page(img,img2=None):
     image_warped = None
     wrong_format = False
     points_to_check = [[10,10], [10,484], [681,11], [681,484], [10,20], [18,10]]
     img_copy = img
     # finds biggest contour in image
     contour = utlis.find_contours(img, 3)
-    #print(len(contour))
+    cv2.drawContours(img_copy, contour, 0, (0, 255, 0), 10)
+    #print(cv2.contourArea(contour[0]))
     for cnt in contour:
         # transform
-        if contour != [] and cv2.contourArea(cnt) > 90000:
+        if contour != [] and cv2.contourArea(cnt) > 1000000:
             image_warped = utlis.image_warping(cnt, img, 500, 700)
+            if img2 is not None:
+                image_warped = utlis.image_warping(cnt, img2, 500, 700)
+            #print(image_warped.shape)
         else:
-            #print("No contour found")
+            img = cv2.GaussianBlur(img, (15, 15), 3)
+            contour = utlis.find_contours(img, 3)
+            cv2.drawContours(img_copy, contour, 0, (0, 255, 0), 10)
+            if contour != [] and cv2.contourArea(contour[0]) > 1000000:
+                print("contour found")
             return None
 
         wrong_format = False
-        # check if the found contour is the answer sheet and if the orientation is correct
-        i = -1
-        for point in points_to_check:
-            i += 1
-            #print(image_warped[point[0], point[1]])
-            if image_warped[point[0], point[1]] < white_thresh:
-                #print("Correct format")
-                continue
-            else:
-                wrong_format = True
-                if i == 4 or i == 5:
-                    #print("Wrong orientation")
-                    break
-                #print("Not an answer sheet. Quitting", point)
-                break
+
 
         if wrong_format:
             continue
@@ -120,23 +117,72 @@ def find_page(img):
         return None
 
 
-def draw_grids(img, warped_imgs):
-    contours = utlis.find_contours2(img, num_answer_fields+1)
-    for warped_img in warped_imgs:
-        back = img
-        overlay = warped_img
-        h, w = back.shape[:2]
-        print(h, w)
-        h1, w1 = overlay.shape[:2]
-        print(h1, w1)
-        # let store center coordinate as cx,cy
-        cx, cy = (h - h1) // 2, (w - w1) // 2
-        # use numpy indexing to place the resized image in the center of
-        # background image
+def draw_grids(img, answers, index, group=1):
+    group = group-1
+    if index==None:
+        index = "000000"
+    img = cv2.cvtColor(img,cv2.COLOR_GRAY2RGB)
+    #print(img)
+    c = utlis.find_contours2(img, num_answer_fields+1)
+    contours = c[:-1]
+    #print("drawing circles")
+    j = -1
+    for i in range(len(answers)-5):
+        #print(i)
+        # change initial position every 20 cells (contour[0-2])
+        q = int(abs(i / 20))
+        if int(abs(i / 20)) == i/20:
+            j = 0
 
-        back[cy:cy + h1, cx:cx + w1] = overlay
+        # width & height of a cell
+        wa = (contours[q][1][0][0] - contours[q][0][0][0])/5
+        ha = (contours[q][3][0][1] - contours[q][0][0][1])/20
 
-        # view result
+        w = contours[q][0][0][0]  # initial grid horizontal position
+        h = contours[q][0][0][1]  # initial grid vertical position
+
+        # position of the center of the circle
+        if answers[i] != "0":
+            posx = w + (ans_array.index(answers[i]) + 0.5) * wa  # horizontal position = initial position + ((x * answers) cells before + 0.5 * cells) * cell_width
+            posy = h + (j + 0.5) * ha # vertical position = initial position + ((i cells before + 0.5 * cells) * cell_height
+            posx = int(posx)
+            posy = int(posy)
+
+        # draw circle
+        #print("a",j)
+        j += 1
+        cv2.circle(img, (posx, posy), int(0.35 * ha), (0,255,0), -1)
+
+
+    # index & group
+    contours = c[-1]
+    #print(index)
+    index_group_array = []
+    for k in index:
+        index_group_array.append(int(k))
+    #print(index_group_array)
+    index_group_array.append(0)
+    index_group_array.append(group)
+    #print(index_group_array)
+    for i in range(len(index_group_array)):
+        #print(i)
+        if i != 6:
+            # width & height of a cell
+            wa = (contours[1][0][0] - contours[0][0][0])/8
+            ha = (contours[3][0][1] - contours[0][0][1])/11
+
+            w = contours[0][0][0]  # initial grid horizontal position
+            h = contours[0][0][1]  # initial grid vertical position
+
+            # position of the center of the circle
+            if index_group_array[i] != "x":
+                posx = w + (i + 0.5) * wa  # horizontal position = initial position + ((x * answers) cells before + 0.5 * cells) * cell_width
+                posy = h + (index_group_array[i]+1 + 0.5) * ha # vertical position = initial position + ((i cells before + 0.5 * cells) * cell_height
+                posx = int(posx)
+                posy = int(posy)
+                cv2.circle(img, (posx, posy), int(0.35 * ha), (0, 255, 0), -1)
+    #cv2.imwrite("img_circles.png", img)
+
     return img
 
 def apply_threshold(img):
@@ -199,17 +245,17 @@ def get_answers(img, img_answers_data, is_index=False):
 def omr_read_correct_answers(img):
     #print("Reading correct answers from image")
     # function reads correct answers from an answer sheet
-    skip_shadows = False
+    skip_shadows = True
     img_preprocessed = preprocess_image(img)
     cv2.imwrite("debugging-opencv/camera-preprocessed.png", img_preprocessed)
     img = find_page(img_preprocessed)
     page_img = img
-    #cv2.imwrite("debugging-opencv/found-page-1.png", img)
+    cv2.imwrite("debugging-opencv/found-page-1.png", img)
     if img is None:
         skip_shadows = True
         img = remove_shadows(img_preprocessed)
         #cv2.imwrite("debugging-opencv/no-shadows-1.png", img)
-        img_preprocessed = find_page(img)
+        img_preprocessed = find_page(img,img_preprocessed)
         #cv2.imwrite("debugging-opencv/found-page-2.png", img_preprocessed)
         page_img = img_preprocessed
         if img_preprocessed is None:
@@ -218,7 +264,7 @@ def omr_read_correct_answers(img):
     if not skip_shadows:
         img_preprocessed = remove_shadows(img)
         #cv2.imwrite("debugging-opencv/no-shadows-2.png", img_preprocessed)
-
+    print(img_preprocessed.shape, "a")
     img_contours = utlis.find_contours(img_preprocessed, num_answer_fields + 1)
     img_contours = utlis.find_contours2(img_preprocessed, num_answer_fields + 1)
 
@@ -236,13 +282,16 @@ def omr_read_correct_answers(img):
     if img_contours[0][0][0][0] > img_contours[1][0][0][0]:
         img_contours[0],img_contours[1] = img_contours[1],img_contours[0]
     '''
-
+    img_preprocessed = img
+    #print(img_preprocessed.shape)
     images_warped = []
     for contour in img_contours:
         images_warped.append(utlis.image_warping(contour, img_preprocessed, widthImg, heightImg))
 
+
     im_i = 0
     for im in images_warped:
+        #print("a")
         cv2.imwrite("debugging-opencv/warped" + str(im_i) + ".png", im)
         if im_i != 3:
             im_grid = utlis.drawGrid(im)
@@ -284,7 +333,7 @@ def omr_read_correct_answers(img):
         answers = []
         for question in answer:
             #print(max(question))
-            if max(question) * 0.50 > statistics.median(question):
+            if max(question) * 0.70 > statistics.median(question):
                 answers.append(ans_array[question.index(max(question))])
             else:
                 answers.append("0")
@@ -327,10 +376,10 @@ def omr_grade(correct_answers, img):
         skip_shadows = True
         img = remove_shadows(img_preprocessed)
         cv2.imwrite("debugging-opencv/no-shadows-1.png", img)
-        img_preprocessed = find_page(img)
+        img_preprocessed = find_page(img,img_preprocessed)
         page_img = img_preprocessed
         if img_preprocessed is not None:
-            cv2.imwrite("debugging-opencv/found-page-2.png", img_preprocessed)
+            cv2.imwrite("debugging-opencv/found-page.png", img_preprocessed)
         if img_preprocessed is None:
             return None, None, None, None, None
     #cv2.imshow("label", img)
@@ -403,7 +452,7 @@ def omr_grade(correct_answers, img):
         answers = []
         for question in answer:
             #print(max(question))
-            if max(question) * 0.50 > statistics.median(question):
+            if max(question) * 0.70 > statistics.median(question):
                 answers.append(ans_array[question.index(max(question))])
             else:
                 answers.append("0")
@@ -458,4 +507,3 @@ if __name__ == '__main__':
     data = usos_utils.import_data()
     export_csv = usos_utils.export_data({index: score}, data, score)
     print(export_csv)
-

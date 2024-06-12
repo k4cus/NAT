@@ -66,6 +66,12 @@ class mainController:
             self.model.readKeysFromFile(data[1])
         elif data[0] == "keys-answers":
             self.model.readAnswersFromFile(data[1])
+        elif data[0] == "folder":
+            print("folder")
+            self.model.readAnswersFromFolder(data[1])
+        elif data[0] == "keys-folder":
+            print("folder")
+            self.model.readKeysFromFolder(data[1])
         else:
             print("KONTROLLER - enterReadingMode unknown data: " + data[0])
 
@@ -73,4 +79,9 @@ class mainController:
         print("img path")
         print(exam_name)
         return self.model.getResultsImgPath(exam_name)
+
+    def exportToCSV(self, e):
+        exam_name = e.control.data
+        return self.model.exportToCSV(exam_name)
+
 

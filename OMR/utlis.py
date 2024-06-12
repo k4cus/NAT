@@ -135,13 +135,19 @@ def score(correct, answers):
 
 
 def find_contours(img, num_rectangles):
-    img_canny = cv2.Canny(img, 10, 230)
+    #print("----------------------------------")
+    img_canny = cv2.Canny(img, 30, 170)
     cv2.imwrite("debugging-opencv/canny.png", img_canny)
     img_contours = img.copy()
-    contours, hierarchy = cv2.findContours(img_canny, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-    cv2.drawContours(img_contours, contours, -1, (0, 255, 0), 10)
-    rect_con = rectContour(contours)
+    contours, hierarchy = cv2.findContours(img_canny, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    #print(len(contours))
+    contours = sorted(contours, key=cv2.contourArea, reverse=True)
 
+
+
+
+    rect_con = rectContour(contours)
+    #print(len(rect_con[0]))
     biggest_contours = []
     if num_rectangles > len(rect_con):
         num_rectangles = len(rect_con)

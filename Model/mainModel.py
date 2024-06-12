@@ -117,6 +117,16 @@ class mainModel:
         self.loadAnswers.loadCorrectAnswersFromFile(self, exam_name)
         pass
 
+    def readAnswersFromFolder(self, exam_name):
+        print("MODEL - Reading answers from folder")
+        self.loadAnswers.loadAnswersFromFolder(self, 1, exam_name, path="data-test/Kolokwium lato 2024/odpowiedzi studentow")
+        pass
+
+    def readKeysFromFolder(self, exam_name):
+        print("MODEL - Reading keys from folder")
+        self.loadAnswers.loadAnswersFromFolder(self, 0, exam_name, path="data-test/Kolokwium lato 2024/Wzory odpowiedzi")
+        pass
+
     def readAnswersFromFile(self, exam_name):
         print("MODEL - Reading answers from file")
         pass
@@ -124,3 +134,7 @@ class mainModel:
     def getResultsImgPath(self, exam_name):
         r = str("../exams-data/" + exam_name + "/student_answers/")  # TODO
         return r
+
+    def exportToCSV(self, exam_name):
+        self.loadAnswers.saveToCSV(self, exam_name)
+        return None

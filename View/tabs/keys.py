@@ -12,6 +12,7 @@ class keysTab:
             [
                 ft.ElevatedButton(text=t("keys-reading-mode"), on_click=self.controller.enterReadingMode, data=["keys", self.controller.getExamName()]),
                 ft.ElevatedButton(text=t("keys-reading-file"), on_click=self.controller.enterReadingMode, data=["keys-file", self.controller.getExamName()]),
+                ft.ElevatedButton(text="Wczytaj klucze odpowiedzi z folderu", on_click=self.controller.enterReadingMode, data=["keys-folder", self.controller.getExamName()]),
             ],
             alignment=ft.MainAxisAlignment.START,
             expand=True
