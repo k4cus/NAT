@@ -60,40 +60,6 @@ class omr:
         cv2.imshow("contour", imgCropped)
         cv2.waitKey(5000)
 
-        contours, hierarchy = cv2.findContours(imgWarpColored, cv2.RETR_EXTERNAL,
-                                               cv2.CHAIN_APPROX_NONE)  # FIND ALL CONTOURS
-        rectCon = utils.rectContour(contours)
-        biggestPoints = utils.getCornerPoints(rectCon[0])  # GET CORNER POINTS OF THE BIGGEST RECTANGLE
-        biggestPoints = utils.reorder(biggestPoints)  # REORDER FOR WARPING
-        cv2.drawContours(imgContours, biggestPoints, -1, (0, 255, 0), 10)  # DRAW ALL DETECTED CONTOURS
-
-        gradePoints = utils.getCornerPoints(rectCon[1])  # GET CORNER POINTS OF THE SECOND BIGGEST RECTANGLE
-        if biggestPoints.size != 0 and gradePoints.size != 0:
-            # BIGGEST RECTANGLE WARPING
-            biggestPoints = utils.reorder(biggestPoints)  # REORDER FOR WARPING
-            cv2.drawContours(imgBigContour, biggestPoints, -1, (0, 255, 0), 20)  # DRAW THE BIGGEST CONTOUR
-
-            pts1 = np.float32(biggestPoints)  # PREPARE POINTS FOR WARP
-            pts2 = np.float32([[0, 0], [widthImg, 0], [0, heightImg], [widthImg, heightImg]])  # PREPARE POINTS FOR WARP
-            matrix = cv2.getPerspectiveTransform(pts1, pts2)  # GET TRANSFORMATION MATRIX
-            imgWarpColored = cv2.warpPerspective(img, matrix, (widthImg, heightImg))  # APPLY WARP PERSPECTIVE
-
-            # SECOND BIGGEST RECTANGLE WARPING
-            cv2.drawContours(imgBigContour, gradePoints, -1, (255, 0, 0), 20)  # DRAW THE BIGGEST CONTOUR
-            gradePoints = utils.reorder(gradePoints)  # REORDER FOR WARPING
-            ptsG1 = np.float32(gradePoints)  # PREPARE POINTS FOR WARP
-            ptsG2 = np.float32([[0, 0], [325, 0], [0, 150], [325, 150]])  # PREPARE POINTS FOR WARP
-            matrixG = cv2.getPerspectiveTransform(ptsG1, ptsG2)  # GET TRANSFORMATION MATRIX
-            imgGradeDisplay = cv2.warpPerspective(img, matrixG, (325, 150))  # APPLY WARP PERSPECTIVE
-
-            # APPLY THRESHOLD
-            imgWarpGray = cv2.cvtColor(imgWarpColored, cv2.COLOR_BGR2GRAY)  # CONVERT TO GRAYSCALE
-            imgThresh = cv2.threshold(imgWarpGray, 170, 255, cv2.THRESH_BINARY_INV)[1]  # APPLY THRESHOLD AND INVERSE
-
-            boxes = utils.splitBoxes(imgThresh)  # GET INDIVIDUAL BOXES
-            cv2.imshow("Split Test ", boxes[3])
-            cv2.waitKey(500)
-
         # index, answers, group_answers, page_img, images_warped = omr_read_correct_answers(img)
         # return index, answers, group_answers, page_img, images_warped
 
