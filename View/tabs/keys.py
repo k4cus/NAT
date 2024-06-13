@@ -2,6 +2,8 @@ import os
 
 import flet as ft
 
+from Model.utils import base64_empty_image
+
 
 class keysTab:
     def __init__(self, controller, mainView):
@@ -9,6 +11,13 @@ class keysTab:
         self.controller = controller
         self.filePicker = ft.FilePicker(on_result=self.onFilePickResult)
         self.fileExtensions = self.controller.getReadFromFileExtensions()
+        self.image = base64_empty_image(2480, 3508)
+        self.ftImage = ft.Image(
+                        src_base64=self.image,
+                        width=100,
+                        height=100,
+                        fit=ft.ImageFit.CONTAIN,
+                    )
 
     def main(self):
         t = self.view.t
@@ -21,6 +30,9 @@ class keysTab:
                     ft.ElevatedButton(text=t("keys-reading-files"), on_click=self.pickFileToRead),
                     ft.ElevatedButton(text=t("keys-reading-directory"), on_click=self.pickDirectoryToRead)
                 ]),
+                ft.Row([
+                    self.ftImage
+                ])
             ],
             alignment=ft.MainAxisAlignment.START,
             expand=True
@@ -52,3 +64,8 @@ class keysTab:
         if len(filePathFiltered) > 0:
             data = ["keys-file", filePathFiltered]
             self.controller.enterReadingMode(data)
+
+    def updateImage(self, image):
+        self.image = image
+        self.ftImage.src_base64 = self.image
+        self.ftImage.update()

@@ -57,6 +57,7 @@ class mainController:
         self.model.storage.settings = settings
 
     def enterReadingMode(self, e):
+        print(e)
         if hasattr(e, 'control'):
             data = e.control.data
         else:
@@ -79,3 +80,7 @@ class mainController:
 
     def getReadFromFileExtensions(self):
         return self.model.readFromFileExtensions
+
+    def keyUpdateImage(self, image):
+        self.view.tabs[1].updateImage(image)
+    

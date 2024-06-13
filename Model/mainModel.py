@@ -8,7 +8,7 @@ import cv2
 from Model.camera import camera
 from Model.config import examsFolder, directories
 from Model.examData import examData
-from Model.omr import processOneSheet, loadImageFromFile
+from Model.omr import omr
 from Model.storage import storage
 from Model.load import loadAnswers
 
@@ -18,9 +18,11 @@ class mainModel:
     def __init__(self, controller):
         self.storage = storage(controller)
         self.controller = controller
+        self.omr = omr(self.controller)
         self.data = None
         self.camera = camera(self.controller)
         self.loadAnswers = loadAnswers
+
         self.readFromFileExtensions = ["pdf", "png", "jpg"]
 
     # def suggestDrink(self):
@@ -115,8 +117,8 @@ class mainModel:
     def readKeysFromFile(self, filePathList):
         print("MODEL - Reading keys from file")
         print(filePathList)
-        img = loadImageFromFile(filePathList[0])
-        index, answers, group_answers, page_img, images_warped = processOneSheet(img)
+        img = self.loadImageFromFile(filePathList[0])
+        index, answers, group_answers, page_img, images_warped = self.processOneSheet(img)
         print(index, answers, group_answers, page_img, images_warped)
         # self.loadAnswers.loadCorrectAnswersFromFile(self, exam_name)
         pass
