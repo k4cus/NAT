@@ -8,6 +8,7 @@ import cv2
 from Model.camera import camera
 from Model.config import examsFolder, directories
 from Model.examData import examData
+from Model.omr import omr
 from Model.storage import storage
 from Model.load import loadAnswers
 
@@ -17,10 +18,12 @@ class mainModel:
     def __init__(self, controller):
         self.storage = storage(controller)
         self.controller = controller
+        self.omr = omr(self.controller)
         self.data = None
         self.camera = camera(self.controller)
         self.loadAnswers = loadAnswers
 
+        self.readFromFileExtensions = ["pdf", "png", "jpg"]
 
     # def suggestDrink(self):
     #     print("MODEL - Dostałem polecenie od kontrolera - uruchamiam losowanie w osobnym wątku")
@@ -77,7 +80,7 @@ class mainModel:
     def getExamsList(self):
         folderList = []
         for item in os.listdir(examsFolder):
-            if os.path.isdir(examsFolder + "/" + item):
+            if os.path.isdir(os.path.join(examsFolder, item)):
                 folderList.append(item)
         folderList.sort(reverse=True)  # newest exams on top
         return folderList
@@ -99,7 +102,6 @@ class mainModel:
         pass  # start reading keys from camera
         '''
 
-
     def enterKeysReadingMode(self, exam_name):
         print("MODEL - Entering answers reading mode")
         cam_index = self.camera.getCameraInputIndex()
@@ -112,9 +114,13 @@ class mainModel:
         self.loadAnswers.loadAnswers(self, 1, exam_name, cam_index)
         pass  # start reading exam from camera
 
-    def readKeysFromFile(self, exam_name):
+    def readKeysFromFile(self, filePathList):
         print("MODEL - Reading keys from file")
-        self.loadAnswers.loadCorrectAnswersFromFile(self, exam_name)
+        print(filePathList)
+        img = self.loadImageFromFile(filePathList[0])
+        index, answers, group_answers, page_img, images_warped = self.processOneSheet(img)
+        print(index, answers, group_answers, page_img, images_warped)
+        # self.loadAnswers.loadCorrectAnswersFromFile(self, exam_name)
         pass
 
     def readAnswersFromFile(self, exam_name):

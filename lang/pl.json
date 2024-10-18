@@ -16,6 +16,7 @@
     "camera-error":  "Błąd kamery.",
     "camera-error-message": "Kamera nie znaleziona.",
     "keys-reading-mode": "Wczytaj klucze odpowiedzi z kamery",
-    "keys-reading-file": "Wczytaj klucze odpowiedzi z pliku",
-    "answers-reading-mode": "Wczytaj odpowiedzi"
+    "keys-reading-files": "Wczytaj klucze odpowiedzi z plików",
+    "keys-reading-directory": "Wczytaj klucze odpowiedzi z katalogu",
+    "answers-reading-mode": "Wczytaj odpowiedzi z kamery"
 }

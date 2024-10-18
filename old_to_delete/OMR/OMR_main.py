@@ -1,11 +1,9 @@
 import cv2
 import numpy as np
 import sys
-sys.path.append("..")
-from OMR import utlis
-from OMR import USOS_utils as usos_utils
+sys.path.append("../..")
+from old_to_delete.OMR import utlis
 import statistics
-import time
 
 # TODO ###################
 # 3. Number of questions
@@ -13,7 +11,7 @@ import time
 
 ########################################################################
 webcam_feed = False
-path_to_image = "../data/answer_sheets/answer_sheet_5_3.png"
+path_to_image = "../../data/answer_sheets/answer_sheet_5_3.png"
 
 cap = cv2.VideoCapture(0)
 cap.set(10, 160)
@@ -121,7 +119,7 @@ def find_page(img):
 
 
 def draw_grids(img, warped_imgs):
-    contours = utlis.find_contours2(img, num_answer_fields+1)
+    contours = utlis.find_contours2(img, num_answer_fields + 1)
     for warped_img in warped_imgs:
         back = img
         overlay = warped_img
@@ -455,7 +453,7 @@ if __name__ == '__main__':
             if answers is not None and score is not None:
                 graded = True
 
-    data = usos_utils.import_data()
-    export_csv = usos_utils.export_data({index: score}, data, score)
+    data = USOS_utils.import_data()
+    export_csv = USOS_utils.export_data({index: score}, data, score)
     print(export_csv)
 

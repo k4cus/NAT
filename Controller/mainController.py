@@ -57,14 +57,18 @@ class mainController:
         self.model.storage.settings = settings
 
     def enterReadingMode(self, e):
-        data = e.control.data
+        print(e)
+        if hasattr(e, 'control'):
+            data = e.control.data
+        else:
+            data = e
         if data[0] == "keys":
             self.model.enterKeysReadingMode(data[1])
         elif data[0] == "answers":
             self.model.enterAnswersReadingMode(data[1])
         elif data[0] == "keys-file":
             self.model.readKeysFromFile(data[1])
-        elif data[0] == "keys-answers":
+        elif data[0] == "answers-file":
             self.model.readAnswersFromFile(data[1])
         else:
             print("KONTROLLER - enterReadingMode unknown data: " + data[0])
@@ -74,3 +78,9 @@ class mainController:
         print(exam_name)
         return self.model.getResultsImgPath(exam_name)
 
+    def getReadFromFileExtensions(self):
+        return self.model.readFromFileExtensions
+
+    def keyUpdateImage(self, image):
+        self.view.tabs[1].updateImage(image)
+    

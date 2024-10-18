@@ -1,9 +1,7 @@
 import cv2
 import numpy as np
-import sys
-sys.path.append("..")
 
-
+## TO STACK ALL THE IMAGES IN ONE WINDOW
 def stackImages(imgArray,scale,lables=[]):
     rows = len(imgArray)
     cols = len(imgArray[0])
@@ -33,18 +31,21 @@ def stackImages(imgArray,scale,lables=[]):
     if len(lables) != 0:
         eachImgWidth= int(ver.shape[1] / cols)
         eachImgHeight = int(ver.shape[0] / rows)
+        #print(eachImgHeight)
         for d in range(0, rows):
             for c in range (0,cols):
                 cv2.rectangle(ver,(c*eachImgWidth,eachImgHeight*d),(c*eachImgWidth+len(lables[d][c])*13+27,30+eachImgHeight*d),(255,255,255),cv2.FILLED)
                 cv2.putText(ver,lables[d][c],(eachImgWidth*c+10,eachImgHeight*d+20),cv2.FONT_HERSHEY_COMPLEX,0.7,(255,0,255),2)
     return ver
 
-
 def reorder(myPoints):
-    myPoints = myPoints.reshape((4, 2))
-    #print(myPoints)
-    myPointsNew = np.zeros((4, 1, 2), np.int32)
+
+    myPoints = myPoints.reshape((4, 2)) # REMOVE EXTRA BRACKET
+    print(myPoints)
+    myPointsNew = np.zeros((4, 1, 2), np.int32) # NEW MATRIX WITH ARRANGED POINTS
     add = myPoints.sum(1)
+    print(add)
+    print(np.argmax(add))
     myPointsNew[0] = myPoints[np.argmin(add)]  #[0,0]
     myPointsNew[3] =myPoints[np.argmax(add)]   #[w,h]
     diff = np.diff(myPoints, axis=1)
@@ -52,7 +53,6 @@ def reorder(myPoints):
     myPointsNew[2] = myPoints[np.argmax(diff)] #[h,0]
 
     return myPointsNew
-
 
 def rectContour(contours):
 
@@ -66,14 +66,13 @@ def rectContour(contours):
             if len(approx) == 4:
                 rectCon.append(i)
     rectCon = sorted(rectCon, key=cv2.contourArea,reverse=True)
+    #print(len(rectCon))
     return rectCon
 
-
 def getCornerPoints(cont):
-    peri = cv2.arcLength(cont, True)
-    approx = cv2.approxPolyDP(cont, 0.02 * peri, True)
+    peri = cv2.arcLength(cont, True) # LENGTH OF CONTOUR
+    approx = cv2.approxPolyDP(cont, 0.02 * peri, True) # APPROXIMATE THE POLY TO GET CORNER POINTS
     return approx
-
 
 def splitBoxes(img):
     rows = np.vsplit(img,5)
@@ -84,37 +83,34 @@ def splitBoxes(img):
             boxes.append(box)
     return boxes
 
-
-def drawGrid(img,questions=5,choices=20):
+def drawGrid(img,questions=5,choices=5):
     secW = int(img.shape[1]/questions)
     secH = int(img.shape[0]/choices)
-    data = [secW, secH]
-    for i in range (0,choices+1):
+    for i in range (0,9):
         pt1 = (0,secH*i)
         pt2 = (img.shape[1],secH*i)
         pt3 = (secW * i, 0)
         pt4 = (secW*i,img.shape[0])
-        cv2.line(img, pt1, pt2, (0, 0, 0),2)
-        cv2.line(img, pt3, pt4, (0, 0, 0),2)
+        cv2.line(img, pt1, pt2, (255, 255, 0),2)
+        cv2.line(img, pt3, pt4, (255, 255, 0),2)
 
-        data.append(pt1)
-        data.append(pt3)
-    return img, data
-
+    return img
 
 def showAnswers(img,myIndex,grading,ans,questions=5,choices=5):
-    secW = int(img.shape[1]/questions)
-    secH = int(img.shape[0]/choices)
+     secW = int(img.shape[1]/questions)
+     secH = int(img.shape[0]/choices)
 
-    for x in range(0,questions):
-        myAns= myIndex[x]
-        cX = (myAns * secW) + secW // 2
-        cY = (x * secH) + secH // 2
-        if grading[x]==1:
+     for x in range(0,questions):
+         myAns= myIndex[x]
+         cX = (myAns * secW) + secW // 2
+         cY = (x * secH) + secH // 2
+         if grading[x]==1:
             myColor = (0,255,0)
+            #cv2.rectangle(img,(myAns*secW,x*secH),((myAns*secW)+secW,(x*secH)+secH),myColor,cv2.FILLED)
             cv2.circle(img,(cX,cY),50,myColor,cv2.FILLED)
-        else:
+         else:
             myColor = (0,0,255)
+            #cv2.rectangle(img, (myAns * secW, x * secH), ((myAns * secW) + secW, (x * secH) + secH), myColor, cv2.FILLED)
             cv2.circle(img, (cX, cY), 50, myColor, cv2.FILLED)
 
             # CORRECT ANSWER
@@ -124,78 +120,5 @@ def showAnswers(img,myIndex,grading,ans,questions=5,choices=5):
             20,myColor,cv2.FILLED)
 
 
-def score(correct, answers):
-    points = 0
-    num_of_questions = len(correct)
-    for question in range(num_of_questions):
-        if correct[question] == answers[question]:
-            points += 1
-    score = 100 * points/num_of_questions
-    return points, score
 
 
-def find_contours(img, num_rectangles):
-    img_canny = cv2.Canny(img, 10, 230)
-    cv2.imwrite("debugging-opencv/canny.png", img_canny)
-    img_contours = img.copy()
-    contours, hierarchy = cv2.findContours(img_canny, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-    cv2.drawContours(img_contours, contours, -1, (0, 255, 0), 10)
-    rect_con = rectContour(contours)
-
-    biggest_contours = []
-    if num_rectangles > len(rect_con):
-        num_rectangles = len(rect_con)
-    if len(rect_con) > 0:
-        for i in range(num_rectangles):
-            #print(i)
-            biggest_contours.append(getCornerPoints(rect_con[i]))
-            #print("aaaaa", biggest_contours[0])
-    return biggest_contours
-
-def find_contours2(img, num_rectangles):
-    hardcoded_values = [
-        [
-            [[39, 314]],
-            [[160, 314]],
-            [[39, 655]],
-            [[160, 655]]
-
-        ],
-        [
-            [[194, 314]],
-            [[316, 314]],
-            [[194, 655]],
-            [[316, 655]]
-
-        ],
-        [
-            [[355, 314]],
-            [[471, 314]],
-            [[355, 655]],
-            [[471, 655]]
-
-        ],
-        [
-            [[137, 31]],
-            [[329, 31]],
-            [[137, 221]],
-            [[329, 221]]
-
-        ]
-    ]
-    hardcoded_values = np.array(hardcoded_values)
-    return hardcoded_values
-
-
-def image_warping(img_contours, img, widthImg, heightImg):
-    if img_contours.size == 0:
-        print("Contour size is zero.")
-        return 0
-    else:
-        img_contours = reorder(img_contours)
-        pts1 = np.float32(img_contours)
-        pts2 = np.float32([[0, 0], [widthImg, 0], [0, heightImg], [widthImg, heightImg]])
-        matrix = cv2.getPerspectiveTransform(pts1, pts2)
-        image_warped = cv2.warpPerspective(img, matrix, (widthImg, heightImg))
-
-        return image_warped
