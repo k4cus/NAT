@@ -116,10 +116,10 @@ class mainModel:
 
     def readKeysFromFile(self, filePathList):
         print("MODEL - Reading keys from file")
-        print(filePathList)
-        img = self.loadImageFromFile(filePathList[0])
-        index, answers, group_answers, page_img, images_warped = self.processOneSheet(img)
-        print(index, answers, group_answers, page_img, images_warped)
+        print("filePathList: ", filePathList)
+        img = self.omr.loadImageFromFile(filePathList[0])
+        index, answers, group_answers, page_img, images_warped = self.omr.processOneSheet(img)
+        # print(index, answers, group_answers, page_img, images_warped)
         # self.loadAnswers.loadCorrectAnswersFromFile(self, exam_name)
         pass
 
