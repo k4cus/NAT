@@ -11,13 +11,12 @@ class keysTab:
         self.controller = controller
         self.filePicker = ft.FilePicker(on_result=self.onFilePickResult)
         self.fileExtensions = self.controller.getReadFromFileExtensions()
-        self.image = base64_empty_image(2480, 3508)
+        self.image = base64_empty_image(1240, 1754)
         self.ftImage = ft.Image(
-                        src_base64=self.image,
-                        width=100,
-                        height=100,
-                        fit=ft.ImageFit.CONTAIN,
-                    )
+            src_base64=self.image,
+            height=1754,
+            fit=ft.ImageFit.FIT_HEIGHT,
+        )
 
     def main(self):
         t = self.view.t
@@ -32,7 +31,10 @@ class keysTab:
                 ]),
                 ft.Row([
                     self.ftImage
-                ])
+                ],
+                    expand=1,
+                    wrap=False,
+                    scroll="always")
             ],
             alignment=ft.MainAxisAlignment.START,
             expand=True

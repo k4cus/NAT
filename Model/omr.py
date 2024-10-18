@@ -1,3 +1,5 @@
+import base64
+
 import cv2
 import numpy as np
 import statistics
@@ -56,9 +58,10 @@ class omr:
         margin = thickness
         imgCropped = imgWarpColored[margin:-margin, margin:-margin]
         imgContours = imgWarpColored.copy()
+
         self.controller.keyUpdateImage(imgCropped)
-        cv2.imshow("contour", imgCropped)
-        cv2.waitKey(5000)
+        # cv2.imshow("contour", imgCropped)
+        # cv2.waitKey(5000)
 
         # index, answers, group_answers, page_img, images_warped = omr_read_correct_answers(img)
         # return index, answers, group_answers, page_img, images_warped
@@ -458,6 +461,9 @@ class omr:
         warped_imgs_grid = []
         return index_txt, full_answers, group, page_img, images_warped
 
+    def imageToBase64(self, img):
+        _, buffer = cv2.imencode('.png', img)
+        return base64.b64encode(buffer).decode('utf-8')
 
     def score(self, correct, answers):
         return utils.score(correct, answers)

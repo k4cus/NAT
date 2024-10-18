@@ -1,3 +1,5 @@
+import base64
+
 from Model.mainModel import mainModel
 from View.mainView import mainView
 
@@ -82,5 +84,6 @@ class mainController:
         return self.model.readFromFileExtensions
 
     def keyUpdateImage(self, image):
-        self.view.tabs[1].updateImage(image)
+        img_base64 = self.model.omr.imageToBase64(image)
+        self.view.tabs[1].updateImage(img_base64)
     
