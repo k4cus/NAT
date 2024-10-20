@@ -9,8 +9,8 @@ from Model import utils
 webcam_feed = False
 path_to_image = "../data/answer_sheets/answer_sheet_5_3.png"
 
-cap = cv2.VideoCapture(0)
-cap.set(10, 160)
+#cap = cv2.VideoCapture(0) # TODO delete - makes it impossible to change settings
+#cap.set(10, 160)
 
 heightImg = 3508
 widthImg = 2480
