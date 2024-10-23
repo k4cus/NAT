@@ -3,7 +3,6 @@ import os
 import numpy as np
 from Model import omr
 
-
 class loadAnswers:
 
     def __init__(self, controller):
@@ -44,7 +43,7 @@ class loadAnswers:
                 img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
                 if type == 0:  # Only scan correct answers
-                    _, answers, group_answers, page_img, images_warped = omr.omr_read_correct_answers(img)
+                    _, answers, group_answers, page_img, images_warped = omr.omr.omr_read_correct_answers(self, img)
 
                     if answers is not None:
                         if not os.path.exists("exams-data/" + currentExamName + "/answer_keys/" + str(group_answers)):
