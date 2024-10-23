@@ -35,36 +35,112 @@ class omr:
         self.controller = mainController
 
     def processOneSheet(self, img):
-        #img = cv2.resize(img, (widthImg, heightImg))
-        imgGray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        imgBlur = cv2.GaussianBlur(imgGray, (5, 5), 1)  # ADD GAUSSIAN BLUR
-        imgCanny = cv2.Canny(imgBlur, 10, 70)  # APPLY CANNY
+        # function reads correct answers from an answer sheet
+        skip_shadows = False   	
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        img_preprocessed = omr.preprocess_image(self, img)
+        cv2.imwrite("debugging-opencv/camera-preprocessed.png", img_preprocessed)
+        img = img_preprocessed
+        img = omr.find_page(self, img_preprocessed)
+        page_img = img
+        try:
+            cv2.imwrite("debugging-opencv/found-page-1.png", img)
+        except:
+            print("No page found")
+        if img is None:
+            skip_shadows = True
+            img = omr.remove_shadows(self, img_preprocessed)
+            cv2.imwrite("debugging-opencv/no-shadows-1.png", img)
+            img_preprocessed = omr.find_page(self, img)
+            cv2.imwrite("debugging-opencv/found-page-2.png", img_preprocessed)
+            page_img = img_preprocessed
+            if img_preprocessed is None:
+                return None, None, None, None, None
+        #cv2.imshow("label", img)
+        if not skip_shadows:
+            img_preprocessed = self.remove_shadows(img)
+            #cv2.imwrite("debugging-opencv/no-shadows-2.png", img_preprocessed)
 
-        # FIND ALL COUNTOURS
-        imgContours = img.copy()  # COPY IMAGE FOR DISPLAY PURPOSES
-        imgBigContour = img.copy()  # COPY IMAGE FOR DISPLAY PURPOSES
-        contours, hierarchy = cv2.findContours(imgCanny, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)  # FIND ALL CONTOURS
-        rectCon = utils.rectContour(contours)  # FILTER FOR RECTANGLE CONTOURS
-        biggestPoints = utils.getCornerPoints(rectCon[0])  # GET CORNER POINTS OF THE BIGGEST RECTANGLE
-        biggestPoints = utils.reorder(biggestPoints)  # REORDER FOR WARPING
-        thickness = 20
-        cv2.drawContours(imgBigContour, biggestPoints, -1, (0, 255, 0), thickness)  # DRAW THE BIGGEST CONTOUR
-        pts1 = np.float32(biggestPoints)  # PREPARE POINTS FOR WARP
-        pts2 = np.float32([[0, 0], [widthImg, 0], [0, heightImg], [widthImg, heightImg]])  # PREPARE POINTS FOR WARP
-        matrix = cv2.getPerspectiveTransform(pts1, pts2)  # GET TRANSFORMATION MATRIX
-        imgWarpColored = cv2.warpPerspective(imgCanny, matrix, (widthImg, heightImg))  # APPLY WARP PERSPECTIVE
+        img_contours = utils.find_contours(img_preprocessed, num_answer_fields + 1)
+        img_contours = utils.find_contours2(img_preprocessed, num_answer_fields + 1)
 
-        # Crop image to remove the biggest contour
-        margin = thickness
-        imgCropped = imgWarpColored[margin:-margin, margin:-margin]
-        imgContours = imgWarpColored.copy()
+        if len(img_contours) < num_answer_fields + 1:
+            return None, None, None, None, None
 
-        self.controller.keyUpdateImage(imgCropped)
-        # cv2.imshow("contour", imgCropped)
-        # cv2.waitKey(5000)
+        images_warped = []
+        for contour in img_contours:
+            images_warped.append(utils.image_warping(contour, img_preprocessed, widthImg, heightImg))
 
-        # index, answers, group_answers, page_img, images_warped = omr_read_correct_answers(img)
-        # return index, answers, group_answers, page_img, images_warped
+        im_i = 0
+        for im in images_warped:
+            cv2.imwrite("debugging-opencv/warped" + str(im_i) + ".png", im)
+            if im_i != 3:
+                im_grid = utils.drawGrid(im)
+                cv2.imwrite("debugging-opencv/warped_grid" + str(im_i) + ".png", im_grid[0])
+            else:
+                im_grid = utils.drawGrid(im, questions=8, choices=11)
+                cv2.imwrite("debugging-opencv/warped_grid" + str(im_i) + ".png", im_grid[0])
+            im_i += 1
+
+        images_threshold = []
+        for warped_image in images_warped:
+            #print("contour", contour)
+            images_threshold.append(self.apply_threshold(warped_image))
+
+        images_grid = []
+        i = 0
+        for threshold_image in images_threshold:
+            if i % (num_answer_fields + 1) == num_answer_fields:
+                images_grid.append(self.draw_grid(threshold_image, is_index=True))
+                i = 0
+            else:
+                images_grid.append(self.draw_grid(threshold_image, is_index=False))  # TODO delete unnecessary data
+                i += 1
+        #cv2.imshow("label3", images_grid[2][0])
+        images_answers = []
+        i = 0
+        for grid in images_grid:
+            if i % (num_answer_fields + 1) == num_answer_fields:
+                images_answers.append(self.get_answers(grid[0], grid[1], is_index=True))
+                i = 0
+            else:
+                images_answers.append(self.get_answers(grid[0], grid[1]))
+                i += 1
+
+        # grade answers
+        all_answers = []
+        for answer in images_answers[:-1]:
+            answers = []
+            for question in answer:
+                #print(max(question))
+                if max(question) * 0.50 > statistics.median(question):
+                    answers.append(ans_array[question.index(max(question))])
+                else:
+                    answers.append("0")
+            all_answers.append(answers)
+        full_answers = []
+        for l in all_answers:
+            for a in l:
+                full_answers.append(a)
+        #print(full_answers)
+
+        # read the index
+        index_answer = images_answers[-1][:-2]
+        #print(index_answer)
+        index_answers = []
+        for char in index_answer:
+            index_answers.append(str(char.index(max(char)) - 1))
+        index_txt = "".join(index_answers)
+
+        group_answer = images_answers[-1][-1]
+        group = group_answer.index(max(group_answer))
+        #print("Grupa:",group)
+        warped_imgs_grid = [1]
+        #page_img_grid = draw_grids(page_img, images_warped)
+        #print(index_txt, full_answers, group, page_img, warped_imgs_grid)
+        #cv2.imshow("label", page_img)
+        return index_txt, full_answers, group, page_img, images_warped
+
 
 
     def loadImageFromFile(self, path):
@@ -114,6 +190,7 @@ class omr:
         # finds biggest contour in image
         contour = utils.find_contours(img, 3)
         print(len(contour))
+    
         for cnt in contour:
             # transform
             if contour != [] and cv2.contourArea(cnt) > 90000:
@@ -123,6 +200,7 @@ class omr:
                 return None
 
             wrong_format = False
+            '''
             # check if the found contour is the answer sheet and if the orientation is correct
             i = -1
             for point in points_to_check:
@@ -143,11 +221,11 @@ class omr:
                 continue
             if not wrong_format:
                 break
-
+            
         if wrong_format:
             print("Wrong format")
             return None
-
+        '''
         if image_warped is not None:
             return image_warped[5:-5, 5:-5]
         else:
@@ -230,30 +308,32 @@ class omr:
 
             return answers_array
 
-
     def omr_read_correct_answers(self, img):
         #print("Reading correct answers from image")
         # function reads correct answers from an answer sheet
         skip_shadows = False
-        img_preprocessed = self.preprocess_image(img)
+        img_preprocessed = omr.preprocess_image(self, img)
         cv2.imwrite("debugging-opencv/camera-preprocessed.png", img_preprocessed)
         img = img_preprocessed
-        img = self.find_page(img_preprocessed)
+        img = omr.find_page(self, img_preprocessed)
         page_img = img
-        cv2.imwrite("debugging-opencv/found-page-1.png", img)
+        try:
+            cv2.imwrite("debugging-opencv/found-page-1.png", img)
+        except:
+            print("No page found")
         if img is None:
             skip_shadows = True
-            img = self.remove_shadows(img_preprocessed)
-            cv2.imwrite("debugging-opencv/no-shadows-1.png", img)
-            img_preprocessed = self.find_page(img)
-            cv2.imwrite("debugging-opencv/found-page-2.png", img_preprocessed)
+            img = omr.remove_shadows(self, img_preprocessed)
+            #cv2.imwrite("debugging-opencv/no-shadows-1.png", img)
+            img_preprocessed = omr.find_page(self, img)
+            #cv2.imwrite("debugging-opencv/found-page-2.png", img_preprocessed)
             page_img = img_preprocessed
             if img_preprocessed is None:
                 return None, None, None, None, None
         #cv2.imshow("label", img)
         if not skip_shadows:
             img_preprocessed = self.remove_shadows(img)
-            cv2.imwrite("debugging-opencv/no-shadows-2.png", img_preprocessed)
+            #cv2.imwrite("debugging-opencv/no-shadows-2.png", img_preprocessed)
 
         img_contours = utils.find_contours(img_preprocessed, num_answer_fields + 1)
         img_contours = utils.find_contours2(img_preprocessed, num_answer_fields + 1)
