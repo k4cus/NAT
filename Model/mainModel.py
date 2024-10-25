@@ -114,13 +114,13 @@ class mainModel:
         self.loadAnswers.loadAnswers(self, 1, exam_name, cam_index)
         pass  # start reading exam from camera
 
-    def readKeysFromFile(self, filePathList):
+    def readKeysFromFile(self, filePathList, exam_name):
         print("MODEL - Reading keys from file")
         print("filePathList: ", filePathList)
         img = self.omr.loadImageFromFile(filePathList[0])
-        index, answers, group_answers, page_img, images_warped = self.omr.processOneSheet(img)
+        #index, answers, group_answers, page_img, images_warped = self.omr.processOneSheet(img)
         # print(index, answers, group_answers, page_img, images_warped)
-        # self.loadAnswers.loadCorrectAnswersFromFile(self, exam_name)
+        self.loadAnswers.loadAnswers(self, 0, exam_name, file_path=filePathList[0])
         pass
 
 

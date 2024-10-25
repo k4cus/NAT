@@ -64,7 +64,7 @@ class keysTab:
             if os.path.splitext(file)[1][1:] in self.fileExtensions:
                 filePathFiltered.append(file)
         if len(filePathFiltered) > 0:
-            data = ["keys-file", filePathFiltered]
+            data = ["keys-file", filePathFiltered, self.controller.getExamName()]
             self.controller.enterReadingMode(data)
 
     def updateImage(self, image):

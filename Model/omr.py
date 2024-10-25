@@ -37,7 +37,7 @@ class omr:
     def processOneSheet(self, img):
         # function reads correct answers from an answer sheet
         skip_shadows = False   	
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        #img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         img_preprocessed = omr.preprocess_image(self, img)
         cv2.imwrite("debugging-opencv/camera-preprocessed.png", img_preprocessed)
         img = img_preprocessed
@@ -58,7 +58,7 @@ class omr:
                 return None, None, None, None, None
         #cv2.imshow("label", img)
         if not skip_shadows:
-            img_preprocessed = self.remove_shadows(img)
+            img_preprocessed = omr.remove_shadows(self, img)
             #cv2.imwrite("debugging-opencv/no-shadows-2.png", img_preprocessed)
 
         img_contours = utils.find_contours(img_preprocessed, num_answer_fields + 1)
@@ -85,26 +85,26 @@ class omr:
         images_threshold = []
         for warped_image in images_warped:
             #print("contour", contour)
-            images_threshold.append(self.apply_threshold(warped_image))
+            images_threshold.append(omr.apply_threshold(self, warped_image))
 
         images_grid = []
         i = 0
         for threshold_image in images_threshold:
             if i % (num_answer_fields + 1) == num_answer_fields:
-                images_grid.append(self.draw_grid(threshold_image, is_index=True))
+                images_grid.append(omr.draw_grid(self, threshold_image, is_index=True))
                 i = 0
             else:
-                images_grid.append(self.draw_grid(threshold_image, is_index=False))  # TODO delete unnecessary data
+                images_grid.append(omr.draw_grid(self, threshold_image, is_index=False))  # TODO delete unnecessary data
                 i += 1
         #cv2.imshow("label3", images_grid[2][0])
         images_answers = []
         i = 0
         for grid in images_grid:
             if i % (num_answer_fields + 1) == num_answer_fields:
-                images_answers.append(self.get_answers(grid[0], grid[1], is_index=True))
+                images_answers.append(omr.get_answers(self, grid[0], grid[1], is_index=True))
                 i = 0
             else:
-                images_answers.append(self.get_answers(grid[0], grid[1]))
+                images_answers.append(omr.get_answers(self, grid[0], grid[1]))
                 i += 1
 
         # grade answers
@@ -308,239 +308,6 @@ class omr:
 
             return answers_array
 
-    def omr_read_correct_answers(self, img):
-        #print("Reading correct answers from image")
-        # function reads correct answers from an answer sheet
-        skip_shadows = False
-        img_preprocessed = omr.preprocess_image(self, img)
-        cv2.imwrite("debugging-opencv/camera-preprocessed.png", img_preprocessed)
-        img = img_preprocessed
-        img = omr.find_page(self, img_preprocessed)
-        page_img = img
-        try:
-            cv2.imwrite("debugging-opencv/found-page-1.png", img)
-        except:
-            print("No page found")
-        if img is None:
-            skip_shadows = True
-            img = omr.remove_shadows(self, img_preprocessed)
-            #cv2.imwrite("debugging-opencv/no-shadows-1.png", img)
-            img_preprocessed = omr.find_page(self, img)
-            #cv2.imwrite("debugging-opencv/found-page-2.png", img_preprocessed)
-            page_img = img_preprocessed
-            if img_preprocessed is None:
-                return None, None, None, None, None
-        #cv2.imshow("label", img)
-        if not skip_shadows:
-            img_preprocessed = self.remove_shadows(img)
-            #cv2.imwrite("debugging-opencv/no-shadows-2.png", img_preprocessed)
-
-        img_contours = utils.find_contours(img_preprocessed, num_answer_fields + 1)
-        img_contours = utils.find_contours2(img_preprocessed, num_answer_fields + 1)
-
-        if len(img_contours) < num_answer_fields + 1:
-            return None, None, None, None, None
-        '''
-        #make sure that the index contour is last
-        for j in range(num_answer_fields + 1):
-            i = j
-            i2 = (j + 1) % (num_answer_fields + 1)
-            #print(i, i2)
-            if img_contours[i][0][0][1] > img_contours[i2][0][0][1]:
-                img_contours[i],img_contours[i2] = img_contours[i2],img_contours[i]
-    
-        if img_contours[0][0][0][0] > img_contours[1][0][0][0]:
-            img_contours[0],img_contours[1] = img_contours[1],img_contours[0]
-        '''
-
-        images_warped = []
-        for contour in img_contours:
-            images_warped.append(utils.image_warping(contour, img_preprocessed, widthImg, heightImg))
-
-        im_i = 0
-        for im in images_warped:
-            cv2.imwrite("debugging-opencv/warped" + str(im_i) + ".png", im)
-            if im_i != 3:
-                im_grid = utils.drawGrid(im)
-                cv2.imwrite("debugging-opencv/warped_grid" + str(im_i) + ".png", im_grid[0])
-            else:
-                im_grid = utils.drawGrid(im, questions=8, choices=11)
-                cv2.imwrite("debugging-opencv/warped_grid" + str(im_i) + ".png", im_grid[0])
-            im_i += 1
-
-        images_threshold = []
-        for warped_image in images_warped:
-            #print("contour", contour)
-            images_threshold.append(self.apply_threshold(warped_image))
-
-        images_grid = []
-        i = 0
-        for threshold_image in images_threshold:
-            if i % (num_answer_fields + 1) == num_answer_fields:
-                images_grid.append(self.draw_grid(threshold_image, is_index=True))
-                i = 0
-            else:
-                images_grid.append(self.draw_grid(threshold_image, is_index=False))  # TODO delete unnecessary data
-                i += 1
-        #cv2.imshow("label3", images_grid[2][0])
-        images_answers = []
-        i = 0
-        for grid in images_grid:
-            if i % (num_answer_fields + 1) == num_answer_fields:
-                images_answers.append(self.get_answers(grid[0], grid[1], is_index=True))
-                i = 0
-            else:
-                images_answers.append(self.get_answers(grid[0], grid[1]))
-                i += 1
-
-        # grade answers
-        all_answers = []
-        for answer in images_answers[:-1]:
-            answers = []
-            for question in answer:
-                #print(max(question))
-                if max(question) * 0.50 > statistics.median(question):
-                    answers.append(ans_array[question.index(max(question))])
-                else:
-                    answers.append("0")
-            all_answers.append(answers)
-        full_answers = []
-        for l in all_answers:
-            for a in l:
-                full_answers.append(a)
-        #print(full_answers)
-
-        # read the index
-        index_answer = images_answers[-1][:-2]
-        #print(index_answer)
-        index_answers = []
-        for char in index_answer:
-            index_answers.append(str(char.index(max(char)) - 1))
-        index_txt = "".join(index_answers)
-
-        group_answer = images_answers[-1][-1]
-        group = group_answer.index(max(group_answer))
-        #print("Grupa:",group)
-        warped_imgs_grid = [1]
-        #page_img_grid = draw_grids(page_img, images_warped)
-        #print(index_txt, full_answers, group, page_img, warped_imgs_grid)
-        #cv2.imshow("label", page_img)
-        return index_txt, full_answers, group, page_img, images_warped
-
-
-    def omr_grade(self, correct_answers, img):
-        #print("Reading student's answers from image")
-        # function grades answers based on the correct answers in the argument
-        skip_shadows = False
-        img_preprocessed = self.preprocess_image(img)
-        cv2.imwrite("debugging-opencv/camera-preprocessed.png", img_preprocessed)
-        img = self.find_page(img_preprocessed)
-        page_img = img
-        if img is not None:
-            cv2.imwrite("debugging-opencv/found-page-1.png", img)
-        if img is None:
-            skip_shadows = True
-            img = self.remove_shadows(img_preprocessed)
-            cv2.imwrite("debugging-opencv/no-shadows-1.png", img)
-            img_preprocessed = self.find_page(img)
-            page_img = img_preprocessed
-            if img_preprocessed is not None:
-                cv2.imwrite("debugging-opencv/found-page-2.png", img_preprocessed)
-            if img_preprocessed is None:
-                return None, None, None, None, None
-        #cv2.imshow("label", img)
-        if not skip_shadows:
-            img_preprocessed = self.remove_shadows(img)
-            cv2.imwrite("debugging-opencv/no-shadows-2.png", img_preprocessed)
-
-        img_contours = utils.find_contours(img_preprocessed, num_answer_fields + 1)
-        img_contours = utils.find_contours2(img_preprocessed, num_answer_fields + 1)
-        print("cnt found")
-        if len(img_contours) < 3:
-            return None, None, None, None, None
-
-        '''
-        #make sure that the index contour is last
-        for j in range(num_answer_fields + 1):
-            i = j
-            i2 = (j + 1) % (num_answer_fields + 1)
-            #print(i, i2)
-            if img_contours[i][0][0][1] > img_contours[i2][0][0][1]:
-                img_contours[i],img_contours[i2] = img_contours[i2],img_contours[i]
-        '''
-
-        if img_contours[0][0][0][0] > img_contours[1][0][0][0]:
-            img_contours[0], img_contours[1] = img_contours[1], img_contours[0]
-
-        images_warped = []
-        for contour in img_contours:
-            images_warped.append(utils.image_warping(contour, img_preprocessed, widthImg, heightImg))
-
-        im_i = 0
-        for im in images_warped:
-            cv2.imwrite("debugging-opencv/warped" + str(im_i) + ".png", im)
-            if im_i != 3:
-                im_grid = utils.drawGrid(im)
-                cv2.imwrite("debugging-opencv/warped_grid" + str(im_i) + ".png", im_grid[0])
-            else:
-                im_grid = utils.drawGrid(im, questions=8, choices=11)
-                cv2.imwrite("debugging-opencv/warped_grid" + str(im_i) + ".png", im_grid[0])
-            im_i += 1
-
-        images_threshold = []
-        for warped_image in images_warped:
-            images_threshold.append(self.apply_threshold(warped_image))
-
-        images_grid = []
-        i = 0
-        for threshold_image in images_threshold:
-            if i % (num_answer_fields + 1) == num_answer_fields:
-                images_grid.append(self.draw_grid(threshold_image, is_index=True))
-                i = 0
-            else:
-                images_grid.append(self.draw_grid(threshold_image, is_index=False))  # TODO delete unnecessary data
-                i += 1
-
-        images_answers = []
-        i = 0
-        for grid in images_grid:
-            if i % (num_answer_fields + 1) == num_answer_fields:
-                images_answers.append(self.get_answers(grid[0], grid[1], is_index=True))
-                i = 0
-            else:
-                images_answers.append(self.get_answers(grid[0], grid[1]))
-                i += 1
-
-        # grade answers
-        all_answers = []
-        for answer in images_answers[:-1]:
-            answers = []
-            for question in answer:
-                #print(max(question))
-                if max(question) * 0.50 > statistics.median(question):
-                    answers.append(ans_array[question.index(max(question))])
-                else:
-                    answers.append("0")
-            all_answers.append(answers)
-        full_answers = []
-        for l in all_answers:
-            for a in l:
-                full_answers.append(a)
-        #print("\nOdpowiedzi:         ", full_answers)
-
-        # read the index
-        index_answer = images_answers[-1][:-2]
-        index_answers = []
-        for char in index_answer:
-            index_answers.append(str(char.index(max(char)) - 1))
-        index_txt = "".join(index_answers)
-
-        group_answer = images_answers[-1][-1]
-        group = group_answer.index(max(group_answer))
-        #print("Grupa:",group)
-        warped_imgs_grid = []
-        return index_txt, full_answers, group, page_img, images_warped
-
     def imageToBase64(self, img):
         _, buffer = cv2.imencode('.png', img)
         return base64.b64encode(buffer).decode('utf-8')
@@ -548,27 +315,3 @@ class omr:
     def score(self, correct, answers):
         return utils.score(correct, answers)
 
-#
-# if __name__ == '__main__':
-#     graded = False
-#     type = 1 # TODO loadning correct answers
-#     while graded == False:
-#         if type == 0:
-#             _, answers, group_answers = omr_read_correct_answers()
-#             print("\nPoprawne odpowiedzi:", answers)
-#             if answers is not None:
-#                 graded = True
-#         if type == 1:
-#             _, answers, group_answers = omr_read_correct_answers()
-#             print("\nPoprawne odpowiedzi:", answers)
-#
-#             index, score, group = omr_grade(answers, path_to_image)
-#             if index is not None:
-#                 print("\nIndeks:", index, "\nWynik:", score, "\nGrupa:", group)
-#             if answers is not None and score is not None:
-#                 graded = True
-#
-#     data = usos_utils.import_data()
-#     export_csv = usos_utils.export_data({index: score}, data, score)
-#     print(export_csv)
-#
