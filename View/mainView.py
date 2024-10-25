@@ -28,7 +28,7 @@ class mainView:
         self.tabs = [
             examTab(controller, self.t),
             keysTab(controller, self),
-            answersTab(controller, self.t),
+            answersTab(controller, self),
             resultsTab(controller, self.t),
             settingsTab(controller, self.t, self),
             grayedTab(controller, self.t)

@@ -120,13 +120,19 @@ class mainModel:
         img = self.omr.loadImageFromFile(filePathList[0])
         #index, answers, group_answers, page_img, images_warped = self.omr.processOneSheet(img)
         # print(index, answers, group_answers, page_img, images_warped)
-        self.loadAnswers.loadAnswers(self, 0, exam_name, file_path=filePathList[0])
-        pass
+        for file in filePathList:
+            self.loadAnswers.loadAnswers(self, 0, exam_name, file_path=file)
+        return img
 
 
-    def readAnswersFromFile(self, exam_name):
+    def readAnswersFromFile(self, filePathList, exam_name):
         print("MODEL - Reading answers from file")
-        pass
+        print("filePathList: ", filePathList)
+
+        img = self.omr.loadImageFromFile(filePathList[0])
+        for file in filePathList:
+            self.loadAnswers.loadAnswers(self, 1, exam_name, file_path=file)
+        return img
 
     def getResultsImgPath(self, exam_name):
         r = str("../exams-data/" + exam_name + "/student_answers/")  # TODO
