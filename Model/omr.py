@@ -52,6 +52,7 @@ class omr:
             img = omr.remove_shadows(self, img_preprocessed)
             cv2.imwrite("debugging-opencv/no-shadows-1.png", img)
             img_preprocessed = omr.find_page(self, img)
+
             try:
                 cv2.imwrite("debugging-opencv/found-page-2.png", img_preprocessed)
             except:
