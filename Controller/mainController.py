@@ -69,7 +69,7 @@ class mainController:
         elif data[0] == "answers":
             self.model.enterAnswersReadingMode(data[1])
         elif data[0] == "keys-file":
-            self.model.readKeysFromFile(data[1])
+            self.model.readKeysFromFile(data[1], data[2])
         elif data[0] == "answers-file":
             self.model.readAnswersFromFile(data[1])
         else:
