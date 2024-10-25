@@ -71,3 +71,4 @@ class keysTab:
         self.image = image
         self.ftImage.src_base64 = self.image
         self.ftImage.update()
+
