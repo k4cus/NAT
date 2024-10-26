@@ -141,23 +141,17 @@ class omr:
         group = group_answer.index(max(group_answer))
         #print("Grupa:",group)
         warped_imgs_grid = [1]
-        #page_img_grid = draw_grids(page_img, images_warped)
-        #print(index_txt, full_answers, group, page_img, warped_imgs_grid)
-        #cv2.imshow("label", page_img)
-        return index_txt, full_answers, group, page_img, images_warped
+        print(index_txt, full_answers, group, page_img, warped_imgs_grid)
+        page_img_grid = omr.draw_grids(self, page_img, images_warped, [index_txt, group], full_answers)
+        
+        cv2.imwrite("debugging-opencv/grid_full_answers.png", page_img_grid)
+
+        return index_txt, full_answers, group, page_img, images_warped, page_img_grid
 
 
 
     def loadImageFromFile(self, path):
         img = cv2.imread(path)
-        return img
-
-
-    def load_image(self, path, webcam_feed):
-        if webcam_feed:
-            success, img = cap.read()
-        else:
-            img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
         return img
 
 
@@ -237,25 +231,18 @@ class omr:
             return None
 
 
-    def draw_grids(self, img, warped_imgs):
-        contours = utils.find_contours2(img, num_answer_fields + 1)
-        for warped_img in warped_imgs:
-            back = img
-            overlay = warped_img
-            h, w = back.shape[:2]
-            print(h, w)
-            h1, w1 = overlay.shape[:2]
-            print(h1, w1)
-            # let store center coordinate as cx,cy
-            cx, cy = (h - h1) // 2, (w - w1) // 2
-            # use numpy indexing to place the resized image in the center of
-            # background image
-
-            back[cy:cy + h1, cx:cx + w1] = overlay
-
-            # view result
+    def draw_grids(self, img, warped_imgs, index_group, full_answers):
+        contours = utils.find_contours3(img, num_answer_fields + 1)
+        img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
+        img = cv2.applyColorMap(img, cv2.COLORMAP_PINK)
+        #img2 = cv2.drawContours(img, contours, -1, (255, 255, 0), 2)
+        i = 0
+        for contour in contours[:-1]:
+            img = utils.drawGridFullPage(img, contour, index_group, full_answers, i)
+            i += 1
+        img = utils.drawGridFullPage(img, contours[-1], index_group, full_answers, i, questions=8, choices=11)
+        # view result
         return img
-
 
     def apply_threshold(self, img):
         img_thresh = cv2.threshold(img, 170, 255, cv2.THRESH_BINARY_INV)[1]

@@ -28,7 +28,6 @@ class loadAnswers:
     def loadAnswers(self, type, currentExamName, cam_index=None, file_path=None, folder_path=None):
         print('processing...')
         #path_to_image = "data/answer_sheets/answer_sheet_5_8.jpg"
-        #img = omr.load_image(path_to_image, False)
         folders = ["/answer_keys/", "/student_answers/"]
 
         if cam_index is not None:
@@ -47,7 +46,7 @@ class loadAnswers:
 
                 img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-                index, answers, group, page_img, images_warped = omr.omr.processOneSheet(self, img)
+                index, answers, group, page_img, images_warped, page_img_grid = omr.omr.processOneSheet(self, img)
                 print("finished one page")
 
                 folders_2 = [group, index]
@@ -116,4 +115,4 @@ class loadAnswers:
             cap.release()
 
 
-        return None
+        return page_img_grid

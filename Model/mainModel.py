@@ -117,11 +117,11 @@ class mainModel:
     def readKeysFromFile(self, filePathList, exam_name):
         print("MODEL - Reading keys from file")
         print("filePathList: ", filePathList)
-        img = self.omr.loadImageFromFile(filePathList[0])
+        #img = self.omr.loadImageFromFile(filePathList[0])
         #index, answers, group_answers, page_img, images_warped = self.omr.processOneSheet(img)
         # print(index, answers, group_answers, page_img, images_warped)
         for file in filePathList:
-            self.loadAnswers.loadAnswers(self, 0, exam_name, file_path=file)
+            img = self.loadAnswers.loadAnswers(self, 0, exam_name, file_path=file)
         return img
 
 
@@ -129,9 +129,9 @@ class mainModel:
         print("MODEL - Reading answers from file")
         print("filePathList: ", filePathList)
 
-        img = self.omr.loadImageFromFile(filePathList[0])
+        #img = self.omr.loadImageFromFile(filePathList[0])
         for file in filePathList:
-            self.loadAnswers.loadAnswers(self, 1, exam_name, file_path=file)
+            img = self.loadAnswers.loadAnswers(self, 1, exam_name, file_path=file)
         return img
 
     def getResultsImgPath(self, exam_name):
