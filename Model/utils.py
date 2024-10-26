@@ -104,6 +104,53 @@ def drawGrid(img, questions=5, choices=20):
         data.append(pt3)
     return img, data
 
+def drawGridFullPage(img, contour, index, answers, field, questions=5, choices=20):
+    index_field = index[0] + "x" + str(index[1]-1)
+    print("index field", index_field)
+    map = ["A", "B", "C", "D", "E"]
+    if field < 3:
+        answers = answers[choices*field:choices*(field+1)]
+    #print("drawing answers", index, answers)
+    #print(contour[1][0][1], contour[0][0][1])
+    secW = int((contour[1][0][0] - contour[0][0][0]) / questions)
+    secH = int((contour[2][0][1] - contour[0][0][1]) / choices)
+    data = [secW, secH]
+    #print("data", data)
+    for i in range(0, choices + 1):
+        pt1 = (contour[0][0][0], contour[0][0][1] + (secH * i))
+        pt2 = (contour[1][0][0], contour[0][0][1] + (secH * i))
+        cv2.line(img, pt1, pt2, (255, 0, 0), 1)
+    for i in range(0, questions + 1):
+        pt3 = (contour[0][0][0] + (secW * i), contour[0][0][1])
+        pt4 = (contour[0][0][0] + (secW * i), contour[2][0][1])
+        cv2.line(img, pt3, pt4, (255, 0, 0), 1)
+
+    if field < 3:
+        #print("drawing...")
+        for i in range(0, choices):
+            if answers[i] == "0":
+                pass
+            else:
+                center = (int(contour[0][0][0] + (secW * map.index(answers[i])) + secW/2), int(contour[0][0][1] + (secH * i) + secH/2))
+                #pt4 = (contour[0][0][0] + (secW * i), contour[2][0][1])
+                cv2.circle(img, center, 1, (255, 0, 0), 5)
+
+    else:
+        print("drawing...")
+        for i in range(0, questions):
+            if i == questions - 2:
+                pass
+            else:
+                if index_field[i] not in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]:
+                    pass
+                else:
+                    center = (int(contour[0][0][0] + (secW * i) + secW/2), int(contour[0][0][1] + (secH * (int(index_field[i])+1)) + secH/2))
+                    #pt4 = (contour[0][0][0] + (secW * i), contour[2][0][1])
+                    cv2.circle(img, center, 1, (255, 0, 0), 5)
+    
+
+    return img
+
 
 def showAnswers(img, myIndex, grading, ans, questions=5, choices=5):
     secW = int(img.shape[1] / questions)
@@ -184,6 +231,40 @@ def find_contours2(img, num_rectangles):
             [[329, 31]],
             [[137, 221]],
             [[329, 221]]
+
+        ]
+    ]
+    hardcoded_values = np.array(hardcoded_values)
+    return hardcoded_values
+
+def find_contours3(img, num_rectangles):
+    hardcoded_values = [
+        [
+            [[39, 314]],
+            [[160, 314]],
+            [[160, 655]],
+            [[39, 655]]
+
+        ],
+        [
+            [[194, 314]],
+            [[316, 314]],
+            [[316, 655]],
+            [[194, 655]]
+
+        ],
+        [
+            [[355, 314]],
+            [[471, 314]],
+            [[471, 655]],
+            [[355, 655]],
+
+        ],
+        [
+            [[137, 31]],
+            [[329, 31]],
+            [[329, 221]],
+            [[137, 221]],
 
         ]
     ]
