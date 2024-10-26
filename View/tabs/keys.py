@@ -12,11 +12,13 @@ class keysTab:
         self.filePicker = ft.FilePicker(on_result=self.onFilePickResult)
         self.fileExtensions = self.controller.getReadFromFileExtensions()
         self.image = base64_empty_image(1240, 1754)
+        self.text = "Test"
         self.ftImage = ft.Image(
             src_base64=self.image,
             height=1754,
             fit=ft.ImageFit.FIT_HEIGHT,
         )
+        self.ftText = ft.Text(value=self.text)
 
     def main(self):
         t = self.view.t
@@ -30,7 +32,8 @@ class keysTab:
                     ft.ElevatedButton(text=t("keys-reading-directory"), on_click=self.pickDirectoryToRead)
                 ]),
                 ft.Row([
-                    self.ftImage
+                    self.ftImage,
+                    self.ftText
                 ],
                     expand=1,
                     wrap=False,
@@ -71,4 +74,9 @@ class keysTab:
         self.image = image
         self.ftImage.src_base64 = self.image
         self.ftImage.update()
+
+    def updateText(self, text):
+        self.text = text
+        self.ftText.value = self.text
+        self.ftText.update()
 

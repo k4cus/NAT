@@ -26,8 +26,6 @@ class loadAnswers:
         return ans
 
     def loadAnswers(self, type, currentExamName, cam_index=None, file_path=None, folder_path=None):
-        print('processing...')
-        #path_to_image = "data/answer_sheets/answer_sheet_5_8.jpg"
         folders = ["/answer_keys/", "/student_answers/"]
 
         if cam_index is not None:
@@ -94,8 +92,6 @@ class loadAnswers:
                                                 1, (0,0,255,255), 2, cv2.LINE_AA)
                             i += 1
 
-                        #cv2.imwrite("exams-data/" + currentExamName + "/answer_keys/result_img.png", transparent_img)
-
                         # grade if in student answers reading mode
                         if type == 1:
                             ans_list = ans[0].split(";")
@@ -105,14 +101,16 @@ class loadAnswers:
                             score = omr.omr.score(self, ans_list[:num_questions], answers[:num_questions])
                             print("Wynik: " + str(round(score[1], 2)) + "%")
                             cv2.imwrite("exams-data/" + currentExamName + "/student_answers/" + str(index) + "/result_img.png", transparent_img)
+                            score_string = str(round(score[1], 2)) + "%"
+                        else:
+                            score_string = ""
 
 
             testing = False # delete when you want to loop
 
-        #cv2.imwrite("assets/page.png", page_img)  # saves the last scanned image to display it later - not working
         print("Finished scanning")
         if cam_index is not None:
             cap.release()
 
-
-        return page_img_grid
+        print(score_string)
+        return page_img_grid, score_string

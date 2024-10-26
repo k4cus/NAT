@@ -6,12 +6,6 @@ import statistics
 
 from Model import utils
 
-webcam_feed = False
-path_to_image = "../data/answer_sheets/answer_sheet_5_3.png"
-
-#cap = cv2.VideoCapture(0) # TODO delete - makes it impossible to change settings
-#cap.set(10, 160)
-
 heightImg = 3508
 widthImg = 2480
 
@@ -24,7 +18,6 @@ num_answer_fields = 3
 
 ans_array = ["A", "B", "C", "D", "E"]
 
-#points_to_check = [[15,11], [15,489], [685,11], [693,489], [15,22], [25,11]]
 points_to_check = [[10, 10], [10, 484], [681, 11], [681, 484], [10, 20], [18, 10]]
 white_thresh = 120
 
@@ -37,16 +30,18 @@ class omr:
     def processOneSheet(self, img):
         # function reads correct answers from an answer sheet
         skip_shadows = False   	
-        #img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
         img_preprocessed = omr.preprocess_image(self, img)
         cv2.imwrite("debugging-opencv/camera-preprocessed.png", img_preprocessed)
         img = img_preprocessed
         img = omr.find_page(self, img_preprocessed)
         page_img = img
+
         try:
             cv2.imwrite("debugging-opencv/found-page-1.png", img)
         except:
             print("No page found")
+
         if img is None:
             skip_shadows = True
             img = omr.remove_shadows(self, img_preprocessed)
@@ -61,10 +56,9 @@ class omr:
             page_img = img_preprocessed
             if img_preprocessed is None:
                 return None, None, None, None, None
-        #cv2.imshow("label", img)
+            
         if not skip_shadows:
             img_preprocessed = omr.remove_shadows(self, img)
-            #cv2.imwrite("debugging-opencv/no-shadows-2.png", img_preprocessed)
 
         img_contours = utils.find_contours(img_preprocessed, num_answer_fields + 1)
         img_contours = utils.find_contours2(img_preprocessed, num_answer_fields + 1)
@@ -101,7 +95,7 @@ class omr:
             else:
                 images_grid.append(omr.draw_grid(self, threshold_image, is_index=False))  # TODO delete unnecessary data
                 i += 1
-        #cv2.imshow("label3", images_grid[2][0])
+
         images_answers = []
         i = 0
         for grid in images_grid:
@@ -117,7 +111,6 @@ class omr:
         for answer in images_answers[:-1]:
             answers = []
             for question in answer:
-                #print(max(question))
                 if max(question) * 0.50 > statistics.median(question):
                     answers.append(ans_array[question.index(max(question))])
                 else:
@@ -127,11 +120,10 @@ class omr:
         for l in all_answers:
             for a in l:
                 full_answers.append(a)
-        #print(full_answers)
 
         # read the index
         index_answer = images_answers[-1][:-2]
-        #print(index_answer)
+
         index_answers = []
         for char in index_answer:
             index_answers.append(str(char.index(max(char)) - 1))
@@ -139,7 +131,7 @@ class omr:
 
         group_answer = images_answers[-1][-1]
         group = group_answer.index(max(group_answer))
-        #print("Grupa:",group)
+
         warped_imgs_grid = [1]
         print(index_txt, full_answers, group, page_img, warped_imgs_grid)
         page_img_grid = omr.draw_grids(self, page_img, images_warped, [index_txt, group], full_answers)
@@ -184,8 +176,8 @@ class omr:
     def find_page(self, img):
         image_warped = None
         wrong_format = False
-        points_to_check = [[10, 10], [10, 484], [681, 11], [681, 484], [10, 20], [18, 10]]
         img_copy = img
+
         # finds biggest contour in image
         contour = utils.find_contours(img, 3)
         print(len(contour))
@@ -307,3 +299,11 @@ class omr:
     def score(self, correct, answers):
         return utils.score(correct, answers)
 
+def score(correct, answers):
+    points = 0
+    num_of_questions = len(correct)
+    for question in range(num_of_questions):
+        if correct[question] == answers[question]:
+            points += 1
+    score = 100 * points / num_of_questions
+    return points, score
