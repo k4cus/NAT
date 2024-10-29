@@ -20,5 +20,6 @@
     "keys-reading-directory": "Read cards with answer keys from directory",
     "answers-reading-mode": "Read answers from camera",
     "answers-reading-files": "Read answers from files",
-    "answers-reading-directory": "Read answers from directory"
+    "answers-reading-directory": "Read answers from directory",
+    "manually-find-page": "Manually pick contours"
 }

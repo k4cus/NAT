@@ -29,7 +29,8 @@ class keysTab:
                     ft.ElevatedButton(text=t("keys-reading-mode"), on_click=self.controller.enterReadingMode,
                                       data=["keys", self.controller.getExamName()]),
                     ft.ElevatedButton(text=t("keys-reading-files"), on_click=self.pickFileToRead),
-                    ft.ElevatedButton(text=t("keys-reading-directory"), on_click=self.pickDirectoryToRead)
+                    ft.ElevatedButton(text=t("keys-reading-directory"), on_click=self.pickDirectoryToRead),
+                    ft.ElevatedButton(text=t("manually-find-page"), on_click=self.findPage)
                 ]),
                 ft.Row([
                     self.ftImage,
@@ -80,3 +81,5 @@ class keysTab:
         self.ftText.value = self.text
         self.ftText.update()
 
+    def findPage(self, e):
+        self.controller.keyPageFinder(self.image)

@@ -103,3 +103,5 @@ class mainController:
         txt = text
         self.view.tabs[2].updateText(txt)
     
+    def keyPageFinder(self, image):
+        self.keyUpdateImage(self.model.pageFinder(image))
