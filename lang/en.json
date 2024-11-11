@@ -18,5 +18,7 @@
     "keys-reading-mode": "Read cards with answer keys from camera",
     "keys-reading-files": "Read cards with answer keys from files",
     "keys-reading-directory": "Read cards with answer keys from directory",
-    "answers-reading-mode": "Read answers from camera"
+    "answers-reading-mode": "Read answers from camera",
+    "answers-reading-files": "Read answers from files",
+    "answers-reading-directory": "Read answers from directory"
 }

@@ -22,6 +22,7 @@ class mainModel:
         self.data = None
         self.camera = camera(self.controller)
         self.loadAnswers = loadAnswers
+        self.omr_instance = omr(self)
 
         self.readFromFileExtensions = ["pdf", "png", "jpg"]
 
@@ -104,9 +105,9 @@ class mainModel:
 
     def enterKeysReadingMode(self, exam_name):
         print("MODEL - Entering answers reading mode")
-        cam_index = self.camera.getCameraInputIndex()
+        cam_index: int = self.camera.getCameraInputIndex()
         self.loadAnswers.loadAnswers(self, 0, exam_name, cam_index)
-        pass
+
 
     def enterAnswersReadingMode(self, exam_name):
         print("MODEL - Entering answers reading mode")
@@ -114,18 +115,22 @@ class mainModel:
         self.loadAnswers.loadAnswers(self, 1, exam_name, cam_index)
         pass  # start reading exam from camera
 
-    def readKeysFromFile(self, filePathList):
+    def readKeysFromFile(self, filePathList, exam_name):
         print("MODEL - Reading keys from file")
-        print(filePathList)
-        img = self.loadImageFromFile(filePathList[0])
-        index, answers, group_answers, page_img, images_warped = self.processOneSheet(img)
-        print(index, answers, group_answers, page_img, images_warped)
-        # self.loadAnswers.loadCorrectAnswersFromFile(self, exam_name)
-        pass
+        print("filePathList: ", filePathList)
 
-    def readAnswersFromFile(self, exam_name):
+        for file in filePathList:
+            img = self.loadAnswers.loadAnswers(self, 0, exam_name, file_path=file)
+        return img
+
+
+    def readAnswersFromFile(self, filePathList, exam_name):
         print("MODEL - Reading answers from file")
-        pass
+        print("filePathList: ", filePathList)
+
+        for file in filePathList:
+            img = self.loadAnswers.loadAnswers(self, 1, exam_name, file_path=file)
+        return img
 
     def getResultsImgPath(self, exam_name):
         r = str("../exams-data/" + exam_name + "/student_answers/")  # TODO

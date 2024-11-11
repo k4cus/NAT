@@ -1,6 +1,17 @@
+import base64
+
 from Model.mainModel import mainModel
 from View.mainView import mainView
-
+from View.tabs.settings import settingsTab
+import cv2
+from Model import camera
+import flet as ft
+import cv2
+import base64
+import io
+import threading
+import time
+from PIL import Image
 
 class mainController:
     model = None
@@ -67,11 +78,17 @@ class mainController:
         elif data[0] == "answers":
             self.model.enterAnswersReadingMode(data[1])
         elif data[0] == "keys-file":
-            self.model.readKeysFromFile(data[1])
+            img, score = self.model.readKeysFromFile(data[1], data[2])
+            self.keyUpdateImage(img)
+            self.keyUpdateText(score)
         elif data[0] == "answers-file":
-            self.model.readAnswersFromFile(data[1])
+            img, score = self.model.readAnswersFromFile(data[1], data[2])
+            self.answerUpdateImage(img)
+            self.answerUpdateText(score)
         else:
             print("KONTROLLER - enterReadingMode unknown data: " + data[0])
+
+
 
     def getResultsImg(self, exam_name):
         print("img path")
@@ -82,5 +99,18 @@ class mainController:
         return self.model.readFromFileExtensions
 
     def keyUpdateImage(self, image):
-        self.view.tabs[1].updateImage(image)
+        img_base64 = self.model.omr.imageToBase64(image)
+        self.view.tabs[1].updateImage(img_base64)
+
+    def answerUpdateImage(self, image):
+        img_base64 = self.model.omr.imageToBase64(image)
+        self.view.tabs[2].updateImage(img_base64)
+
+    def keyUpdateText(self, text):
+        txt = text
+        self.view.tabs[1].updateText(txt)
+
+    def answerUpdateText(self, text):
+        txt = text
+        self.view.tabs[2].updateText(txt)
     
