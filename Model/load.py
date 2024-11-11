@@ -3,6 +3,7 @@ import os
 import numpy as np
 from Model import omr
 import Model.utlis
+import View.tabs.keys as keys
 
 
 class loadAnswers:
@@ -63,7 +64,7 @@ class loadAnswers:
                 cv2.drawContours(imgContours, contours, -1, (0, 255, 0), 10)  # DRAW ALL DETECTED CONTOURS
                 rectCon = Model.utlis.rectContour(contours)  # FILTER FOR RECTANGLE CONTOURS
                 biggestPoints = Model.utlis.getCornerPoints(rectCon[0])  # GET CORNER POINTS OF THE BIGGEST RECTANGLE
-                gradePoints = Model.utlis.getCornerPoints(rectCon[4])  # GET CORNER POINTS OF THE SECOND BIGGEST RECTANGLE
+                gradePoints = Model.utlis.getCornerPoints(rectCon[1])  # GET CORNER POINTS OF THE SECOND BIGGEST RECTANGLE
 
                 if biggestPoints.size != 0 and gradePoints.size != 0:
 
@@ -140,7 +141,7 @@ class loadAnswers:
                     # SHOW ANSWERS AND GRADE ON FINAL IMAGE
                     imgFinal = cv2.addWeighted(imgFinal, 1, imgInvWarp, 1, 0)
                     imgFinal = cv2.addWeighted(imgFinal, 1, imgInvGradeDisplay, 1, 0)
-
+                    keys.fraaaame = imgFinal
                     # IMAGE ARRAY FOR DISPLAY
                     imageArray = ([img, imgGray, imgCanny, imgContours],
                                   [imgBigContour, imgThresh, imgWarpColored, imgFinal])
@@ -156,8 +157,8 @@ class loadAnswers:
 
             stackedImage = Model.utlis.stackImages(imageArray, 0.5, lables)
             cv2.imshow("Result", stackedImage)
-            cv2.waitKey(0)
-            """
+
+
             # SAVE IMAGE WHEN 's' key is pressed
             if cv2.waitKey(1) & 0xFF == ord('s'):
                 cv2.imwrite("Scanned/myImage" + str(count) + ".jpg", imgFinal)
@@ -168,4 +169,3 @@ class loadAnswers:
                 cv2.imshow('Result', stackedImage)
                 cv2.waitKey(300)
                 count += 1
-            """
