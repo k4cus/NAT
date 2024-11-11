@@ -1,3 +1,8 @@
+1. Dodane testowanie kamery działania w ustawieniach
+2. Dodano otwieranie kamery do zczytania odpowiedzi
+3. Dodano zczytywanie odpowiedzi z kamery w trybie live z arkusza PWr
+
+
 # NAT
 Not Another Tester - by PWr Natalia Konopka and Kacper Nowak, 2024
 
