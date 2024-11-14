@@ -2,6 +2,10 @@ import os
 import random
 import threading
 import time
+import numpy as np
+import base64
+import time
+from pynput import mouse
 
 import cv2
 
@@ -22,6 +26,9 @@ class mainModel:
         self.data = None
         self.camera = camera(self.controller)
         self.loadAnswers = loadAnswers
+        self.image = None
+        self.clicks = 0
+        self.coords = []
 
         self.readFromFileExtensions = ["pdf", "png", "jpg"]
 
@@ -134,3 +141,34 @@ class mainModel:
     def getResultsImgPath(self, exam_name):
         r = str("../exams-data/" + exam_name + "/student_answers/")  # TODO
         return r
+
+    def pageFinder(self, image):
+        self.clicks = 0
+        self.coords = []
+
+        with mouse.Listener(on_click=self.on_click) as listener:
+            try:
+                listener.join()
+            except:
+                pass
+        print(self.coords)
+
+        image = base64.b64decode(image)
+        #print(image)
+        image = np.frombuffer(image, np.uint8)
+
+        # Decode the numpy array to an image
+        image = cv2.imdecode(image, cv2.IMREAD_GRAYSCALE)
+        res = self.omr.processOneSheet(image, cropped=True, coords=self.coords)[5]
+        cv2.imwrite("debugging-opencv/new_img.png", res)
+        return (res)
+
+
+    def on_click(self, x, y, button, pressed):
+        #print(x, y, self.clicks)
+        if self.clicks % 2 == 0:
+            self.coords.append([x,y])
+        self.clicks = self.clicks + 1
+        if (self.clicks>=7):
+            raise Exception("Too many clicks")
+

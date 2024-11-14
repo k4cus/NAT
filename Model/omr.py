@@ -3,6 +3,7 @@ import base64
 import cv2
 import numpy as np
 import statistics
+from PIL import ImageGrab
 
 from Model import utils
 
@@ -27,38 +28,48 @@ class omr:
     def __init__(self, mainController):
         self.controller = mainController
 
-    def processOneSheet(self, img):
+    def processOneSheet(self, img, cropped=False, coords=None):
         # function reads correct answers from an answer sheet
-        skip_shadows = False   	
 
-        img_preprocessed = omr.preprocess_image(self, img)
-        cv2.imwrite("debugging-opencv/camera-preprocessed.png", img_preprocessed)
-        img = img_preprocessed
-        img = omr.find_page(self, img_preprocessed)
-        page_img = img
+        skip_shadows = False
+        if cropped:
+            page_img = img
+        if not cropped:
 
-        try:
-            cv2.imwrite("debugging-opencv/found-page-1.png", img)
-        except:
-            print("No page found")
-
-        if img is None:
-            skip_shadows = True
-            img = omr.remove_shadows(self, img_preprocessed)
-            cv2.imwrite("debugging-opencv/no-shadows-1.png", img)
-            img_preprocessed = omr.find_page(self, img)
+            img_preprocessed = omr.preprocess_image(self, img)
+            cv2.imwrite("debugging-opencv/camera-preprocessed.png", img_preprocessed)
+            img = img_preprocessed
+            img = omr.find_page(self, img_preprocessed)
+            page_img = img
 
             try:
-                cv2.imwrite("debugging-opencv/found-page-2.png", img_preprocessed)
+                cv2.imwrite("debugging-opencv/found-page-1.png", img)
             except:
                 print("No page found")
-            
-            page_img = img_preprocessed
-            if img_preprocessed is None:
-                return None, None, None, None, None
+
+            if img is None:
+                skip_shadows = True
+                img = omr.remove_shadows(self, img_preprocessed)
+                cv2.imwrite("debugging-opencv/no-shadows-1.png", img)
+                img_preprocessed = omr.find_page(self, img)
+
+                try:
+                    cv2.imwrite("debugging-opencv/found-page-2.png", img_preprocessed)
+                except:
+                    print("No page found")
+                
+                page_img = img_preprocessed
+                if img_preprocessed is None:
+                    return None, None, None, None, None
             
         if not skip_shadows:
             img_preprocessed = omr.remove_shadows(self, img)
+
+        if coords is not None:
+            screenshot = np.array(ImageGrab.grab(bbox=(None)))
+            img_preprocessed = omr.find_page(self, screenshot, coords)
+            page_img = img_preprocessed
+            img_preprocessed = cv2.cvtColor(img_preprocessed, cv2.COLOR_BGR2GRAY)
 
         img_contours = utils.find_contours(img_preprocessed, num_answer_fields + 1)
         img_contours = utils.find_contours2(img_preprocessed, num_answer_fields + 1)
@@ -83,7 +94,6 @@ class omr:
 
         images_threshold = []
         for warped_image in images_warped:
-            #print("contour", contour)
             images_threshold.append(omr.apply_threshold(self, warped_image))
 
         images_grid = []
@@ -133,11 +143,9 @@ class omr:
         group = group_answer.index(max(group_answer))
 
         warped_imgs_grid = [1]
-        print(index_txt, full_answers, group, page_img, warped_imgs_grid)
         page_img_grid = omr.draw_grids(self, page_img, images_warped, [index_txt, group], full_answers)
         
         cv2.imwrite("debugging-opencv/grid_full_answers.png", page_img_grid)
-
         return index_txt, full_answers, group, page_img, images_warped, page_img_grid
 
 
@@ -173,19 +181,28 @@ class omr:
         return img_blur
 
 
-    def find_page(self, img):
+    def find_page(self, img, coords=None):
         image_warped = None
         wrong_format = False
         img_copy = img
+        coords_2 = []
 
         # finds biggest contour in image
-        contour = utils.find_contours(img, 3)
-        print(len(contour))
+        if coords is None:
+            contour = utils.find_contours(img, 3)
+        else:
+            for c in range(len(coords)):
+                coords_2.append([coords[c]])
+
+            contour1 = np.array(coords_2)
+            contour = [np.array(contour1)]
     
         for cnt in contour:
             # transform
-            if contour != [] and cv2.contourArea(cnt) > 90000:
+            #if contour != [] and cv2.contourArea(cnt) > 90000:
+            if contour != []:
                 image_warped = utils.image_warping(cnt, img, 500, 700)
+                cv2.imwrite("debugging-opencv/new_img_warped.png", image_warped)
             else:
                 print("No contour found")
                 return None
@@ -225,7 +242,10 @@ class omr:
 
     def draw_grids(self, img, warped_imgs, index_group, full_answers):
         contours = utils.find_contours3(img, num_answer_fields + 1)
-        img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
+        try:
+            img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
+        except:
+            pass
         img = cv2.applyColorMap(img, cv2.COLORMAP_PINK)
         #img2 = cv2.drawContours(img, contours, -1, (255, 255, 0), 2)
         i = 0
@@ -269,14 +289,12 @@ class omr:
                     answers_array_row.append(average_color)
                 answers_array.append(answers_array_row)
                 start_height += height_answer
-            # print(answers_array)
 
             return answers_array
 
         else:
             start_width = 0
             for col in range(8):
-                #print(col)
                 answers_array_column = []
                 start_height = 0
                 for row in range(11):

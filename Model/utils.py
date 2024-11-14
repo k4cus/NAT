@@ -118,9 +118,7 @@ def find_contours(img, num_rectangles):
         num_rectangles = len(rect_con)
     if len(rect_con) > 0:
         for i in range(num_rectangles):
-            #print(i)
             biggest_contours.append(getCornerPoints(rect_con[i]))
-            #print("aaaaa", biggest_contours[0])
     return biggest_contours
 
 
