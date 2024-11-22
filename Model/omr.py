@@ -6,6 +6,7 @@ import statistics
 from PIL import ImageGrab
 
 from Model import utils
+from Model import cropRectangle
 
 heightImg = 3508
 widthImg = 2480
@@ -21,6 +22,8 @@ ans_array = ["A", "B", "C", "D", "E"]
 
 points_to_check = [[10, 10], [10, 484], [681, 11], [681, 484], [10, 20], [18, 10]]
 white_thresh = 120
+
+#np.set_printoptions(threshold = np.inf)
 
 class omr:
     controller = None
@@ -72,6 +75,8 @@ class omr:
             img_preprocessed = cv2.cvtColor(img_preprocessed, cv2.COLOR_BGR2GRAY)
 
         img_contours = utils.find_contours(img_preprocessed, num_answer_fields + 1)
+
+        tableWithIndex = cropRectangle.cropRectangle([260, 50], [670, 454])
         img_contours = utils.find_contours2(img_preprocessed, num_answer_fields + 1)
 
         if len(img_contours) < num_answer_fields + 1:
@@ -79,7 +84,7 @@ class omr:
 
         images_warped = []
         for contour in img_contours:
-            images_warped.append(utils.image_warping(contour, img_preprocessed, widthImg, heightImg))
+            images_warped.append(utils.image_warping(contour, img_preprocessed, 510, 404)) # width, height
 
         im_i = 0
         for im in images_warped:
@@ -88,6 +93,8 @@ class omr:
                 im_grid = utils.drawGrid(im)
                 cv2.imwrite("debugging-opencv/warped_grid" + str(im_i) + ".png", im_grid[0])
             else:
+                cnt = utils.find_contours(im, 1)[0]
+                im = utils.image_warping(cnt, im, tableWithIndex.getWidth(), tableWithIndex.getHeight())
                 im_grid = utils.drawGrid(im, questions=8, choices=11)
                 cv2.imwrite("debugging-opencv/warped_grid" + str(im_i) + ".png", im_grid[0])
             im_i += 1
@@ -121,7 +128,10 @@ class omr:
         for answer in images_answers[:-1]:
             answers = []
             for question in answer:
-                if max(question) * 0.50 > statistics.median(question):
+                #question2 = question/max(question)
+                print("Question:", question, statistics.median(question))
+                if statistics.median(question) < 0.7:
+                    #print("Question:", question2)
                     answers.append(ans_array[question.index(max(question))])
                 else:
                     answers.append("0")
@@ -201,7 +211,7 @@ class omr:
             # transform
             #if contour != [] and cv2.contourArea(cnt) > 90000:
             if contour != []:
-                image_warped = utils.image_warping(cnt, img, 500, 700)
+                image_warped = utils.image_warping(cnt, img, 1000, 1400)
                 cv2.imwrite("debugging-opencv/new_img_warped.png", image_warped)
             else:
                 print("No contour found")
@@ -257,8 +267,16 @@ class omr:
         return img
 
     def apply_threshold(self, img):
-        img_thresh = cv2.threshold(img, 170, 255, cv2.THRESH_BINARY_INV)[1]
-
+        #print("Img 0:", img)
+        img_flattened = [item for sublist in img for item in sublist]
+        img_median = statistics.median(img_flattened)
+        #print("Median:", img_median)
+        cv2.imwrite("debugging-opencv/thresh_test.png", img)
+        img_thresh = cv2.threshold(img, 255-img_median, 255, cv2.THRESH_BINARY)[1]
+        
+        cv2.imwrite("debugging-opencv/thresh_test_2.png", img_thresh)
+        #print("Img:", img_thresh)
+        #print("Img 3:", img)
         return img_thresh
 
 
@@ -271,34 +289,79 @@ class omr:
 
     def get_answers(self, img, img_answers_data, is_index=False):
         # search for all grid areas, find the most colored ones, add threshold
+        #print("Img:", img)
+        #print("Img answers data:", img_answers_data)
+
         height_answer = img_answers_data[1]
         width_answer = img_answers_data[0]
         answers_array = []
 
         if not is_index:
+        # tables with answers
             start_height = 0
             for row in range(rows):
                 answers_array_row = []
                 start_width = 0
+                
                 for col in range(columns):
-                    crop_img = img[start_height:start_height + height_answer, start_width:start_width + width_answer]
+                    # 0 - black, 255 - white
+                    crop_img = img[round(start_height):round(start_height + height_answer), round(start_width):round(start_width + width_answer)]
                     start_width += width_answer
+                    #print("img 1:", crop_img)
+                    crop_img_flattened = [item for sublist in crop_img for item in sublist]
+                    #print("Img max:", max(crop_img_flattened))
+                    #print("Img min:", min(crop_img_flattened))
+                    #crop_img_flattened = crop_img_flattened - min(crop_img_flattened)
+                    crop_img_flattened = crop_img_flattened/max(crop_img_flattened)
+                    #average_color = statistics.mean(crop_img_flattened)
+                    #crop_img_median = statistics.median(crop_img_flattened)
 
-                    average_color = crop_img.mean(axis=0).mean(axis=0)
+                    #print("Img 2:", crop_img_flattened)
+                    
+                    black_count = 0
+                    white_count = 0
+                    for pixel in crop_img_flattened:
+                        if pixel > 0.8:
+                            white_count += 1
+                        else:
+                            black_count += 1
+                            
+                    percent = black_count/(black_count+white_count)
+                    #print("Black:", black_count)
+                    #print("White:", white_count)
+                    #print("Percent:", percent)
+                    #print("Img:", crop_img_flattened)
+                    #print("Median:", crop_img_median)
+                    #print("Avg color:", average_color)
+                    #print("Sum:", sum(crop_img_flattened))
+                    
 
-                    answers_array_row.append(average_color)
+                    if percent > 0.8:
+                        print ("czarny")
+                        percent = 0
+                    
+                    answers_array_row.append(percent)
                 answers_array.append(answers_array_row)
                 start_height += height_answer
+            #print("Answers array:", answers_array)
+
+            flattened_list = [item for sublist in answers_array for item in sublist]
+
+            #print("Answers array median:", statistics.median(flattened_list)/max(flattened_list))
+            #print("Answers array max:", max(flattened_list)/max(flattened_list))
+            #print("Answers array min:", min(flattened_list)/max(flattened_list))
+            #print("Answers array avg:", statistics.mean(flattened_list)/max(flattened_list))
 
             return answers_array
 
         else:
+        # table with index number
             start_width = 0
             for col in range(8):
                 answers_array_column = []
                 start_height = 0
                 for row in range(11):
-                    crop_img = img[start_height:start_height + height_answer, start_width:start_width + width_answer]
+                    crop_img = img[round(start_height):round(start_height + height_answer), round(start_width):round(start_width + width_answer)]
                     #cv2.imshow("label", crop_img)
                     start_height += height_answer
 
