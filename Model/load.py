@@ -81,9 +81,11 @@ class loadAnswers:
                         cv2.imwrite("exams-data/" + currentExamName + folders[type] + str(folders_2[type]) + "/page_img_" + str(graded) + ".png", page_img)
                         for im in range(len(images_warped)):
                             cv2.imwrite("exams-data/" + currentExamName + folders[type] + str(folders_2[type]) + "/answers_grid_" + str(im) + ".png", images_warped[im])
-                        cv2.imwrite(
-                            "exams-data/" + currentExamName + folders[type] + str(folders_2[type]) + "/answers_grid_all" + str(
-                                graded) + ".png", cv2.hconcat(images_warped))
+
+                        # won't work - different size of images
+                        # cv2.imwrite(
+                        #     "exams-data/" + currentExamName + folders[type] + str(folders_2[type]) + "/answers_grid_all" + str(
+                        #         graded) + ".png", cv2.hconcat(images_warped))
                         transparent_img = np.ones((690, 490), dtype=np.uint8)
                         i = 0
                         for i in range(20):
