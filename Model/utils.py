@@ -4,6 +4,8 @@ import cv2
 import numpy as np
 import sys
 
+from Model import cropRectangle
+
 
 def reorder(myPoints):
     myPoints = myPoints.reshape((4, 2))
@@ -38,14 +40,16 @@ def getCornerPoints(cont):
     return approx
 
 def drawGrid(img, questions=5, choices=20):
-    secW = int(img.shape[1] / questions)
-    secH = int(img.shape[0] / choices)
+    secW = (img.shape[1] / questions)
+    secH = (img.shape[0] / choices)
     data = [secW, secH]
+    print("shape: ", img.shape[0], img.shape[1])
     for i in range(0, choices + 1):
-        pt1 = (0, secH * i)
-        pt2 = (img.shape[1], secH * i)
-        pt3 = (secW * i, 0)
-        pt4 = (secW * i, img.shape[0])
+        print("secH * i:", secH*i)
+        pt1 = (0, round(secH * i))
+        pt2 = (img.shape[1], round(secH * i))
+        pt3 = (round(secW * i), 0)
+        pt4 = (round(secW * i), img.shape[0])
         cv2.line(img, pt1, pt2, (0, 0, 0), 2)
         cv2.line(img, pt3, pt4, (0, 0, 0), 2)
 
@@ -123,36 +127,33 @@ def find_contours(img, num_rectangles):
 
 
 def find_contours2(img, num_rectangles):
+    tableWithIndex = cropRectangle.cropRectangle([260, 50], [670, 454])
     hardcoded_values = [
         [
-            [[39, 314]],
-            [[160, 314]],
-            [[39, 655]],
-            [[160, 655]]
+            [[70, 625]],
+            [[329, 625]],
+            [[70, 1320]],
+            [[329, 1320]]
 
         ],
         [
-            [[194, 314]],
-            [[316, 314]],
-            [[194, 655]],
-            [[316, 655]]
+            [[380, 625]],
+            [[642, 625]],
+            [[380, 1320]],
+            [[642, 1320]]
 
         ],
         [
-            [[355, 314]],
-            [[471, 314]],
-            [[355, 655]],
-            [[471, 655]]
-
-        ],
-        [
-            [[137, 31]],
-            [[329, 31]],
-            [[137, 221]],
-            [[329, 221]]
+            [[692, 625]],
+            [[956, 625]],
+            [[692, 1320]],
+            [[956, 1320]]
 
         ]
     ]
+    print(hardcoded_values)
+    print(tableWithIndex.getContour())
+    hardcoded_values.append(tableWithIndex.getContour()[0])
     hardcoded_values = np.array(hardcoded_values)
     return hardcoded_values
 
