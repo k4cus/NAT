@@ -4,18 +4,16 @@ import cv2
 import numpy as np
 import sys
 
-from Model import cropRectangle
-
 
 def reorder(myPoints):
     myPoints = myPoints.reshape((4, 2))
     myPointsNew = np.zeros((4, 1, 2), np.int32)
     add = myPoints.sum(1)
-    myPointsNew[0] = myPoints[np.argmin(add)]  #[0,0]
-    myPointsNew[3] = myPoints[np.argmax(add)]  #[w,h]
+    myPointsNew[0] = myPoints[np.argmin(add)]  # [0,0]
+    myPointsNew[3] = myPoints[np.argmax(add)]  # [w,h]
     diff = np.diff(myPoints, axis=1)
-    myPointsNew[1] = myPoints[np.argmin(diff)]  #[w,0]
-    myPointsNew[2] = myPoints[np.argmax(diff)]  #[h,0]
+    myPointsNew[1] = myPoints[np.argmin(diff)]  # [w,0]
+    myPointsNew[2] = myPoints[np.argmax(diff)]  # [h,0]
 
     return myPointsNew
 
@@ -39,34 +37,32 @@ def getCornerPoints(cont):
     approx = cv2.approxPolyDP(cont, 0.02 * peri, True)
     return approx
 
+
 def drawGrid(img, questions=5, choices=20):
     secW = (img.shape[1] / questions)
     secH = (img.shape[0] / choices)
     data = [secW, secH]
-    print("shape: ", img.shape[0], img.shape[1])
     for i in range(0, choices + 1):
-        print("secH * i:", secH*i)
         pt1 = (0, round(secH * i))
         pt2 = (img.shape[1], round(secH * i))
         pt3 = (round(secW * i), 0)
         pt4 = (round(secW * i), img.shape[0])
         cv2.line(img, pt1, pt2, (0, 0, 0), 2)
         cv2.line(img, pt3, pt4, (0, 0, 0), 2)
-
         data.append(pt1)
         data.append(pt3)
     return img, data
 
+
 def drawGridFullPage(img, contour, index, answers, field, questions=5, choices=20):
-    index_field = index[0] + "x" + str(index[1]-1)
+    index_field = index[0] + "x" + str(index[1] - 1)
     print("index field", index_field)
     map = ["A", "B", "C", "D", "E"]
     if field < 3:
-        answers = answers[choices*field:choices*(field+1)]
+        answers = answers[choices * field:choices * (field + 1)]
 
     secW = int((contour[1][0][0] - contour[0][0][0]) / questions)
     secH = int((contour[2][0][1] - contour[0][0][1]) / choices)
-    data = [secW, secH]
 
     for i in range(0, choices + 1):
         pt1 = (contour[0][0][0], contour[0][0][1] + (secH * i))
@@ -82,7 +78,7 @@ def drawGridFullPage(img, contour, index, answers, field, questions=5, choices=2
             if answers[i] == "0":
                 pass
             else:
-                center = (int(contour[0][0][0] + (secW * map.index(answers[i])) + secW/2), int(contour[0][0][1] + (secH * i) + secH/2))
+                center = (int(contour[0][0][0] + (secW * map.index(answers[i])) + secW / 2), int(contour[0][0][1] + (secH * i) + secH / 2))
                 cv2.circle(img, center, 1, (255, 0, 0), 5)
 
     else:
@@ -93,7 +89,7 @@ def drawGridFullPage(img, contour, index, answers, field, questions=5, choices=2
                 if index_field[i] not in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]:
                     pass
                 else:
-                    center = (int(contour[0][0][0] + (secW * i) + secW/2), int(contour[0][0][1] + (secH * (int(index_field[i])+1)) + secH/2))
+                    center = (int(contour[0][0][0] + (secW * i) + secW / 2), int(contour[0][0][1] + (secH * (int(index_field[i]) + 1)) + secH / 2))
                     cv2.circle(img, center, 1, (255, 0, 0), 5)
 
     return img
@@ -127,7 +123,7 @@ def find_contours(img, num_rectangles):
 
 
 def find_contours2(img, num_rectangles):
-    tableWithIndex = cropRectangle.cropRectangle([260, 50], [670, 454])
+    tableWithIndex = cropRectangle([260, 50], [670, 454])
     hardcoded_values = [
         [
             [[70, 625]],
@@ -151,11 +147,13 @@ def find_contours2(img, num_rectangles):
 
         ]
     ]
-    print(hardcoded_values)
-    print(tableWithIndex.getContour())
-    hardcoded_values.append(tableWithIndex.getContour()[0])
+    # print("1: ", hardcoded_values)
+    # print("2: ", tableWithIndex.getContour())
+    hardcoded_values.append(tableWithIndex.getContour())
+    # print("3: ", hardcoded_values)
     hardcoded_values = np.array(hardcoded_values)
     return hardcoded_values
+
 
 def find_contours3(img, num_rectangles):
     hardcoded_values = [
@@ -215,3 +213,23 @@ def to_base64(image):
 def base64_empty_image(width, height):
     empty_image = np.zeros((width, height, 3), dtype=np.uint8) + 128
     return to_base64(empty_image)
+
+
+class cropRectangle:
+    def __init__(self, pt_top_left, pt_bottom_right):
+        self.pt_top_left = pt_top_left
+        self.pt_bottom_right = pt_bottom_right
+
+    def getWidth(self):
+        return self.pt_bottom_right[0] - self.pt_top_left[0]
+
+    def getHeight(self):
+        return self.pt_bottom_right[1] - self.pt_top_left[1]
+
+    def getContour(self):
+        return [
+            [[self.pt_top_left[0], self.pt_top_left[1]]],
+            [[self.pt_bottom_right[0], self.pt_top_left[1]]],
+            [[self.pt_bottom_right[0], self.pt_bottom_right[1]]],
+            [[self.pt_top_left[0], self.pt_bottom_right[1]]]
+        ]
