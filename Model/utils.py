@@ -1,8 +1,6 @@
 import base64
-
 import cv2
 import numpy as np
-import sys
 
 
 def reorder(myPoints):
@@ -20,7 +18,6 @@ def reorder(myPoints):
 
 def rectContour(contours):
     rectCon = []
-    max_area = 0
     for i in contours:
         area = cv2.contourArea(i)
         if area > 50:
@@ -57,20 +54,20 @@ def drawGrid(img, questions=5, choices=20):
 def drawGridFullPage(img, contour, index, answers, field, questions=5, choices=20):
     index_field = index[0] + "x" + str(index[1] - 1)
     print("index field", index_field)
-    map = ["A", "B", "C", "D", "E"]
+    letters = ["A", "B", "C", "D", "E"]
     if field < 3:
         answers = answers[choices * field:choices * (field + 1)]
 
-    secW = int((contour[1][0][0] - contour[0][0][0]) / questions)
-    secH = int((contour[2][0][1] - contour[0][0][1]) / choices)
+    secW = ((contour[1][0][0] - contour[0][0][0]) / questions)
+    secH = ((contour[2][0][1] - contour[0][0][1]) / choices)
 
     for i in range(0, choices + 1):
-        pt1 = (contour[0][0][0], contour[0][0][1] + (secH * i))
-        pt2 = (contour[1][0][0], contour[0][0][1] + (secH * i))
+        pt1 = (contour[0][0][0], contour[0][0][1] + round(secH * i))
+        pt2 = (contour[1][0][0], contour[0][0][1] + round(secH * i))
         cv2.line(img, pt1, pt2, (255, 0, 0), 1)
     for i in range(0, questions + 1):
-        pt3 = (contour[0][0][0] + (secW * i), contour[0][0][1])
-        pt4 = (contour[0][0][0] + (secW * i), contour[2][0][1])
+        pt3 = (contour[0][0][0] + round(secW * i), contour[0][0][1])
+        pt4 = (contour[0][0][0] + round(secW * i), contour[2][0][1])
         cv2.line(img, pt3, pt4, (255, 0, 0), 1)
 
     if field < 3:
@@ -78,7 +75,7 @@ def drawGridFullPage(img, contour, index, answers, field, questions=5, choices=2
             if answers[i] == "0":
                 pass
             else:
-                center = (int(contour[0][0][0] + (secW * map.index(answers[i])) + secW / 2), int(contour[0][0][1] + (secH * i) + secH / 2))
+                center = (round(contour[0][0][0] + (secW * letters.index(answers[i])) + secW / 2), round(contour[0][0][1] + (secH * i) + secH / 2))
                 cv2.circle(img, center, 1, (255, 0, 0), 5)
 
     else:
@@ -89,7 +86,8 @@ def drawGridFullPage(img, contour, index, answers, field, questions=5, choices=2
                 if index_field[i] not in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]:
                     pass
                 else:
-                    center = (int(contour[0][0][0] + (secW * i) + secW / 2), int(contour[0][0][1] + (secH * (int(index_field[i]) + 1)) + secH / 2))
+                    center = (
+                        round(contour[0][0][0] + (secW * i) + secW / 2), round(contour[0][0][1] + (secH * (int(index_field[i]) + 1)) + secH / 2))
                     cv2.circle(img, center, 1, (255, 0, 0), 5)
 
     return img
@@ -101,8 +99,8 @@ def score(correct, answers):
     for question in range(num_of_questions):
         if correct[question] == answers[question]:
             points += 1
-    score = 100 * points / num_of_questions
-    return points, score
+    s = 100 * points / num_of_questions
+    return points, s
 
 
 def find_contours(img, num_rectangles):
@@ -120,74 +118,6 @@ def find_contours(img, num_rectangles):
         for i in range(num_rectangles):
             biggest_contours.append(getCornerPoints(rect_con[i]))
     return biggest_contours
-
-
-def find_contours2(img, num_rectangles):
-    tableWithIndex = cropRectangle([260, 50], [670, 454])
-    hardcoded_values = [
-        [
-            [[70, 625]],
-            [[329, 625]],
-            [[70, 1320]],
-            [[329, 1320]]
-
-        ],
-        [
-            [[380, 625]],
-            [[642, 625]],
-            [[380, 1320]],
-            [[642, 1320]]
-
-        ],
-        [
-            [[692, 625]],
-            [[956, 625]],
-            [[692, 1320]],
-            [[956, 1320]]
-
-        ]
-    ]
-    # print("1: ", hardcoded_values)
-    # print("2: ", tableWithIndex.getContour())
-    hardcoded_values.append(tableWithIndex.getContour())
-    # print("3: ", hardcoded_values)
-    hardcoded_values = np.array(hardcoded_values)
-    return hardcoded_values
-
-
-def find_contours3(img, num_rectangles):
-    hardcoded_values = [
-        [
-            [[39, 314]],
-            [[160, 314]],
-            [[160, 655]],
-            [[39, 655]]
-
-        ],
-        [
-            [[194, 314]],
-            [[316, 314]],
-            [[316, 655]],
-            [[194, 655]]
-
-        ],
-        [
-            [[355, 314]],
-            [[471, 314]],
-            [[471, 655]],
-            [[355, 655]],
-
-        ],
-        [
-            [[137, 31]],
-            [[329, 31]],
-            [[329, 221]],
-            [[137, 221]],
-
-        ]
-    ]
-    hardcoded_values = np.array(hardcoded_values)
-    return hardcoded_values
 
 
 def image_warping(img_contours, img, widthImg, heightImg):
@@ -233,3 +163,32 @@ class cropRectangle:
             [[self.pt_bottom_right[0], self.pt_bottom_right[1]]],
             [[self.pt_top_left[0], self.pt_bottom_right[1]]]
         ]
+
+    def updateFromRelativeContour(self, cnt):
+        # updates position of points and width+height based on the new relative contour dimensions detected on the cut out image
+        # and passed here
+        # calculate corrections
+        # point are out of order so we must sort x and y coordinates
+        if isinstance(cnt, np.ndarray):
+            xes = [cnt[0][0][0], cnt[1][0][0], cnt[2][0][0], cnt[3][0][0]]
+            xes.sort()
+            yes = [cnt[0][0][1], cnt[1][0][1], cnt[2][0][1], cnt[3][0][1]]
+            yes.sort()
+            xleft = (xes[0] + xes[1]) / 2
+            xright = self.getWidth() - (xes[2] + xes[3]) / 2
+            ytop = (yes[0] + yes[1]) / 2
+            ybottom = self.getHeight() - (yes[2] + yes[3]) / 2
+            # print("before update: ", self.pt_top_left)
+            # print("before update: ", self.pt_bottom_right)
+            self.pt_top_left = [round(self.pt_top_left[0] + xleft), round(self.pt_top_left[1] + ytop)]
+            self.pt_bottom_right = [round(self.pt_bottom_right[0] - xright), round(self.pt_bottom_right[1] - ybottom)]
+            # print("after update: ", self.pt_top_left)
+            # print("after update: ", self.pt_bottom_right)
+            # print(type(cnt))
+            # print("cnt:", cnt)
+            # print("xleft:", xleft)
+            # print("xright:", xright)
+            # print("ytop:", ytop)
+            # print("ybottom:", ybottom)
+        else:
+            print("updateFromRelativeContour - ERROR: cnt is not a numpy array")

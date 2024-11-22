@@ -95,9 +95,14 @@ class omr:
                                                    imgRectangle.getHeight()))  # width, height
             # find contours for each table
             cnt = utils.find_contours(tableWithMargin, 1)[0]
+            imgRectangle.updateFromRelativeContour(cnt)
+
             # cut out each table to remove margins
-            tableWithoutMargin = utils.image_warping(cnt, tableWithMargin, imgRectangle.getWidth(), imgRectangle.getHeight())
+            tableWithoutMargin = (utils.image_warping(np.array(imgRectangle.getContour()), img_preprocessed, imgRectangle.getWidth(),
+                                                   imgRectangle.getHeight()))
+            # tableWithoutMargin = utils.image_warping(cnt, tableWithMargin, imgRectangle.getWidth(), imgRectangle.getHeight())
             images_warped.append(tableWithoutMargin)
+
 
         # store to disk for debbuging
         images_threshold = []
@@ -165,7 +170,7 @@ class omr:
         group = group_answer.index(max(group_answer))
 
         warped_imgs_grid = [1]
-        page_img_grid = omr.draw_grids(self, page_img, images_warped, [index_txt, group], full_answers)
+        page_img_grid = omr.draw_grids(self, page_img, imgRectangles, [index_txt, group], full_answers)
 
         cv2.imwrite("debugging-opencv/4_grid_full_answers.png", page_img_grid)
         return index_txt, full_answers, group, page_img, images_warped, page_img_grid
@@ -256,19 +261,24 @@ class omr:
         else:
             return None
 
-    def draw_grids(self, img, warped_imgs, index_group, full_answers):
-        contours = utils.find_contours3(img, num_answer_fields + 1)
+    def draw_grids(self, img, imgRectangles, index_group, full_answers):
         try:
             img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
         except:
             pass
         img = cv2.applyColorMap(img, cv2.COLORMAP_PINK)
         # img2 = cv2.drawContours(img, contours, -1, (255, 255, 0), 2)
-        i = 0
-        for contour in contours[:-1]:
-            img = utils.drawGridFullPage(img, contour, index_group, full_answers, i)
-            i += 1
-        img = utils.drawGridFullPage(img, contours[-1], index_group, full_answers, i, questions=8, choices=11)
+
+        for i, imgRectangle in enumerate(imgRectangles):
+            cnt = imgRectangle.getContour()
+            if i == 3:
+                # table with index number
+                img = utils.drawGridFullPage(img, imgRectangles[-1].getContour(), index_group, full_answers, i, questions=8, choices=11)
+            else:
+                # tables with answers
+                img = utils.drawGridFullPage(img, cnt, index_group, full_answers, i)
+
+        #
         # view result
         return img
 
@@ -384,5 +394,5 @@ def score(correct, answers):
     for question in range(num_of_questions):
         if correct[question] == answers[question]:
             points += 1
-    score = 100 * points / num_of_questions
-    return points, score
+    s = 100 * points / num_of_questions
+    return points, s
