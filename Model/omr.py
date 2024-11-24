@@ -136,6 +136,7 @@ class omr:
                 images_answers.append(omr.get_answers(self, grid[0], grid[1], is_index=True))
                 i = 0
             else:
+                cv2.imwrite("debugging-opencv/5_full_img" + str(i) + ".png", grid[0])
                 images_answers.append(omr.get_answers(self, grid[0], grid[1]))
                 i += 1
 
@@ -146,7 +147,7 @@ class omr:
             for question in answer:
                 # question2 = question/max(question)
                 print("Question:", question, statistics.median(question))
-                if statistics.median(question) < 0.7:
+                if 3 * statistics.median(question) < max(question):
                     # print("Question:", question2)
                     answers.append(ans_array[question.index(max(question))])
                 else:
@@ -286,9 +287,10 @@ class omr:
         # print("Img 0:", img)
         img_flattened = [item for sublist in img for item in sublist]
         img_median = statistics.median(img_flattened)
-        # print("Median:", img_median)
+        print("Median:", img_median)
         cv2.imwrite("debugging-opencv/thresh_test.png", img)
-        img_thresh = cv2.threshold(img, 255 - img_median, 255, cv2.THRESH_BINARY)[1]
+        #img_thresh = cv2.threshold(img, 280 - img_median, 255, cv2.THRESH_BINARY)[1]
+        img_thresh = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
 
         cv2.imwrite("debugging-opencv/thresh_test_2.png", img_thresh)
         # print("Img:", img_thresh)
@@ -314,6 +316,28 @@ class omr:
                 for col in range(columns):
                     # 0 - black, 255 - white
                     crop_img = img[round(start_height):round(start_height + height_answer), round(start_width):round(start_width + width_answer)]
+                    
+                    crop_img_size = [crop_img.shape[0], crop_img.shape[1]]
+                    mask= np.ones((crop_img_size[0], crop_img_size[1]), dtype=np.uint8) * 127
+                    circle_center = (crop_img_size[1] // 2, crop_img_size[0] // 2)  # Center of the circle
+                    circle_radius = 2*crop_img_size[0] // 5  # Radius of the circle
+                    circle_color = 0  # Black color
+                    circle_thickness = -1
+
+                    cv2.circle(mask, circle_center, circle_radius, circle_color, circle_thickness)
+                    cv2.imwrite("debugging-opencv/5_mask_img.png", mask)
+
+                    mask_negative = np.ones((crop_img_size[0], crop_img_size[1]), dtype=np.uint8) * 0
+                    circle_center = (crop_img_size[1] // 2, crop_img_size[0] // 2)  # Center of the circle
+                    circle_radius = 2*crop_img_size[0] // 5  # Radius of the circle
+                    circle_color = 127  # Black color
+                    circle_thickness = -1
+
+                    cv2.circle(mask_negative, circle_center, circle_radius, circle_color, circle_thickness)
+                    cv2.imwrite("debugging-opencv/5_mask_img_negative.png", mask_negative)
+
+                    #print("Size of the cropped img: ", crop_img_size)
+                    cv2.imwrite("debugging-opencv/5_cropped_img.png", crop_img)
                     start_width += width_answer
                     # print("img 1:", crop_img)
                     crop_img_flattened = [item for sublist in crop_img for item in sublist]
@@ -326,15 +350,20 @@ class omr:
 
                     # print("Img 2:", crop_img_flattened)
 
-                    black_count = 0
-                    white_count = 0
-                    for pixel in crop_img_flattened:
-                        if pixel > 0.8:
-                            white_count += 1
-                        else:
-                            black_count += 1
+                    #print(crop_img)
+                    #print(mask)
+                    matching_pixels = np.sum(crop_img == mask)
+                    matching_pixels_negative = np.sum(crop_img == mask_negative)
+                    print(f"Matching Pixels: ", matching_pixels, matching_pixels_negative)
 
-                    percent = black_count / (black_count + white_count)
+                    #black_count = 0
+                    #white_count = 0
+                    #for pixel in crop_img_flattened:
+                    #    if pixel > 0.8:
+                    #        white_count += 1
+                    #    else:
+                    #        black_count += 1
+
                     # print("Black:", black_count)
                     # print("White:", white_count)
                     # print("Percent:", percent)
@@ -342,12 +371,11 @@ class omr:
                     # print("Median:", crop_img_median)
                     # print("Avg color:", average_color)
                     # print("Sum:", sum(crop_img_flattened))
+                    if matching_pixels_negative > 500:
+                        print("wrong answer")
+                        matching_pixels = 0
 
-                    if percent > 0.8:
-                        print("czarny")
-                        percent = 0
-
-                    answers_array_row.append(percent)
+                    answers_array_row.append(matching_pixels)
                 answers_array.append(answers_array_row)
                 start_height += height_answer
             # print("Answers array:", answers_array)
