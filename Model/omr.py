@@ -133,6 +133,7 @@ class omr:
         i = 0
         for grid in images_grid:
             if i % (num_answer_fields + 1) == num_answer_fields:
+                cv2.imwrite("debugging-opencv/5_full_img_index" + str(i) + ".png", grid[0])
                 images_answers.append(omr.get_answers(self, grid[0], grid[1], is_index=True))
                 i = 0
             else:
@@ -147,7 +148,7 @@ class omr:
             for question in answer:
                 # question2 = question/max(question)
                 print("Question:", question, statistics.median(question))
-                if 3 * statistics.median(question) < max(question):
+                if 2 * statistics.median(question) < max(question) and max(question) > 100:
                     # print("Question:", question2)
                     answers.append(ans_array[question.index(max(question))])
                 else:
@@ -380,8 +381,6 @@ class omr:
                 start_height += height_answer
             # print("Answers array:", answers_array)
 
-            flattened_list = [item for sublist in answers_array for item in sublist]
-
             # print("Answers array median:", statistics.median(flattened_list)/max(flattened_list))
             # print("Answers array max:", max(flattened_list)/max(flattened_list))
             # print("Answers array min:", min(flattened_list)/max(flattened_list))
@@ -397,11 +396,42 @@ class omr:
                 start_height = 0
                 for row in range(11):
                     crop_img = img[round(start_height):round(start_height + height_answer), round(start_width):round(start_width + width_answer)]
-                    # cv2.imshow("label", crop_img)
+                    #cv2.imwrite("debugging-opencv/6_crop_img_index" + str(row) + ".png", crop_img)
+                    crop_img_size = [crop_img.shape[0], crop_img.shape[1]]
+
+                    mask= np.ones((crop_img_size[0], crop_img_size[1]), dtype=np.uint8) * 127
+                    circle_center = (crop_img_size[1] // 2, crop_img_size[0] // 2)  # Center of the circle
+                    circle_radius = 2*crop_img_size[0] // 5  # Radius of the circle
+                    circle_color = 0  # Black color
+                    circle_thickness = -1
+
+                    cv2.circle(mask, circle_center, circle_radius, circle_color, circle_thickness)
+                    cv2.imwrite("debugging-opencv/6_mask_img_index.png", mask)
+                    #print("Size:", crop_img_size)
+
+                    mask_negative = np.ones((crop_img_size[0], crop_img_size[1]), dtype=np.uint8) * 0
+                    circle_center = (crop_img_size[1] // 2, crop_img_size[0] // 2)  # Center of the circle
+                    circle_radius = 2*crop_img_size[0] // 5  # Radius of the circle
+                    circle_color = 127  # Black color
+                    circle_thickness = -1
+
+                    cv2.circle(mask_negative, circle_center, circle_radius, circle_color, circle_thickness)
+                    cv2.imwrite("debugging-opencv/6_mask_img_negative_index.png", mask_negative)
+
                     start_height += height_answer
 
-                    average_color = crop_img.mean(axis=0).mean(axis=0)
-                    answers_array_column.append(average_color)
+                    crop_img_flattened = [item for sublist in crop_img for item in sublist]
+                    crop_img_flattened = crop_img_flattened / max(crop_img_flattened)
+
+                    matching_pixels = np.sum(crop_img == mask)
+                    matching_pixels_negative = np.sum(crop_img == mask_negative)
+                    print(f"Matching Pixels: ", matching_pixels, matching_pixels_negative)                    
+
+                    if matching_pixels_negative > 500:
+                        print("wrong answer")
+                        matching_pixels = 0
+
+                    answers_array_column.append(matching_pixels)
 
                 answers_array.append(answers_array_column)
                 start_width += width_answer
