@@ -20,14 +20,33 @@ def rectContour(contours):
     rectCon = []
     for i in contours:
         area = cv2.contourArea(i)
+        #print("Area:" ,area)
+        # exit()
         if area > 50:
             peri = cv2.arcLength(i, True)
-            approx = cv2.approxPolyDP(i, 0.02 * peri, True)
+            #print("Peri:", peri)
+            approx = cv2.approxPolyDP(i, 0.09 * peri, True)
+            #print("Approx:", approx)
             if len(approx) == 4:
                 rectCon.append(i)
     rectCon = sorted(rectCon, key=cv2.contourArea, reverse=True)
     return rectCon
 
+def rectContourTables(contours):
+    rectCon = []
+    for i in contours:
+        area = cv2.contourArea(i)
+        print("Area:" ,area)
+        # exit()
+        if area > 50:
+            peri = cv2.arcLength(i, True)
+            print("Peri:", peri)
+            approx = cv2.approxPolyDP(i, 0.09 * peri, True)
+            print("Approx:", approx)
+            if len(approx) == 4:
+                rectCon.append(i)
+    rectCon = sorted(rectCon, key=cv2.contourArea, reverse=True)
+    return rectCon
 
 def getCornerPoints(cont):
     peri = cv2.arcLength(cont, True)
@@ -107,7 +126,7 @@ def find_contours(img, num_rectangles):
     img_canny = cv2.Canny(img, 10, 230)
     cv2.imwrite("debugging-opencv/canny.png", img_canny)
     img_contours = img.copy()
-    contours, hierarchy = cv2.findContours(img_canny, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    contours, hierarchy = cv2.findContours(img_canny, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     cv2.drawContours(img_contours, contours, -1, (0, 255, 0), 10)
     rect_con = rectContour(contours)
 
@@ -119,6 +138,31 @@ def find_contours(img, num_rectangles):
             biggest_contours.append(getCornerPoints(rect_con[i]))
     return biggest_contours
 
+def find_contours_tables(img, num_rectangles):
+    img_canny = cv2.Canny(img, 10, 130)
+    cv2.imwrite("debugging-opencv/3b_canny_table.png", img_canny)
+    img_contours = img.copy()
+    size = img_contours.size
+    print("size:", size)
+    # kernel = np.ones((5, 5), np.uint8)
+    # kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (5,1))
+    kernel = np.zeros((15,15), dtype=np.uint8)
+    kernel[0:14,14] = 1
+    kernel[0,0:14] = 1
+    img_morph = cv2.morphologyEx(img_canny, cv2.MORPH_CLOSE, kernel)
+    contours, hierarchy = cv2.findContours(img_morph, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    rect_con = rectContourTables(contours)
+    cv2.drawContours(img_contours, rect_con, -1, (0, 255, 0), 2)
+    cv2.imwrite("debugging-opencv/3b_img_contours.png", img_contours)
+    exit()
+    biggest_contours = []
+    print("Znalezionych:", len(rect_con))
+    if num_rectangles > len(rect_con):
+        num_rectangles = len(rect_con)
+    if len(rect_con) > 0:
+        for i in range(num_rectangles):
+            biggest_contours.append(getCornerPoints(rect_con[i]))
+    return biggest_contours
 
 def image_warping(img_contours, img, widthImg, heightImg):
     if img_contours.size == 0:

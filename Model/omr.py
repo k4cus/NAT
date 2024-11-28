@@ -94,7 +94,7 @@ class omr:
             tableWithMargin = (utils.image_warping(np.array(imgRectangle.getContour()), img_preprocessed, imgRectangle.getWidth(),
                                                    imgRectangle.getHeight()))  # width, height
             # find contours for each table
-            cnt = utils.find_contours(tableWithMargin, 1)[0]
+            cnt = utils.find_contours_tables(tableWithMargin, 1)[0]
             imgRectangle.updateFromRelativeContour(cnt)
 
             # cut out each table to remove margins
