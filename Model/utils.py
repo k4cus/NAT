@@ -37,13 +37,13 @@ def rectContourTables(contours):
     rectCon = []
     for i in contours:
         area = cv2.contourArea(i)
-        print("Area:", area)
+        # print("Area:", area)
         # exit()
         if area > 50:
             peri = cv2.arcLength(i, True)
-            print("Peri:", peri)
+            # print("Peri:", peri)
             approx = cv2.approxPolyDP(i, 0.02 * peri, True)
-            print("Approx:", approx)
+            # print("Approx:", approx)
             if len(approx) == 4:
                 rectCon.append(i)
     rectCon = sorted(rectCon, key=cv2.contourArea, reverse=True)
@@ -162,19 +162,22 @@ def createRectangleImage(height, width):
     return image
 
 
-def find_contours_tables(img, num_rectangles):
+def find_contours_tables(img, num_rectangles, index=False):
     img_canny = cv2.Canny(img, 10, 130)
     cv2.imwrite("debugging-opencv/3b_canny_table.png", img_canny)
     img_contours = img.copy()
     img_contours2 = img.copy()
     height, width = img_contours.shape
     print("size:", height, width)
-
-    img_rectangle = createRectangleImage(680, 242)
+    if not index:
+        img_rectangle = createRectangleImage(680, 242)
+    else:
+        img_rectangle = createRectangleImage(378, 385)
     h, w = img_rectangle.shape
     cv2.imwrite("debugging-opencv/3bb_matchTemplate.png", img)
     # Apply template Matching
     res = cv2.matchTemplate(img, img_rectangle, cv2.TM_CCOEFF_NORMED)
+    print("done")
     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
     top_left = max_loc
     bottom_right = (top_left[0] + w, top_left[1] + h)
@@ -188,8 +191,8 @@ def find_contours_tables(img, num_rectangles):
     cv2.imwrite("debugging-opencv/3c_img_contours.png", img_contours)
     cv2.imwrite("debugging-opencv/3c_img_contours2.png", img_contours2)
     biggest_contours = []
-    exit()
-    print("Znalezionych:", len(rect_con))
+    # exit()
+    # print("Znalezionych:", len(rect_con))
     if num_rectangles > len(rect_con):
         num_rectangles = len(rect_con)
     if len(rect_con) > 0:
