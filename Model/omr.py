@@ -217,7 +217,7 @@ class omr:
 
         # finds biggest contour in image
         if coords is None:
-            contour = utils.find_contours(img, 3)
+            contour = utils.find_contours_page(img, 3)
         else:
             for c in range(len(coords)):
                 coords_2.append([coords[c]])
