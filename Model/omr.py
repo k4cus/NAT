@@ -89,12 +89,16 @@ class omr:
             return None, None, None, None, None
 
         images_warped = []
-        for imgRectangle in imgRectangles:
+        for i, imgRectangle in enumerate(imgRectangles):
             # cut out each table with margin around
             tableWithMargin = (utils.image_warping(np.array(imgRectangle.getContour()), img_preprocessed, imgRectangle.getWidth(),
                                                    imgRectangle.getHeight()))  # width, height
+            cv2.imwrite("debugging-opencv/3a_tableWithMargin" + str(i) + ".png", tableWithMargin)
             # find contours for each table
-            cnt = utils.find_contours(tableWithMargin, 1)[0]
+            if i < 3:
+                cnt = utils.find_contours_tables(tableWithMargin, 1)[0]
+            else:
+                cnt = utils.find_contours_tables(tableWithMargin, 1, index=True)[0]
             imgRectangle.updateFromRelativeContour(cnt)
 
             # cut out each table to remove margins

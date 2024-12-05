@@ -20,9 +20,30 @@ def rectContour(contours):
     rectCon = []
     for i in contours:
         area = cv2.contourArea(i)
+        # print("Area:" ,area)
+        # exit()
         if area > 50:
             peri = cv2.arcLength(i, True)
+            # print("Peri:", peri)
+            approx = cv2.approxPolyDP(i, 0.09 * peri, True)
+            # print("Approx:", approx)
+            if len(approx) == 4:
+                rectCon.append(i)
+    rectCon = sorted(rectCon, key=cv2.contourArea, reverse=True)
+    return rectCon
+
+
+def rectContourTables(contours):
+    rectCon = []
+    for i in contours:
+        area = cv2.contourArea(i)
+        # print("Area:", area)
+        # exit()
+        if area > 50:
+            peri = cv2.arcLength(i, True)
+            # print("Peri:", peri)
             approx = cv2.approxPolyDP(i, 0.02 * peri, True)
+            # print("Approx:", approx)
             if len(approx) == 4:
                 rectCon.append(i)
     rectCon = sorted(rectCon, key=cv2.contourArea, reverse=True)
@@ -107,11 +128,71 @@ def find_contours(img, num_rectangles):
     img_canny = cv2.Canny(img, 10, 230)
     cv2.imwrite("debugging-opencv/canny.png", img_canny)
     img_contours = img.copy()
-    contours, hierarchy = cv2.findContours(img_canny, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    contours, hierarchy = cv2.findContours(img_canny, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     cv2.drawContours(img_contours, contours, -1, (0, 255, 0), 10)
     rect_con = rectContour(contours)
 
     biggest_contours = []
+    if num_rectangles > len(rect_con):
+        num_rectangles = len(rect_con)
+    if len(rect_con) > 0:
+        for i in range(num_rectangles):
+            biggest_contours.append(getCornerPoints(rect_con[i]))
+    return biggest_contours
+
+
+def createRectangleImage(height, width):
+    # Create a blank image
+    image = np.ones((height, width, 3), dtype=np.uint8) * 255
+
+    # Define the top-left and bottom-right points of the rectangle
+    top_left = (0, 0)
+    bottom_right = (width, height)
+
+    # Define the color (BGR) and thickness of the rectangle
+    color = (0, 0, 0)
+    thickness = 2  # Thickness of 2 pixels
+
+    # Draw the rectangle on the image
+    cv2.rectangle(image, top_left, bottom_right, color, thickness)
+
+    # Save or display the result
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    cv2.imwrite('debugging-opencv/rectangle_image.png', image)
+    return image
+
+
+def find_contours_tables(img, num_rectangles, index=False):
+    img_canny = cv2.Canny(img, 10, 130)
+    cv2.imwrite("debugging-opencv/3b_canny_table.png", img_canny)
+    img_contours = img.copy()
+    img_contours2 = img.copy()
+    height, width = img_contours.shape
+    print("size:", height, width)
+    if not index:
+        img_rectangle = createRectangleImage(680, 242)
+    else:
+        img_rectangle = createRectangleImage(378, 385)
+    h, w = img_rectangle.shape
+    cv2.imwrite("debugging-opencv/3bb_matchTemplate.png", img)
+    # Apply template Matching
+    res = cv2.matchTemplate(img, img_rectangle, cv2.TM_CCOEFF_NORMED)
+    print("done")
+    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+    top_left = max_loc
+    bottom_right = (top_left[0] + w, top_left[1] + h)
+    cv2.rectangle(img, top_left, bottom_right, 0, 2)
+    cv2.imwrite("debugging-opencv/3b_matchTemplate.png", img)
+
+    contours, hierarchy = cv2.findContours(img_canny, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    rect_con = rectContourTables(contours)
+    cv2.drawContours(img_contours, contours, -1, (0, 255, 0), 1)
+    cv2.drawContours(img_contours2, rect_con, -1, (0, 255, 0), 1)
+    cv2.imwrite("debugging-opencv/3c_img_contours.png", img_contours)
+    cv2.imwrite("debugging-opencv/3c_img_contours2.png", img_contours2)
+    biggest_contours = []
+    # exit()
+    # print("Znalezionych:", len(rect_con))
     if num_rectangles > len(rect_con):
         num_rectangles = len(rect_con)
     if len(rect_con) > 0:

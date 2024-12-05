@@ -4,3 +4,4 @@ numpy
 flet
 python-i18n
 aenum
+pynput
