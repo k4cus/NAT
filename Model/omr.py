@@ -76,10 +76,15 @@ class omr:
 
         # hardcoded positions of tables
         imgRectangles = [
-            utils.cropRectangle([70, 625], [329, 1320]),  # table with answers 1
-            utils.cropRectangle([380, 625], [642, 1320]),  # table with answers 2
-            utils.cropRectangle([692, 625], [956, 1320]),  # table with answers 3
-            utils.cropRectangle([260, 50], [670, 454])  # table with index number
+            # utils.cropRectangle([70, 625], [329, 1320]),  # table with answers 1
+            # utils.cropRectangle([380, 625], [642, 1320]),  # table with answers 2
+            # utils.cropRectangle([692, 625], [956, 1320]),  # table with answers 3
+            # utils.cropRectangle([260, 50], [670, 454])  # table with index number
+
+            utils.cropRectangle([37, 341], [199, 742]),
+            utils.cropRectangle([224, 341], [387, 742]),  # table with answers 2
+            utils.cropRectangle([413, 341], [576, 742]),  # table with answers 3
+            utils.cropRectangle([158, 38], [402, 258])  # table with index number
         ]
 
         imgRectangles = np.array(imgRectangles)  # convert to numpy array
@@ -96,16 +101,16 @@ class omr:
             cv2.imwrite("debugging-opencv/3a_tableWithMargin" + str(i) + ".png", tableWithMargin)
             # find contours for each table
             if i < 3:
-                cnt = utils.find_contours_tables(tableWithMargin, 1)[0]
+                cnt = utils.find_contours_tables(tableWithMargin, 1)
             else:
-                cnt = utils.find_contours_tables(tableWithMargin, 1, index=True)[0]
-            imgRectangle.updateFromRelativeContour(cnt)
+                cnt = utils.find_contours_tables(tableWithMargin, 1, index=True)
+            # imgRectangle.updateFromRelativeContour(cnt)
 
             # cut out each table to remove margins
-            tableWithoutMargin = (utils.image_warping(np.array(imgRectangle.getContour()), img_preprocessed, imgRectangle.getWidth(),
-                                                   imgRectangle.getHeight()))
+            # tableWithoutMargin = (utils.image_warping(np.array(imgRectangle.getContour()), img_preprocessed, imgRectangle.getWidth(),
+            #                                        imgRectangle.getHeight()))
             # tableWithoutMargin = utils.image_warping(cnt, tableWithMargin, imgRectangle.getWidth(), imgRectangle.getHeight())
-            images_warped.append(tableWithoutMargin)
+            images_warped.append(cnt)
 
 
         # store to disk for debbuging
@@ -210,6 +215,7 @@ class omr:
         return img_blur
 
     def find_page(self, img, coords=None):
+        '''
         image_warped = None
         wrong_format = False
         img_copy = img
@@ -236,7 +242,7 @@ class omr:
                 return None
 
             wrong_format = False
-            '''
+
             # check if the found contour is the answer sheet and if the orientation is correct
             i = -1
             for point in points_to_check:
@@ -246,7 +252,7 @@ class omr:
                     print("Correct format")
                     continue
                 else:
-                    wrong_format = True
+                    wrong_format = Trumatrixe
                     if i == 4 or i == 5:
                         print("Wrong orientation")
                         break
@@ -262,6 +268,7 @@ class omr:
             print("Wrong format")
             return None
         '''
+        image_warped = utils.find_contours_page(img, 3)
         if image_warped is not None:
             return image_warped[5:-5, 5:-5]
         else:
