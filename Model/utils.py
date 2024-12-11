@@ -138,7 +138,52 @@ def find_contours(img, num_rectangles):
     if len(rect_con) > 0:
         for i in range(num_rectangles):
             biggest_contours.append(getCornerPoints(rect_con[i]))
+
+    print("biggest contours:", biggest_contours)
     return biggest_contours
+
+def find_contours_page(img, num_rectangles):
+    if img is None:
+        raise ValueError("Image not loaded. Please check the image path or URL.")
+
+    # Sprawdź liczbę kanałów w obrazie
+    if len(img.shape) == 2:  # Obraz w skali szarości
+        img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+    elif img.shape[2] == 4:  # Obraz RGBA
+        img = cv2.cvtColor(img, cv2.COLOR_RGBA2BGR)
+
+    # Konwertuj obraz do skali szarości
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    # Zdefiniuj słownik ArUco i parametry detekcji
+    aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_250)
+    parameters = cv2.aruco.DetectorParameters()
+
+    # Utwórz detektor znaczników ArUco
+    detector = cv2.aruco.ArucoDetector(aruco_dict, parameters)
+
+    # Wykryj znaczniki ArUco
+    corners, ids, rejected = detector.detectMarkers(gray)
+
+    # Sprawdź, czy wykryto znaczniki
+    if ids is not None and len(ids) >= 4:
+        # Posortuj wykryte znaczniki na podstawie ich ID
+        ids = ids.flatten()
+        sorted_indices = np.argsort(ids)
+        corners = [corners[i] for i in sorted_indices]
+
+        # Pobierz cztery znaczniki (lewy górny, prawy górny, prawy dolny, lewy dolny)
+        selected_corners = [corners[0][0][0], corners[1][0][1], corners[2][0][3], corners[3][0][2]]
+        print(sorted_indices, ids, selected_corners)
+        # Utwórz macierz perspektywy
+        src_points = np.float32(selected_corners)  # Wykryte punkty znaczników
+        dst_points = np.float32([[0, 0], [600, 0], [0, 800], [600, 800]])  # Prostokąt docelowy
+        matrix = cv2.getPerspectiveTransform(src_points, dst_points)
+
+        # Przekształcenie perspektywy (wycięcie obszaru strony)
+        warped_image = cv2.warpPerspective(img, matrix, (600, 800))
+
+    return warped_image
 
 
 def createRectangleImage(height, width):
@@ -163,19 +208,22 @@ def createRectangleImage(height, width):
 
 
 def find_contours_tables(img, num_rectangles, index=False):
-    img_canny = cv2.Canny(img, 10, 130)
-    cv2.imwrite("debugging-opencv/3b_canny_table.png", img_canny)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    #cv2.imwrite("debugging-opencv/3b_canny_table.png", img_canny)
     img_contours = img.copy()
     img_contours2 = img.copy()
-    height, width = img_contours.shape
-    print("size:", height, width)
+    print("size:", img_contours.shape)
+    height, width = img_contours.shape[:2]
+
     if not index:
-        img_rectangle = createRectangleImage(680, 242)
+        # img_rectangle = createRectangleImage(680, 242)
+        img_rectangle = createRectangleImage(385, 144)
     else:
-        img_rectangle = createRectangleImage(378, 385)
+        img_rectangle = createRectangleImage(212, 234)
     h, w = img_rectangle.shape
     cv2.imwrite("debugging-opencv/3bb_matchTemplate.png", img)
     # Apply template Matching
+    print("shape 2:", img.shape, img_rectangle.shape)
     res = cv2.matchTemplate(img, img_rectangle, cv2.TM_CCOEFF_NORMED)
     print("done")
     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
@@ -183,22 +231,16 @@ def find_contours_tables(img, num_rectangles, index=False):
     bottom_right = (top_left[0] + w, top_left[1] + h)
     cv2.rectangle(img, top_left, bottom_right, 0, 2)
     cv2.imwrite("debugging-opencv/3b_matchTemplate.png", img)
+    print("coords", top_left, bottom_right)
+    crop_img = img_contours[top_left[1]:bottom_right[1], top_left[0]:bottom_right[0]]
 
-    contours, hierarchy = cv2.findContours(img_canny, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    rect_con = rectContourTables(contours)
-    cv2.drawContours(img_contours, contours, -1, (0, 255, 0), 1)
-    cv2.drawContours(img_contours2, rect_con, -1, (0, 255, 0), 1)
-    cv2.imwrite("debugging-opencv/3c_img_contours.png", img_contours)
+    #contours, hierarchy = cv2.findContours(img_canny, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    # rect_con = rectContourTables(contours)
+    # cv2.drawContours(img_contours, contours, -1, (0, 255, 0), 1)
+    # cv2.drawContours(img_contours2, rect_con, -1, (0, 255, 0), 1)
+    cv2.imwrite("debugging-opencv/3c_img_cropped.png", crop_img)
     cv2.imwrite("debugging-opencv/3c_img_contours2.png", img_contours2)
-    biggest_contours = []
-    # exit()
-    # print("Znalezionych:", len(rect_con))
-    if num_rectangles > len(rect_con):
-        num_rectangles = len(rect_con)
-    if len(rect_con) > 0:
-        for i in range(num_rectangles):
-            biggest_contours.append(getCornerPoints(rect_con[i]))
-    return biggest_contours
+    return crop_img
 
 
 def image_warping(img_contours, img, widthImg, heightImg):
