@@ -65,9 +65,9 @@
     & \circled{0} & \circled{0} & \circled{0} & \circled{0} & \circled{0} & \circled{0} &  & \circled{A} & Poprawnie zaznaczona odpowiedź: \\ \cline{2-7} \cline{9-9}
     & \circled{1} & \circled{1} & \circled{1} & \circled{1} & \circled{1} & \circled{1} &  &  \circled{B} & \\ \cline{2-7} \cline{9-9}
     & \circled{2} & \circled{2} & \circled{2} & \circled{2} & \circled{2} & \circled{2} &  &  \circled{C} & \\ \cline{2-7} \cline{9-9}
-    & \circled{3} & \circled{3} & \circled{3} & \circled{3} & \circled{3} & \circled{3} &  & \circled{D} & Niepoprawnie zaznaczona odpowiedź:\\ \cline{2-7} \cline{9-9}
+    & \circled{3} & \circled{3} & \circled{3} & \circled{3} & \circled{3} & \circled{3} &  & \circled{D} & \\ \cline{2-7} \cline{9-9}
     & \circled{4} & \circled{4} & \circled{4} & \circled{4} & \circled{4} & \circled{4} &  &  & \\ \cline{2-7} \cline{9-9}
-    Imię: \dots........ & \circled{5} & \circled{5} & \circled{5} & \circled{5} & \circled{5} & \circled{5} &  &  & \\ \cline{2-7} \cline{9-9}
+    Imię: \dots........ & \circled{5} & \circled{5} & \circled{5} & \circled{5} & \circled{5} & \circled{5} &  &  & Niepoprawnie zaznaczona odpowiedź: \\ \cline{2-7} \cline{9-9}
     & \circled{6} & \circled{6} & \circled{6} & \circled{6} & \circled{6} & \circled{6} &  &  & \\ \cline{2-7} \cline{9-9}
     Nazwisko: \dots & \circled{7} & \circled{7} & \circled{7} & \circled{7} & \circled{7} & \circled{7} &  &  & \\ \cline{2-7} \cline{9-9}
     & \circled{8} & \circled{8} & \circled{8} & \circled{8} & \circled{8} & \circled{8} &  &  & \\ \cline{2-7} \cline{9-9}
@@ -80,15 +80,19 @@
 \end{tikzpicture}
 
 \begin{tikzpicture}[remember picture,overlay,shift={(current page.north east)}]
-\node[anchor=north east,xshift=-1.7cm,yshift=-5.8cm]{\includegraphics[scale=1.5]{images/00_answer_incorrect_1.png}};
+\node[anchor=north east,xshift=-1.7cm,yshift=-4.6cm]{\includegraphics[scale=1.5]{images/00_answer_corrected.png}};
 \end{tikzpicture}
 
 \begin{tikzpicture}[remember picture,overlay,shift={(current page.north east)}]
-\node[anchor=north east,xshift=-1.7cm,yshift=-7.0cm]{\includegraphics[scale=1.5]{images/00_answer_incorrect_2.png}};
+\node[anchor=north east,xshift=-1.7cm,yshift=-7.0cm]{\includegraphics[scale=1.5]{images/00_answer_incorrect_1.png}};
+\end{tikzpicture}
+
+\begin{tikzpicture}[remember picture,overlay,shift={(current page.north east)}]
+\node[anchor=north east,xshift=-1.7cm,yshift=-8.0cm]{\includegraphics[scale=1.5]{images/00_answer_incorrect_2.png}};
 \end{tikzpicture}
 
 % remove space between top table and three bottom tables
-\vspace{-0.5cm}
+\vspace{-1.5cm}
 
 
 \def\tablebreak{0.5cm}
