@@ -217,9 +217,9 @@ def find_contours_tables(img, num_rectangles, index=False):
 
     if not index:
         # img_rectangle = createRectangleImage(680, 242)
-        img_rectangle = createRectangleImage(385, 144)
+        img_rectangle = createRectangleImage(390, 149)
     else:
-        img_rectangle = createRectangleImage(212, 234)
+        img_rectangle = createRectangleImage(216, 237)
     h, w = img_rectangle.shape
     cv2.imwrite("debugging-opencv/3bb_matchTemplate.png", img)
     # Apply template Matching
