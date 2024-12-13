@@ -20,13 +20,9 @@ def rectContour(contours):
     rectCon = []
     for i in contours:
         area = cv2.contourArea(i)
-        # print("Area:" ,area)
-        # exit()
         if area > 50:
             peri = cv2.arcLength(i, True)
-            # print("Peri:", peri)
             approx = cv2.approxPolyDP(i, 0.09 * peri, True)
-            # print("Approx:", approx)
             if len(approx) == 4:
                 rectCon.append(i)
     rectCon = sorted(rectCon, key=cv2.contourArea, reverse=True)
@@ -37,13 +33,9 @@ def rectContourTables(contours):
     rectCon = []
     for i in contours:
         area = cv2.contourArea(i)
-        # print("Area:", area)
-        # exit()
         if area > 50:
             peri = cv2.arcLength(i, True)
-            # print("Peri:", peri)
             approx = cv2.approxPolyDP(i, 0.02 * peri, True)
-            # print("Approx:", approx)
             if len(approx) == 4:
                 rectCon.append(i)
     rectCon = sorted(rectCon, key=cv2.contourArea, reverse=True)
@@ -209,14 +201,10 @@ def createRectangleImage(height, width):
 
 def find_contours_tables(img, num_rectangles, index=False):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    #cv2.imwrite("debugging-opencv/3b_canny_table.png", img_canny)
     img_contours = img.copy()
     img_contours2 = img.copy()
-    print("size:", img_contours.shape)
-    height, width = img_contours.shape[:2]
 
     if not index:
-        # img_rectangle = createRectangleImage(680, 242)
         img_rectangle = createRectangleImage(390, 149)
     else:
         img_rectangle = createRectangleImage(216, 237)
@@ -232,18 +220,14 @@ def find_contours_tables(img, num_rectangles, index=False):
     cv2.rectangle(img, top_left, bottom_right, 0, 2)
     cv2.imwrite("debugging-opencv/3b_matchTemplate.png", img)
     print("coords", top_left, bottom_right)
-    #crop_img = img_contours[top_left[1]:bottom_right[1], top_left[0]:bottom_right[0]]
+
     contours = np.array([[
         [[top_left[0], top_left[1]]],
         [[top_left[0], bottom_right[1]]],
         [[bottom_right[0], top_left[1]]],
         [[bottom_right[0], bottom_right[1]]]
     ]])
-    #contours, hierarchy = cv2.findContours(img_canny, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    # rect_con = rectContourTables(contours)
-    # cv2.drawContours(img_contours, contours, -1, (0, 255, 0), 1)
-    # cv2.drawContours(img_contours2, rect_con, -1, (0, 255, 0), 1)
-    # cv2.imwrite("debugging-opencv/3c_img_cropped.png", crop_img)
+
     cv2.imwrite("debugging-opencv/3c_img_contours2.png", img_contours2)
     return contours
 
@@ -307,17 +291,9 @@ class cropRectangle:
             xright = self.getWidth() - (xes[2] + xes[3]) / 2
             ytop = (yes[0] + yes[1]) / 2
             ybottom = self.getHeight() - (yes[2] + yes[3]) / 2
-            # print("before update: ", self.pt_top_left)
-            # print("before update: ", self.pt_bottom_right)
+
             self.pt_top_left = [round(self.pt_top_left[0] + xleft), round(self.pt_top_left[1] + ytop)]
             self.pt_bottom_right = [round(self.pt_bottom_right[0] - xright), round(self.pt_bottom_right[1] - ybottom)]
-            # print("after update: ", self.pt_top_left)
-            # print("after update: ", self.pt_bottom_right)
-            # print(type(cnt))
-            # print("cnt:", cnt)
-            # print("xleft:", xleft)
-            # print("xright:", xright)
-            # print("ytop:", ytop)
-            # print("ybottom:", ybottom)
+
         else:
             print("updateFromRelativeContour - ERROR: cnt is not a numpy array")
