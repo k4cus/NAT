@@ -81,10 +81,10 @@ class omr:
             # utils.cropRectangle([692, 625], [956, 1320]),  # table with answers 3
             # utils.cropRectangle([260, 50], [670, 454])  # table with index number
 
-            utils.cropRectangle([37, 341], [199, 742]),
-            utils.cropRectangle([224, 341], [387, 742]),  # table with answers 2
-            utils.cropRectangle([413, 341], [576, 742]),  # table with answers 3
-            utils.cropRectangle([158, 38], [402, 258])  # table with index number
+            utils.cropRectangle([37, 320], [199, 742]),
+            utils.cropRectangle([224, 320], [387, 742]),  # table with answers 2
+            utils.cropRectangle([413, 320], [576, 742]),  # table with answers 3
+            utils.cropRectangle([158, 20], [402, 258])  # table with index number
         ]
 
         imgRectangles = np.array(imgRectangles)  # convert to numpy array
