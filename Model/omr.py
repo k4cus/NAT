@@ -88,7 +88,6 @@ class omr:
         ]
 
         imgRectangles = np.array(imgRectangles)  # convert to numpy array
-        # img_contours = utils.find_contours2(img_preprocessed, num_answer_fields + 1)
 
         if len(imgRectangles) < num_answer_fields + 1 or img_preprocessed is None:
             return None, None, None, None, None
@@ -132,7 +131,6 @@ class omr:
             im_i += 1
 
         i = 0
-        # print("Images threshold:", images_threshold)
         for threshold_image in images_threshold:
             if i % (num_answer_fields + 1) == num_answer_fields:
                 images_grid.append(utils.drawGrid(threshold_image, questions=8, choices=11))
@@ -158,10 +156,8 @@ class omr:
         for answer in images_answers[:-1]:
             answers = []
             for question in answer:
-                # question2 = question/max(question)
                 print("Question:", question, statistics.median(question))
                 if 2 * statistics.median(question) < max(question) and max(question) > 100:
-                    # print("Question:", question2)
                     answers.append(ans_array[question.index(max(question))])
                 else:
                     answers.append("0")
@@ -183,7 +179,6 @@ class omr:
         group_answer = images_answers[-1][-1]
         group = group_answer.index(max(group_answer))
 
-        warped_imgs_grid = [1]
         page_img_grid = omr.draw_grids(self, page_img, imgRectangles, [index_txt, group], full_answers)
 
         cv2.imwrite("debugging-opencv/4_grid_full_answers.png", page_img_grid)
@@ -206,71 +201,16 @@ class omr:
             result_planes.append(diff_img)
             result_norm_planes.append(norm_img)
 
-        result = cv2.merge(result_planes)
         result_norm = cv2.merge(result_norm_planes)
         return result_norm
 
     def preprocess_image(self, img):
-        # img = cv2.GaussianBlur(img, (3, 3), 0)
         normalized_img = np.zeros((800, 800))
         img = cv2.normalize(img, normalized_img, 0, 255, cv2.NORM_MINMAX)
         img_blur = cv2.GaussianBlur(img, (3, 3), 1)
         return img_blur
 
     def find_page(self, img, coords=None):
-        '''
-        image_warped = None
-        wrong_format = False
-        img_copy = img
-        coords_2 = []
-
-        # finds biggest contour in image
-        if coords is None:
-            contour = utils.find_contours(img, 3)
-        else:
-            for c in range(len(coords)):
-                coords_2.append([coords[c]])
-
-            contour1 = np.array(coords_2)
-            contour = [np.array(contour1)]
-
-        for cnt in contour:
-            # transform
-            # if contour != [] and cv2.contourArea(cnt) > 90000:
-            if contour != []:
-                image_warped = utils.image_warping(cnt, img, 1000, 1400)
-                cv2.imwrite("debugging-opencv/new_img_warped.png", image_warped)
-            else:
-                print("No contour found")
-                return None
-
-            wrong_format = False
-
-            # check if the found contour is the answer sheet and if the orientation is correct
-            i = -1
-            for point in points_to_check:
-                i += 1
-                #print(image_warped[point[0], point[1]])
-                if image_warped[point[0], point[1]] < white_thresh:
-                    print("Correct format")
-                    continue
-                else:
-                    wrong_format = Trumatrixe
-                    if i == 4 or i == 5:
-                        print("Wrong orientation")
-                        break
-                    print("Not an answer sheet. Quitting", point)
-                    break
-
-            if wrong_format:
-                continue
-            if not wrong_format:
-                break
-            
-        if wrong_format:
-            print("Wrong format")
-            return None
-        '''
         image_warped = utils.find_contours_page(img, 3)
         if image_warped is not None:
             return image_warped[5:-5, 5:-5]
@@ -283,7 +223,6 @@ class omr:
         except:
             pass
         img = cv2.applyColorMap(img, cv2.COLORMAP_PINK)
-        # img2 = cv2.drawContours(img, contours, -1, (255, 255, 0), 2)
 
         for i, imgRectangle in enumerate(imgRectangles):
             cnt = imgRectangle.getContour()
@@ -294,30 +233,22 @@ class omr:
                 # tables with answers
                 img = utils.drawGridFullPage(img, cnt, index_group, full_answers, i)
 
-        #
-        # view result
         return img
 
     def apply_threshold(self, img):
         img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-        # print("Img 0:", img)
         img_flattened = [item for sublist in img for item in sublist]
-        #print("Img flattened:", img_flattened)
         img_median = statistics.median(img_flattened)
-        print("Median:", img_median)
-        cv2.imwrite("debugging-opencv/thresh_test.png", img)
-        #img_thresh = cv2.threshold(img, 280 - img_median, 255, cv2.THRESH_BINARY)[1]
-        img_thresh = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
 
+        print("Median:", img_median)
+
+        cv2.imwrite("debugging-opencv/thresh_test.png", img)
+        img_thresh = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
         cv2.imwrite("debugging-opencv/thresh_test_2.png", img_thresh)
-        # print("Img:", img_thresh)
-        # print("Img 3:", img)
         return img_thresh
 
     def get_answers(self, img, img_answers_data, is_index=False):
         # search for all grid areas, find the most colored ones, add threshold
-        # print("Img:", img)
-        # print("Img answers data:", img_answers_data)
 
         height_answer = img_answers_data[1]
         width_answer = img_answers_data[0]
@@ -351,43 +282,16 @@ class omr:
                     circle_thickness = -1
 
                     cv2.circle(mask_negative, circle_center, circle_radius, circle_color, circle_thickness)
+
                     cv2.imwrite("debugging-opencv/5_mask_img_negative.png", mask_negative)
-
-                    #print("Size of the cropped img: ", crop_img_size)
                     cv2.imwrite("debugging-opencv/5_cropped_img.png", crop_img)
+
                     start_width += width_answer
-                    # print("img 1:", crop_img)
-                    crop_img_flattened = [item for sublist in crop_img for item in sublist]
-                    # print("Img max:", max(crop_img_flattened))
-                    # print("Img min:", min(crop_img_flattened))
-                    # crop_img_flattened = crop_img_flattened - min(crop_img_flattened)
-                    crop_img_flattened = crop_img_flattened / max(crop_img_flattened)
-                    # average_color = statistics.mean(crop_img_flattened)
-                    # crop_img_median = statistics.median(crop_img_flattened)
 
-                    # print("Img 2:", crop_img_flattened)
-
-                    #print(crop_img)
-                    #print(mask)
                     matching_pixels = np.sum(crop_img == mask)
                     matching_pixels_negative = np.sum(crop_img == mask_negative)
                     print(f"Matching Pixels: ", matching_pixels, matching_pixels_negative)
 
-                    #black_count = 0
-                    #white_count = 0
-                    #for pixel in crop_img_flattened:
-                    #    if pixel > 0.8:
-                    #        white_count += 1
-                    #    else:
-                    #        black_count += 1
-
-                    # print("Black:", black_count)
-                    # print("White:", white_count)
-                    # print("Percent:", percent)
-                    # print("Img:", crop_img_flattened)
-                    # print("Median:", crop_img_median)
-                    # print("Avg color:", average_color)
-                    # print("Sum:", sum(crop_img_flattened))
                     if matching_pixels_negative > 500:
                         print("wrong answer")
                         matching_pixels = 0
@@ -395,12 +299,6 @@ class omr:
                     answers_array_row.append(matching_pixels)
                 answers_array.append(answers_array_row)
                 start_height += height_answer
-            # print("Answers array:", answers_array)
-
-            # print("Answers array median:", statistics.median(flattened_list)/max(flattened_list))
-            # print("Answers array max:", max(flattened_list)/max(flattened_list))
-            # print("Answers array min:", min(flattened_list)/max(flattened_list))
-            # print("Answers array avg:", statistics.mean(flattened_list)/max(flattened_list))
 
             return answers_array
 
@@ -412,7 +310,6 @@ class omr:
                 start_height = 0
                 for row in range(11):
                     crop_img = img[round(start_height):round(start_height + height_answer), round(start_width):round(start_width + width_answer)]
-                    #cv2.imwrite("debugging-opencv/6_crop_img_index" + str(row) + ".png", crop_img)
                     crop_img_size = [crop_img.shape[0], crop_img.shape[1]]
 
                     mask= np.ones((crop_img_size[0], crop_img_size[1]), dtype=np.uint8) * 127
@@ -423,7 +320,6 @@ class omr:
 
                     cv2.circle(mask, circle_center, circle_radius, circle_color, circle_thickness)
                     cv2.imwrite("debugging-opencv/6_mask_img_index.png", mask)
-                    #print("Size:", crop_img_size)
 
                     mask_negative = np.ones((crop_img_size[0], crop_img_size[1]), dtype=np.uint8) * 0
                     circle_center = (crop_img_size[1] // 2, crop_img_size[0] // 2)  # Center of the circle
@@ -435,9 +331,6 @@ class omr:
                     cv2.imwrite("debugging-opencv/6_mask_img_negative_index.png", mask_negative)
 
                     start_height += height_answer
-
-                    crop_img_flattened = [item for sublist in crop_img for item in sublist]
-                    crop_img_flattened = crop_img_flattened / max(crop_img_flattened)
 
                     matching_pixels = np.sum(crop_img == mask)
                     matching_pixels_negative = np.sum(crop_img == mask_negative)
