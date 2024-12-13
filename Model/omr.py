@@ -101,16 +101,19 @@ class omr:
             cv2.imwrite("debugging-opencv/3a_tableWithMargin" + str(i) + ".png", tableWithMargin)
             # find contours for each table
             if i < 3:
-                cnt = utils.find_contours_tables(tableWithMargin, 1)
+                cnt = utils.find_contours_tables(tableWithMargin, 1)[0]
             else:
-                cnt = utils.find_contours_tables(tableWithMargin, 1, index=True)
-            # imgRectangle.updateFromRelativeContour(cnt)
+                cnt = utils.find_contours_tables(tableWithMargin, 1, index=True)[0]
+            imgRectangle.updateFromRelativeContour(cnt)
 
             # cut out each table to remove margins
-            # tableWithoutMargin = (utils.image_warping(np.array(imgRectangle.getContour()), img_preprocessed, imgRectangle.getWidth(),
-            #                                        imgRectangle.getHeight()))
-            # tableWithoutMargin = utils.image_warping(cnt, tableWithMargin, imgRectangle.getWidth(), imgRectangle.getHeight())
-            images_warped.append(cnt)
+            tableWithoutMargin = (utils.image_warping(np.array(imgRectangle.getContour()), img_preprocessed, imgRectangle.getWidth(),
+                                                   imgRectangle.getHeight()))
+            tableWithoutMargin = utils.image_warping(cnt, tableWithMargin, imgRectangle.getWidth(), imgRectangle.getHeight())
+            cv2.imwrite("debugging-opencv/3_table_without_margin.png", tableWithoutMargin)
+            print(tableWithoutMargin)
+
+            images_warped.append(tableWithoutMargin)
 
 
         # store to disk for debbuging
@@ -296,8 +299,10 @@ class omr:
         return img
 
     def apply_threshold(self, img):
+        img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
         # print("Img 0:", img)
         img_flattened = [item for sublist in img for item in sublist]
+        #print("Img flattened:", img_flattened)
         img_median = statistics.median(img_flattened)
         print("Median:", img_median)
         cv2.imwrite("debugging-opencv/thresh_test.png", img)

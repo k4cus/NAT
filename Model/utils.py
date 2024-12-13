@@ -232,15 +232,20 @@ def find_contours_tables(img, num_rectangles, index=False):
     cv2.rectangle(img, top_left, bottom_right, 0, 2)
     cv2.imwrite("debugging-opencv/3b_matchTemplate.png", img)
     print("coords", top_left, bottom_right)
-    crop_img = img_contours[top_left[1]:bottom_right[1], top_left[0]:bottom_right[0]]
-
+    #crop_img = img_contours[top_left[1]:bottom_right[1], top_left[0]:bottom_right[0]]
+    contours = np.array([[
+        [[top_left[0], top_left[1]]],
+        [[top_left[0], bottom_right[1]]],
+        [[bottom_right[0], top_left[1]]],
+        [[bottom_right[0], bottom_right[1]]]
+    ]])
     #contours, hierarchy = cv2.findContours(img_canny, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     # rect_con = rectContourTables(contours)
     # cv2.drawContours(img_contours, contours, -1, (0, 255, 0), 1)
     # cv2.drawContours(img_contours2, rect_con, -1, (0, 255, 0), 1)
-    cv2.imwrite("debugging-opencv/3c_img_cropped.png", crop_img)
+    # cv2.imwrite("debugging-opencv/3c_img_cropped.png", crop_img)
     cv2.imwrite("debugging-opencv/3c_img_contours2.png", img_contours2)
-    return crop_img
+    return contours
 
 
 def image_warping(img_contours, img, widthImg, heightImg):
@@ -293,6 +298,7 @@ class cropRectangle:
         # calculate corrections
         # point are out of order so we must sort x and y coordinates
         if isinstance(cnt, np.ndarray):
+            print("cnt:", cnt)
             xes = [cnt[0][0][0], cnt[1][0][0], cnt[2][0][0], cnt[3][0][0]]
             xes.sort()
             yes = [cnt[0][0][1], cnt[1][0][1], cnt[2][0][1], cnt[3][0][1]]
