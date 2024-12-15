@@ -38,7 +38,7 @@ class omr:
         if cropped:
             page_img = img
         if not cropped:
-
+            img = utils.change_brightness(img, 1, -100)
             img_preprocessed = omr.preprocess_image(self, img)
             cv2.imwrite("debugging-opencv/1_camera-preprocessed.png", img_preprocessed)
             img = img_preprocessed
@@ -207,8 +207,8 @@ class omr:
     def preprocess_image(self, img):
         normalized_img = np.zeros((800, 800))
         img = cv2.normalize(img, normalized_img, 0, 255, cv2.NORM_MINMAX)
-        img_blur = cv2.GaussianBlur(img, (3, 3), 1)
-        return img_blur
+        img = cv2.GaussianBlur(img, (3, 3), 1)
+        return img
 
     def find_page(self, img, coords=None):
         image_warped = utils.find_contours_page(img, 3)
