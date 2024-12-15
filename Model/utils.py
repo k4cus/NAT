@@ -154,27 +154,38 @@ def find_contours_page(img, num_rectangles):
     # Utwórz detektor znaczników ArUco
     detector = cv2.aruco.ArucoDetector(aruco_dict, parameters)
 
-    # Wykryj znaczniki ArUco
-    corners, ids, rejected = detector.detectMarkers(gray)
+    def detectAruco(arucoDetector, image):
+        # Wykryj znaczniki ArUco
+        corners, ids, rejected = arucoDetector.detectMarkers(image)
 
-    # Sprawdź, czy wykryto znaczniki
-    if ids is not None and len(ids) >= 4:
-        # Posortuj wykryte znaczniki na podstawie ich ID
-        ids = ids.flatten()
-        sorted_indices = np.argsort(ids)
-        corners = [corners[i] for i in sorted_indices]
+        # Sprawdź, czy wykryto znaczniki
+        if ids is not None and len(ids) >= 4:
+            # Posortuj wykryte znaczniki na podstawie ich ID
+            ids = ids.flatten()
+            sorted_indices = np.argsort(ids)
+            corners = [corners[j] for j in sorted_indices]
 
-        # Pobierz cztery znaczniki (lewy górny, prawy górny, prawy dolny, lewy dolny)
-        selected_corners = [corners[0][0][0], corners[1][0][1], corners[2][0][3], corners[3][0][2]]
-        print(sorted_indices, ids, selected_corners)
-        # Utwórz macierz perspektywy
-        src_points = np.float32(selected_corners)  # Wykryte punkty znaczników
-        dst_points = np.float32([[0, 0], [600, 0], [0, 800], [600, 800]])  # Prostokąt docelowy
-        matrix = cv2.getPerspectiveTransform(src_points, dst_points)
+            # Pobierz cztery znaczniki (lewy górny, prawy górny, prawy dolny, lewy dolny)
+            selected_corners = [corners[0][0][0], corners[1][0][1], corners[2][0][3], corners[3][0][2]]
+            print(sorted_indices, ids, selected_corners)
+            # Utwórz macierz perspektywy
+            src_points = np.float32(selected_corners)  # Wykryte punkty znaczników
+            dst_points = np.float32([[0, 0], [600, 0], [0, 800], [600, 800]])  # Prostokąt docelowy
+            matrix = cv2.getPerspectiveTransform(src_points, dst_points)
 
-        # Przekształcenie perspektywy (wycięcie obszaru strony)
-        warped_image = cv2.warpPerspective(img, matrix, (600, 800))
+            # Przekształcenie perspektywy (wycięcie obszaru strony)
+            return cv2.warpPerspective(img, matrix, (600, 800))
+        else:
+            return
 
+    # if aruco detector fails to detect markers, try to do adaptive thresholding
+    warped_image = detectAruco(detector, gray)
+    for i in range(51, 152, 10):
+        if warped_image is not None:
+            break
+        # Zastosuj progowanie adaptacyjne - znacząco poprawia detekcję markerów
+        gray = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, i, 5)
+        warped_image = detectAruco(detector, gray)
     return warped_image
 
 
@@ -255,6 +266,18 @@ def to_base64(image):
 def base64_empty_image(width, height):
     empty_image = np.zeros((width, height, 3), dtype=np.uint8) + 128
     return to_base64(empty_image)
+
+def change_brightness(input_image, contrast = 1, brightness=30):
+    ''' input_image:  color or grayscale image
+        contrast:  1 gives original image, # Contrast control (1.0-3.0)
+        brightness:  -255 (all black) to +255 (all white)
+
+        returns image of same type as input_image but with
+        brightness adjusted
+    '''
+    img = input_image.copy()
+    cv2.convertScaleAbs(img, img, contrast, brightness)
+    return img
 
 
 class cropRectangle:

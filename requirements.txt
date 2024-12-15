@@ -5,3 +5,5 @@ flet
 python-i18n
 aenum
 pynput
+flet_core
+
