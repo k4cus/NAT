@@ -115,4 +115,4 @@ class loadAnswers:
             cap.release()
 
         print(score_string)
-        return page_img_grid, score_string, answers
+        return page_img_grid, score_string, answers, group
