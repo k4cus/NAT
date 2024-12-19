@@ -15,7 +15,7 @@ def change_brightness(input_image, contrast = 1.0, brightness=30):
     return img
 
 # Wczytaj obraz
-image = cv2.imread("kluczOdpowiedzi.4.png")
+image = cv2.imread("img_8.png")
 
 # Create the sharpening kernel
 # kernel = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]])
