@@ -38,10 +38,8 @@ class omr:
         if cropped:
             page_img = img
         if not cropped:
-            img = utils.change_brightness(img, 1, -100)
             img_preprocessed = omr.preprocess_image(self, img)
             cv2.imwrite("debugging-opencv/1_camera-preprocessed.png", img_preprocessed)
-            img = img_preprocessed
             img = omr.find_page(self, img_preprocessed)
             page_img = img
 
