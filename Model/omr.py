@@ -292,7 +292,7 @@ class omr:
                     matching_pixels_negative = np.sum(crop_img == mask_negative)
                     print(f"Matching Pixels: ", matching_pixels, matching_pixels_negative)
 
-                    if matching_pixels_negative > 500:
+                    if matching_pixels_negative/(len(mask_negative)*len(mask_negative[0])) > 0.6:
                         print("wrong answer")
                         matching_pixels = 0
 
@@ -334,9 +334,10 @@ class omr:
 
                     matching_pixels = np.sum(crop_img == mask)
                     matching_pixels_negative = np.sum(crop_img == mask_negative)
+                    #print(f"All pixels: ", len(mask_negative), matching_pixels_negative/(len(mask_negative)*len(mask_negative[0])))
                     print(f"Matching Pixels: ", matching_pixels, matching_pixels_negative)                    
 
-                    if matching_pixels_negative > 500:
+                    if matching_pixels_negative/(len(mask_negative)*len(mask_negative[0])) > 0.6:
                         print("wrong answer")
                         matching_pixels = 0
 

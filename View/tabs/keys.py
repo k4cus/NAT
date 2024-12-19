@@ -13,6 +13,8 @@ class keysTab:
         self.fileExtensions = self.controller.getReadFromFileExtensions()
         self.image = base64_empty_image(1240, 1754)
         self.text = "Test"
+        self.index = "123456"
+        self.group = "0"
         self.answers2 = self.generateTemplateAnswers(60)
         self.answers = self.answers2
         self.ftImage = ft.Image(
@@ -91,12 +93,14 @@ class keysTab:
     def updateTextBox(self, e):
         print("updating...")
         if self.answers == self.ftTextField.value:
+            print("skipping")
             pass
         else:
             exam_name = self.controller.getExamName()
             print(exam_name)
             new_answers = self.ftTextField.value.split()
-            new_answers = [ x for x in new_answers if "." not in x ]
+            new_answers = [ x for x in new_answers if "." not in x ][2:]
+            print(len(new_answers))
             if len(new_answers) == 60:
                 new_answers_2 = []
                 for i in range(3):
@@ -104,8 +108,8 @@ class keysTab:
                     for j in range(0,60,3):
                         print(i+j)
                         new_answers_2.append(new_answers[i+j])
-                print(new_answers_2)
-                with open("exams-data/" + exam_name + "/answer_keys/answers.csv", "w") as f:
+                print("AAAAAAAAAA",new_answers_2)
+                with open("exams-data/" + exam_name + "/answer_keys/" + str(self.group) + "/answers.csv", "w") as f:
                     f.write(';'.join(new_answers_2) + ";")
 
 
@@ -122,8 +126,9 @@ class keysTab:
             template += "\n"
         return template
     
-    def updateAnswers(self, num, answers):
+    def updateAnswers(self, num, answers, index="222222", group="00"):
         template = ""
+        template += index + "\n" + str(group) + "\n"
         br = ". "
         br2 = "   "
         for i in range(int(len(answers)/3)):
@@ -133,6 +138,8 @@ class keysTab:
             template += "\n"
         
         self.answers2 = template
+        self.index = index
+        self.group = group
         self.ftTextField.value = self.answers2
         self.ftTextField.disabled = False
         self.ftTextField.update()
