@@ -134,6 +134,7 @@ def find_contours(img, num_rectangles):
     print("biggest contours:", biggest_contours)
     return biggest_contours
 
+
 def find_contours_page(img, num_rectangles):
     if img is None:
         raise ValueError("Image not loaded. Please check the image path or URL.")
@@ -213,33 +214,54 @@ def createRectangleImage(height, width):
 def find_contours_tables(img, num_rectangles, index=False):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     img_contours = img.copy()
-    img_contours2 = img.copy()
-
-    if not index:
-        img_rectangle = createRectangleImage(390, 149)
-    else:
-        img_rectangle = createRectangleImage(216, 237)
-    h, w = img_rectangle.shape
     cv2.imwrite("debugging-opencv/3bb_matchTemplate.png", img)
-    # Apply template Matching
-    print("shape 2:", img.shape, img_rectangle.shape)
-    res = cv2.matchTemplate(img, img_rectangle, cv2.TM_CCOEFF_NORMED)
-    print("done")
-    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
-    top_left = max_loc
-    bottom_right = (top_left[0] + w, top_left[1] + h)
-    cv2.rectangle(img, top_left, bottom_right, 0, 2)
+
+    contours = None
+    top_left = (0, 0)
+    bottom_right = (0, 0)
+    best_max_value = 0
+    best_width_offset = 0
+
+    # TODO this two loops need some cleanup in code
+    for i in range(-5, 5):
+        if not index:
+            img_rectangle = createRectangleImage(390, 149 + i)
+        else:
+            img_rectangle = createRectangleImage(216, 237 + i)
+        # Apply template Matching
+        res = cv2.matchTemplate(img, img_rectangle, cv2.TM_CCOEFF_NORMED)
+        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+        # Store best match
+        if max_val > best_max_value:
+            best_max_value = max_val
+            best_width_offset = i
+    for j in range(-5, 5):
+        if not index:
+            img_rectangle = createRectangleImage(390 + j, 149 + best_width_offset)
+        else:
+            img_rectangle = createRectangleImage(216 + j, 237 + best_width_offset)
+        # Apply template Matching
+        res = cv2.matchTemplate(img, img_rectangle, cv2.TM_CCOEFF_NORMED)
+        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+        # Store best match
+        if max_val > best_max_value:
+            best_max_value = max_val
+            top_left = max_loc
+            h, w = img_rectangle.shape
+            bottom_right = (top_left[0] + w, top_left[1] + h)
+            contours = np.array([[
+                [[top_left[0], top_left[1]]],
+                [[top_left[0], bottom_right[1]]],
+                [[bottom_right[0], top_left[1]]],
+                [[bottom_right[0], bottom_right[1]]]
+            ]])
+
+    # Draw clear rectangle for perfect contour detection in next step
+    print("top left", top_left, "bottom right", bottom_right)
+    cv2.rectangle(img,  top_left, bottom_right, 0, 2)
     cv2.imwrite("debugging-opencv/3b_matchTemplate.png", img)
-    print("coords", top_left, bottom_right)
+    cv2.imwrite("debugging-opencv/3c_img_contours2.png", img_contours)
 
-    contours = np.array([[
-        [[top_left[0], top_left[1]]],
-        [[top_left[0], bottom_right[1]]],
-        [[bottom_right[0], top_left[1]]],
-        [[bottom_right[0], bottom_right[1]]]
-    ]])
-
-    cv2.imwrite("debugging-opencv/3c_img_contours2.png", img_contours2)
     return contours
 
 
@@ -267,7 +289,8 @@ def base64_empty_image(width, height):
     empty_image = np.zeros((width, height, 3), dtype=np.uint8) + 128
     return to_base64(empty_image)
 
-def change_brightness(input_image, contrast = 1, brightness=30):
+
+def change_brightness(input_image, contrast=1, brightness=30):
     ''' input_image:  color or grayscale image
         contrast:  1 gives original image, # Contrast control (1.0-3.0)
         brightness:  -255 (all black) to +255 (all white)
