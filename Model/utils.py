@@ -244,7 +244,7 @@ def find_contours_tables(img, num_rectangles, index=False):
         res = cv2.matchTemplate(img, img_rectangle, cv2.TM_CCOEFF_NORMED)
         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
         # Store best match
-        if max_val > best_max_value:
+        if max_val >= best_max_value: #TODO >= koniecznie wyliczenie naroznikow musi sie wykonac chociaz 1 raz!!!
             best_max_value = max_val
             top_left = max_loc
             h, w = img_rectangle.shape
