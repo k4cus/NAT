@@ -155,7 +155,7 @@ def find_contours_page(img, num_rectangles):
     # Utwórz detektor znaczników ArUco
     detector = cv2.aruco.ArucoDetector(aruco_dict, parameters)
 
-    def detectAruco(arucoDetector, image):
+    def detectAruco(arucoDetector, image, image2warp):
         # Wykryj znaczniki ArUco
         corners, ids, rejected = arucoDetector.detectMarkers(image)
 
@@ -174,19 +174,19 @@ def find_contours_page(img, num_rectangles):
             dst_points = np.float32([[0, 0], [600, 0], [0, 800], [600, 800]])  # Prostokąt docelowy
             matrix = cv2.getPerspectiveTransform(src_points, dst_points)
 
-            # Przekształcenie perspektywy (wycięcie obszaru strony)
-            return cv2.warpPerspective(img, matrix, (600, 800))
+            # Przekształcenie perspektywy (wycięcie obszaru strony) ale z oryginalnego obrazu
+            return cv2.warpPerspective(image2warp, matrix, (600, 800))
         else:
             return
 
     # if aruco detector fails to detect markers, try to do adaptive thresholding
-    warped_image = detectAruco(detector, gray)
+    warped_image = detectAruco(detector, gray, img)
     for i in range(51, 152, 10):
         if warped_image is not None:
             break
         # Zastosuj progowanie adaptacyjne - znacząco poprawia detekcję markerów
-        gray = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, i, 5)
-        warped_image = detectAruco(detector, gray)
+        imgThresholded = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, i, 5)
+        warped_image = detectAruco(detector, imgThresholded, img)
     return warped_image
 
 
