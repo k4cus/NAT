@@ -69,13 +69,13 @@ class mainController:
         elif data[0] == "answers":
             self.model.enterAnswersReadingMode(data[1])
         elif data[0] == "keys-file":
-            img, score, answers, group = self.model.readKeysFromFile(data[1], data[2])
+            img, score, answers, index, group = self.model.readKeysFromFile(data[1], data[2])
             self.keyUpdateImage(img)
-            self.keyUpdateText(score, answers, group)
+            self.keyUpdateText(score, answers, index, group)
         elif data[0] == "answers-file":
-            img, score, answers = self.model.readAnswersFromFile(data[1], data[2])
+            img, score, answers, index, group = self.model.readAnswersFromFile(data[1], data[2])
             self.answerUpdateImage(img)
-            self.answerUpdateText(score, answers)
+            self.answerUpdateText(score, answers, index, group)
         else:
             print("KONTROLLER - enterReadingMode unknown data: " + data[0])
 
@@ -95,15 +95,15 @@ class mainController:
         img_base64 = self.model.omr.imageToBase64(image)
         self.view.tabs[2].updateImage(img_base64)
 
-    def keyUpdateText(self, text, answers, group):
+    def keyUpdateText(self, text, answers, index, group):
         txt = text
         self.view.tabs[1].updateText(txt)
-        self.view.tabs[1].updateAnswers(num=60, answers=answers, group=group)
+        self.view.tabs[1].updateAnswers(num=60, answers=answers, index=index, group=group)
 
-    def answerUpdateText(self, text, answers):
+    def answerUpdateText(self, text, answers, index, group="00"):
         txt = text
         self.view.tabs[2].updateText(txt)
-        self.view.tabs[2].updateAnswers(num=60, answers=answers)
+        self.view.tabs[2].updateAnswers(num=60, answers=answers, index=index, group=group)
         
     def keyPageFinder(self, image):
         self.keyUpdateImage(self.model.pageFinder(image))

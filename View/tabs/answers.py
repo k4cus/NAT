@@ -122,8 +122,9 @@ class answersTab:
             template += "\n"
         return template
     
-    def updateAnswers(self, num, answers):
+    def updateAnswers(self, num, answers, index, group="00"):
         template = ""
+        template += "index: " + index + "\n" + "group: " + str(group) + "\n"
         br = ". "
         br2 = "   "
         for i in range(int(len(answers)/3)):

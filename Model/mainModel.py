@@ -135,7 +135,7 @@ class mainModel:
         print("filePathList: ", filePathList)
 
         for file in filePathList:
-            img = self.loadAnswers.loadAnswers(self, 1, exam_name, file_path=file)
+            img= self.loadAnswers.loadAnswers(self, 1, exam_name, file_path=file)
         return img
 
     def getResultsImgPath(self, exam_name):

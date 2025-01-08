@@ -126,9 +126,9 @@ class keysTab:
             template += "\n"
         return template
     
-    def updateAnswers(self, num, answers, index="222222", group="00"):
+    def updateAnswers(self, num, answers, index="000000", group="00"):
         template = ""
-        template += index + "\n" + str(group) + "\n"
+        template += "index: " + index + "\n" + "group: " + str(group) + "\n"
         br = ". "
         br2 = "   "
         for i in range(int(len(answers)/3)):

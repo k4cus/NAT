@@ -60,8 +60,9 @@ class loadAnswers:
                                 ans = f.readlines()
                             if ans == []:
                                 print("No answers to load. First scan the answer sheet or create the csv file manually.")
-                                return None
-                                            
+                                return None #czasami zwraca None dla odp studentów, jakby nie było klucza, nie wiem od czego to zależy
+                                            #podejrzewam, że to może mieć związek z plikami z poprzednich uruchomień programu
+
                         # save the read data to files
                         
                         # create the folder to store the data
@@ -97,15 +98,16 @@ class loadAnswers:
                         # grade if in student answers reading mode
                         if type == 1:
                             ans_list = ans[0].split(";")
-                            print(ans_list)
-                            print(answers)
+                            print("Klucz: ", ans_list)
+                            print("Odpowiedzi: ", answers)
                             num_questions = 55
-                            score = omr.omr.score(self, ans_list[:num_questions], answers[:num_questions])
+                            score = omr.omr.score(self, ans_list[:num_questions], answers[:num_questions]) # czasami ocenia na 100% i bierze zczytane właśnie odpoweiedzi jako klucz
+                            # podejrzewam, że to może mieć związek z plikami z poprzednich uruchomień programu
                             print("Wynik: " + str(round(score[1], 2)) + "%")
                             cv2.imwrite("exams-data/" + currentExamName + "/student_answers/" + str(index) + "/result_img.png", transparent_img)
                             score_string = str(round(score[1], 2)) + "%"
                         else:
-                            score_string = ""
+                            score_string = "no score to show"
 
 
             testing = False # delete when you want to loop
@@ -115,4 +117,4 @@ class loadAnswers:
             cap.release()
 
         print(score_string)
-        return page_img_grid, score_string, answers, group
+        return page_img_grid, score_string, answers, index, group
