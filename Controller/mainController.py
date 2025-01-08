@@ -1,5 +1,4 @@
 import base64
-
 from Model.mainModel import mainModel
 from View.mainView import mainView
 
@@ -69,13 +68,13 @@ class mainController:
         elif data[0] == "answers":
             self.model.enterAnswersReadingMode(data[1])
         elif data[0] == "keys-file":
-            img, score, answers, group = self.model.readKeysFromFile(data[1], data[2])
+            img, score, answers, group, index = self.model.readKeysFromFile(data[1], data[2])
             self.keyUpdateImage(img)
             self.keyUpdateText(score, answers, group)
         elif data[0] == "answers-file":
-            img, score, answers = self.model.readAnswersFromFile(data[1], data[2])
+            img, score, answers, group, index = self.model.readAnswersFromFile(data[1], data[2])
             self.answerUpdateImage(img)
-            self.answerUpdateText(score, answers)
+            self.answerUpdateText(score, answers, index)
         else:
             print("KONTROLLER - enterReadingMode unknown data: " + data[0])
 
@@ -100,10 +99,10 @@ class mainController:
         self.view.tabs[1].updateText(txt)
         self.view.tabs[1].updateAnswers(num=60, answers=answers, group=group)
 
-    def answerUpdateText(self, text, answers):
+    def answerUpdateText(self, text, answers, index):
         txt = text
         self.view.tabs[2].updateText(txt)
-        self.view.tabs[2].updateAnswers(num=60, answers=answers)
+        self.view.tabs[2].updateAnswers(num=60, answers=answers, index=index)
         
     def keyPageFinder(self, image):
         self.keyUpdateImage(self.model.pageFinder(image))
