@@ -171,7 +171,7 @@ class omr:
 
         index_answers = []
         for char in index_answer:
-            index_answers.append(str(char.index(max(char)) - 1))
+            index_answers.append(str(int(char.index(max(char)))-1))
         index_txt = "".join(index_answers)
 
         group_answer = images_answers[-1][-1]

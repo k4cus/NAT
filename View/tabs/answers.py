@@ -122,8 +122,9 @@ class answersTab:
             template += "\n"
         return template
     
-    def updateAnswers(self, num, answers):
+    def updateAnswers(self, num, answers, index="222222", group="00"):
         template = ""
+        template += index + "\n" + str(group) + "\n"
         br = ". "
         br2 = "   "
         for i in range(int(len(answers)/3)):
@@ -133,6 +134,8 @@ class answersTab:
             template += "\n"
         
         self.answers2 = template
+        self.index = index
+        self.group = group
         self.ftTextField.value = self.answers2
         self.ftTextField.disabled = False
         self.ftTextField.update()
