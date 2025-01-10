@@ -61,7 +61,7 @@ class omr:
 
                 page_img = img_preprocessed
                 if img_preprocessed is None:
-                    return None, None, None, None, None
+                    return None, None, None, None, None, None
 
         if not skip_shadows:
             img_preprocessed = omr.remove_shadows(self, img)
@@ -180,6 +180,7 @@ class omr:
         page_img_grid = omr.draw_grids(self, page_img, imgRectangles, [index_txt, group], full_answers)
 
         cv2.imwrite("debugging-opencv/4_grid_full_answers.png", page_img_grid)
+        print([index_txt, full_answers, group, page_img, images_warped, page_img_grid])
         return index_txt, full_answers, group, page_img, images_warped, page_img_grid
 
     def loadImageFromFile(self, path):

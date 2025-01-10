@@ -2,6 +2,7 @@ import cv2
 import os
 import numpy as np
 from Model import omr
+import subprocess
 
 class loadAnswers:
 
@@ -29,15 +30,36 @@ class loadAnswers:
         folders = ["/answer_keys/", "/student_answers/"]
 
         if cam_index is not None:
-            cap = cv2.VideoCapture(cam_index)
+            camera_index = 'Microsoft® LifeCam HD-5000'  # Zmień na nazwę swojej kamerki (ffmpeg -list_devices true -f dshow -i dummy)
+            video_size = "640x480"  # Rozdzielczość obrazu
+            fps = 30  # Liczba klatek na sekundę
 
+            command = [
+                "ffmpeg",
+                "-f", "dshow",  # Format dla Windowsa
+                "-framerate", str(fps),
+                "-video_size", video_size,
+                "-i", f"video={camera_index}",  # Kamerka
+                "-pix_fmt", "bgr24",  # Format obrazu zgodny z OpenCV
+                "-f", "rawvideo",  # Surowy format wideo
+                "-"
+            ]
+            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, bufsize=10 ** 8)
         testing = True
         while testing:
             graded = 0
             while graded < 1:
                 if cam_index is not None:
-                    success, img = cap.read()
+                    while True:
+                        raw_frame = process.stdout.read(640 * 480 * 3)
+                        if not raw_frame:
+                            pass
+                        frame = np.frombuffer(raw_frame, np.uint8).reshape((480, 640, 3))
+                        img=frame.copy()
+                        break
+
                 elif file_path is not None:
+
                     img = omr.omr.loadImageFromFile(self, file_path)
 
                 cv2.imwrite("debugging-opencv/camera-test.png", img)
@@ -106,13 +128,22 @@ class loadAnswers:
                             score_string = str(round(score[1], 2)) + "%"
                         else:
                             score_string = ""
+                        # if index is not None:
+                        #     self.answerUpdateImage(page_img_grid)
+                        # else:
+                        #     self.answerUpdateImage(frame)
+
 
 
             testing = False # delete when you want to loop
 
         print("Finished scanning")
         if cam_index is not None:
-            cap.release()
+            process.terminate()  # Zakończ proces FFmpeg
+            cv2.destroyAllWindows()
 
         print(score_string)
-        return page_img_grid, score_string, answers, group, index
+        if index is not None:
+            return page_img_grid, score_string, answers, group, index
+        else:
+            return img, None, None, None, None
