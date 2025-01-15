@@ -1,5 +1,4 @@
 import base64
-import os, shutil
 from Model.mainModel import mainModel
 from View.mainView import mainView
 
