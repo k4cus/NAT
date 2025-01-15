@@ -24,24 +24,24 @@ example_results = {
 }
 
 #results = example_results
-def import_data():
-    with open("../data/exportFromUSOS.csv") as csv_file:
+def import_data(file):
+    with open(file) as csv_file:
         imported_USOS_file = csv.reader(csv_file, delimiter=";")
-
+        data = {}
         line_count = 0
         for row in imported_USOS_file:
             if line_count == 0:
                 print(f'Column names are {", ".join(row)}')
                 line_count += 1
             else:
-                data.append([row[0], row[1], row[3], row[4], row[8], row[9], row[10]])
+                data[row[1]] = [row[0], row[3], row[4]]
                 line_count += 1
 
     print("From USOS:")
     print(data)
     return data
 
-def export_data(results, data, score,zerowka=False, comment_public="Test",comment_private="Test2"):
+def export_data(results, data, score,zerowka=False, comment_public="",comment_private=""):
     line = ""
     export_csv = ""
 
@@ -65,14 +65,10 @@ def export_data(results, data, score,zerowka=False, comment_public="Test",commen
                     [student[0], student[2], student[3], student[4], student[5], student[6], str(int(score)), comment_public])  # TODO add more
                 export_csv += (line + "\n")
 
-    with open("../data/test_results.csv", "w") as csv_file:
+    with open("test_results.csv", "w") as csv_file:
         csv_file.write(export_csv)
     return export_csv
 
 
-#data = import_data(example_results)
-#export_csv = export_data(data, 40)
-
-#print(export_csv)
 
 

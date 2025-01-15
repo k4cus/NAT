@@ -12,7 +12,7 @@ class answersTab:
         self.filePicker = ft.FilePicker(on_result=self.onFilePickResult)
         self.fileExtensions = self.controller.getReadFromFileExtensions()
         self.image = base64_empty_image(1240, 1754)
-        self.text = "Test"
+        self.text = ""
         self.index = "123456"
         self.group = "0"
         self.answers2 = self.generateTemplateAnswers(60)
@@ -55,10 +55,10 @@ class answersTab:
         return content
 
     def pickDirectoryToRead(self, e):
-        self.filePicker.get_directory_path()
+        self.filePicker.get_directory_path(initial_directory=".")
 
     def pickFileToRead(self, e):
-        self.filePicker.pick_files(allow_multiple=True, allowed_extensions=self.fileExtensions)
+        self.filePicker.pick_files(allow_multiple=True, allowed_extensions=self.fileExtensions, initial_directory=".")
 
     def onFilePickResult(self, e: ft.FilePickerResultEvent):
         fileList = []
@@ -127,7 +127,7 @@ class answersTab:
             template += "\n"
         return template
 
-    def updateAnswers(self, num, answers, index="222222", group="00"):
+    def updateAnswers(self, num, answers, index="000000", group="00"):
         template = ""
         template += index + "\n" + str(group) + "\n"
         br = ". "

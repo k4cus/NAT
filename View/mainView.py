@@ -29,7 +29,7 @@ class mainView:
             examTab(controller, self.t),
             keysTab(controller, self),
             answersTab(controller, self),
-            resultsTab(controller, self.t),
+            resultsTab(controller, self),
             settingsTab(controller, self.t, self),
             grayedTab(controller, self.t)
         ]
