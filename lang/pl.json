@@ -21,5 +21,8 @@
     "answers-reading-mode": "Wczytaj odpowiedzi z kamery",
     "answers-reading-files": "Wczytaj odpowiedzi z plików",
     "answers-reading-directory": "Wczytaj odpowiedzi z katalogu",
-    "manually-find-page": "Zaznacz kontury ręcznie"
+    "manually-find-page": "Zaznacz kontury ręcznie",
+    "pick-directory": "Wybierz folder",
+    "save-to-dir": "Zapisz",
+    "enter-password": "Wprowadź hasło"
 }

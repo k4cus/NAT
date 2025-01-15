@@ -71,13 +71,6 @@ class loadAnswers:
                         print("\nZczytane dpowiedzi:", answers)
                         graded += 1
 
-                        # save the answers 
-                        with open("exams-data/" + currentExamName + folders[type] + str(folders_2[type]) + "/answers.csv", "w") as f:
-                            if type == 0:
-                                f.write(";".join(answers))
-                            if type == 1:
-                                f.write(str(index) + ";" + str(answers) + ";" + str(group))
-
                         cv2.imwrite("exams-data/" + currentExamName + folders[type] + str(folders_2[type]) + "/page_img_" + str(graded) + ".png", page_img)
                         for im in range(len(images_warped)):
                             cv2.imwrite("exams-data/" + currentExamName + folders[type] + str(folders_2[type]) + "/answers_grid_" + str(im) + ".png", images_warped[im])
@@ -106,6 +99,14 @@ class loadAnswers:
                             score_string = str(round(score[1], 2)) + "%"
                         else:
                             score_string = ""
+
+                        # save the answers
+                        with open("exams-data/" + currentExamName + folders[type] + str(folders_2[type]) + "/answers.csv", "w") as f:
+                            if type == 0:
+                                f.write(";".join(answers))
+                            if type == 1:
+                                #print("AAAAAAAAAAAAA" + (str(index) + ";" + str(answers) + ";" + str(group)))
+                                f.write(str(index) + ";" + str(answers) + ";" + str(group) + ";" + score_string)
 
 
             testing = False # delete when you want to loop
