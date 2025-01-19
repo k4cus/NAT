@@ -58,7 +58,6 @@ class mainController:
         self.model.storage.settings = settings
 
     def enterReadingMode(self, e):
-        print(e)
         if hasattr(e, 'control'):
             data = e.control.data
         else:
@@ -79,8 +78,6 @@ class mainController:
             print("KONTROLLER - enterReadingMode unknown data: " + data[0])
 
     def getResultsImg(self, exam_name):
-        print("img path")
-        print(exam_name)
         return self.model.getResultsImgPath(exam_name)
 
     def getReadFromFileExtensions(self):

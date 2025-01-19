@@ -58,9 +58,7 @@ def export_data(results, data, score,zerowka=False, comment_public="",comment_pr
         print("1")
         # os_id;imie;nazwisko;zerówka;komentarz;komentarz dla studenta;pierwszy termin;kolejny komentarz
         for student in data:
-            #print(student[1])
             if student[1] in results.keys():
-                #print("match")
                 line = ';'.join(
                     [student[0], student[2], student[3], student[4], student[5], student[6], str(int(score)), comment_public])  # TODO add more
                 export_csv += (line + "\n")

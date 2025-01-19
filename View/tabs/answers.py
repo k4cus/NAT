@@ -91,26 +91,18 @@ class answersTab:
         self.ftText.update()
 
     def updateTextBox(self, e):
-        print("updating...")
         if self.answers == self.ftTextField.value:
-            print("skipping")
             pass
         else:
             exam_name = self.controller.getExamName()
-            print(exam_name)
             new_answers = self.ftTextField.value.split()
             new_answers = [ x for x in new_answers if "." not in x ][2:]
-            print(len(new_answers))
             if len(new_answers) == 60:
                 new_answers_2 = []
                 for i in range(3):
-                    print(i)
                     for j in range(0,60,3):
-                        print(i+j)
                         new_answers_2.append(new_answers[i+j])
-                print("AAAAAAAAAA",new_answers_2)
                 with open("exams-data/" + exam_name + "/student_answers/" + str(self.index) + "/answers.csv", "w") as f:
-                    print("WRITING FILE")
                     f.write(';'.join(new_answers_2) + ";")
 
 

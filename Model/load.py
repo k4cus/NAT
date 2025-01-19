@@ -6,7 +6,6 @@ from Model import omr
 class loadAnswers:
 
     def __init__(self, controller):
-        print("LOADING...")
         self.controller = controller
 
     def initialize(self):
@@ -17,10 +16,8 @@ class loadAnswers:
 
     def loadCorrectAnswersFromFile(self,currentExamName):
         with open("exams-data/" + currentExamName + "/answer_keys/answers.csv", "a+") as f:
-            print("exams-data/" + currentExamName + "/answer_keys/answers.csv")
             f.seek(0)
             ans = f.read()
-            print(ans)
         if ans == []:
             print("No answers to load. First scan the answer sheet or create the csv file manually.")
         return ans
@@ -45,7 +42,6 @@ class loadAnswers:
                 img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
                 index, answers, group, page_img, images_warped, page_img_grid = omr.omr.processOneSheet(self, img)
-                print("finished one page")
 
                 folders_2 = [group, index]
 
@@ -75,10 +71,6 @@ class loadAnswers:
                         for im in range(len(images_warped)):
                             cv2.imwrite("exams-data/" + currentExamName + folders[type] + str(folders_2[type]) + "/answers_grid_" + str(im) + ".png", images_warped[im])
 
-                        # won't work - different size of images
-                        # cv2.imwrite(
-                        #     "exams-data/" + currentExamName + folders[type] + str(folders_2[type]) + "/answers_grid_all" + str(
-                        #         graded) + ".png", cv2.hconcat(images_warped))
                         transparent_img = np.ones((690, 490), dtype=np.uint8)
                         i = 0
                         for i in range(20):
@@ -90,11 +82,8 @@ class loadAnswers:
                         # grade if in student answers reading mode
                         if type == 1:
                             ans_list = ans[0].split(";")
-                            print(ans_list)
-                            print(answers)
                             num_questions = 55
                             score = omr.omr.score(self, ans_list[:num_questions], answers[:num_questions])
-                            print("Wynik: " + str(round(score[1], 2)) + "%")
                             cv2.imwrite("exams-data/" + currentExamName + "/student_answers/" + str(index) + "/result_img.png", transparent_img)
                             score_string = str(round(score[1], 2)) + "%"
                         else:
@@ -105,7 +94,6 @@ class loadAnswers:
                             if type == 0:
                                 f.write(";".join(answers))
                             if type == 1:
-                                #print("AAAAAAAAAAAAA" + (str(index) + ";" + str(answers) + ";" + str(group)))
                                 f.write(str(index) + ";" + str(answers) + ";" + str(group) + ";" + score_string)
 
 
@@ -115,5 +103,4 @@ class loadAnswers:
         if cam_index is not None:
             cap.release()
 
-        print(score_string)
         return page_img_grid, score_string, answers, group, index

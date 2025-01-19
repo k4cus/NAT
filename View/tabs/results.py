@@ -6,11 +6,12 @@ class resultsTab:
     def __init__(self, controller, mainView):
         self.view = mainView
         self.controller = controller
-        self.text = "Test"
+        self.text = "/"
         self.filePicker = ft.FilePicker(on_result=self.onFilePickResult)
         self.filePickerUsos = ft.FilePicker(on_result=self.onFilePickResultUsos)
         self.fileExtensions = self.controller.getReadFromFileExtensions()
         self.ftTextField = ft.TextField(value=self.text, disabled=True)
+        self.ftTextFieldImport = ft.TextField(value=self.text, disabled=True)
         self.usosFilePath = ""
 
 
@@ -21,7 +22,12 @@ class resultsTab:
                 self.filePicker,
                 self.filePickerUsos,
                 ft.Row([
+                    ft.Text(t("choose-destination-dir")),
                     self.ftTextField,
+                ]),
+                ft.Row([
+                    ft.Text(t("choose-usos-file")),
+                    self.ftTextFieldImport,
                 ]),
                 ft.Row([
                     ft.ElevatedButton(text=t("pick-directory"), on_click=self.pickDirectoryToRead),
@@ -45,6 +51,8 @@ class resultsTab:
 
     def onFilePickResultUsos(self, e: ft.FilePickerResultEvent):
         self.usosFilePath = e.files[0].path
+        self.ftTextFieldImport.value = self.usosFilePath
+        self.ftTextFieldImport.update()
 
     def saveToDirectory(self, e):
         os_dict_index = import_data(self.usosFilePath)
@@ -60,16 +68,26 @@ class resultsTab:
                     os_id = os_dict[0]
                     with open(os.path.join(root, directory, "answers.csv")) as f:
                         line = f.readline().split(";")
-                        print("l1 ", line)
-                        grade = line[3][:-3]
-                        print(os_dict)
-                        # os_id;imie;nazwisko;zerówka;komentarz;komentarz dla studenta;pierwszy termin;kolejny komentarz
-                        line2 = str(os_id) + ";" + os_dict[1] + ";" + os_dict[2] + ";" + grade + ";;;;;"
-                        print("l1 ", line2)
+                        p = line[3][:-3]
+                        percent = int(p)
+                        if percent < 50:
+                            grade = 2
+                        elif percent < 60:
+                            grade = 3
+                        elif percent < 70:
+                            grade = 3.5
+                        elif percent < 80:
+                            grade = 4
+                        elif percent < 90:
+                            grade = 4.5
+                        elif percent < 100:
+                            grade = 5
+                        else:
+                            grade = 5.5
+                        line2 = str(os_id) + ";" + os_dict[1] + ";" + os_dict[2] + ";" + str(grade) + ";;;;;"
                         csv_list.append(line2)
                 except:
                     pass
-        print(directory, csv_list)
         filename = exam_name + "_answers.csv"
         with open(os.path.join(self.text, filename), "w") as f:
             for file in csv_list:
