@@ -154,7 +154,6 @@ class omr:
         for answer in images_answers[:-1]:
             answers = []
             for question in answer:
-                print("Question:", question, statistics.median(question))
                 if 2 * statistics.median(question) < max(question) and max(question) > 100:
                     answers.append(ans_array[question.index(max(question))])
                 else:

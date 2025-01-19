@@ -24,5 +24,8 @@
     "manually-find-page": "Manually pick contours",
     "pick-directory": "Pick a directory",
     "save-to-dir": "Save",
-    "enter-password": "Enter the password"
+    "enter-password": "Enter the password",
+    "pick-usos-file": "Pick a student list from USOS",
+    "choose-destination-dir": "Destination directory:",
+    "choose-usos-file": "List of students from USOS (csv)"
 }

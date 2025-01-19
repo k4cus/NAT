@@ -32,18 +32,6 @@ class mainModel:
 
         self.readFromFileExtensions = ["pdf", "png", "jpg"]
 
-    # def suggestDrink(self):
-    #     print("MODEL - Dostałem polecenie od kontrolera - uruchamiam losowanie w osobnym wątku")
-    #     thread = threading.Thread(target=self.lottery)
-    #     thread.start()
-
-    # def lottery(self):
-    #     print("MODEL - Loteria rozpoczęta")
-    #     drink = random.choice(self.drinksList)
-    #     time.sleep(2)  # simulate long task
-    #     print("MODEL - Loteria zakończona, przekazuje wynik do kontrolera")
-    #     self.controller.onDrinkSuggested(drink)
-
     def createNewExam(self, name):
         print("MODEL - Tworzę nowy folder z egzaminem o nazwie: " + name)
         # create folders

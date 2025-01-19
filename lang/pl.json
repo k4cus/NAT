@@ -24,5 +24,8 @@
     "manually-find-page": "Zaznacz kontury ręcznie",
     "pick-directory": "Wybierz folder",
     "save-to-dir": "Zapisz",
-    "enter-password": "Wprowadź hasło"
+    "enter-password": "Wprowadź hasło",
+    "pick-usos-file": "Wybierz listę studentów z USOSa",
+    "choose-destination-dir": "Folder do zapisu:",
+    "choose-usos-file": "Lista studentów z USOSa (csv)"
 }
