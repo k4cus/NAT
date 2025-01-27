@@ -66,7 +66,7 @@ def drawGrid(img, questions=5, choices=20):
 
 def drawGridFullPage(img, contour, index, answers, field, questions=5, choices=20):
     index_field = index[0] + "x" + str(index[1] - 1)
-    print("index field", index_field)
+    #print("index field", index_field)
     letters = ["A", "B", "C", "D", "E"]
     if field < 3:
         answers = answers[choices * field:choices * (field + 1)]
@@ -131,7 +131,7 @@ def find_contours(img, num_rectangles):
         for i in range(num_rectangles):
             biggest_contours.append(getCornerPoints(rect_con[i]))
 
-    print("biggest contours:", biggest_contours)
+    #print("biggest contours:", biggest_contours)
     return biggest_contours
 
 
@@ -168,7 +168,7 @@ def find_contours_page(img, num_rectangles):
 
             # Pobierz cztery znaczniki (lewy górny, prawy górny, prawy dolny, lewy dolny)
             selected_corners = [corners[0][0][0], corners[1][0][1], corners[2][0][3], corners[3][0][2]]
-            print(sorted_indices, ids, selected_corners)
+            #print(sorted_indices, ids, selected_corners)
             # Utwórz macierz perspektywy
             src_points = np.float32(selected_corners)  # Wykryte punkty znaczników
             dst_points = np.float32([[0, 0], [600, 0], [0, 800], [600, 800]])  # Prostokąt docelowy
@@ -212,7 +212,8 @@ def createRectangleImage(height, width):
 
 
 def find_contours_tables(img, num_rectangles, index=False):
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    if len(img.shape)==3:    
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     img_contours = img.copy()
     cv2.imwrite("debugging-opencv/3bb_matchTemplate.png", img)
 
@@ -328,7 +329,7 @@ class cropRectangle:
         # calculate corrections
         # point are out of order so we must sort x and y coordinates
         if isinstance(cnt, np.ndarray):
-            print("cnt:", cnt)
+            #print("cnt:", cnt)
             xes = [cnt[0][0][0], cnt[1][0][0], cnt[2][0][0], cnt[3][0][0]]
             xes.sort()
             yes = [cnt[0][0][1], cnt[1][0][1], cnt[2][0][1], cnt[3][0][1]]

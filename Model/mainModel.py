@@ -115,6 +115,7 @@ class mainModel:
 
         for file in filePathList:
             img = self.loadAnswers.loadAnswers(self, 0, exam_name, file_path=file)
+            self.controller.keyUpdateImage(img[0], img[3])
         return img
 
 
@@ -124,6 +125,7 @@ class mainModel:
 
         for file in filePathList:
             img = self.loadAnswers.loadAnswers(self, 1, exam_name, file_path=file)
+            self.controller.answerUpdateImage(img[0], img[4])
         return img
 
     def getResultsImgPath(self, exam_name):
@@ -154,16 +156,17 @@ class mainModel:
 
         # Decode the numpy array to an image
         image = cv2.imdecode(image, cv2.IMREAD_GRAYSCALE)
-        res = self.omr.processOneSheet(image, cropped=True, coords=coords_2)[5]
-        cv2.imwrite("debugging-opencv/new_img.png", res)
-        return (res)
+        res = self.omr.processOneSheet(image, cropped=True, coords=coords_2)
+        cv2.imwrite("debugging-opencv/new_img.png", res[5])
+        return(res)
 
 
     def on_click(self, x, y, button, pressed):
         #print(x, y, self.clicks)
         if self.clicks % 2 == 0:
             self.coords.append([x,y])
+            print("CLICK")
         self.clicks = self.clicks + 1
-        if (self.clicks>=7):
+        if (self.clicks>=5):
             raise Exception("Too many clicks")
 

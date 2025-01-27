@@ -68,11 +68,9 @@ class mainController:
             self.model.enterAnswersReadingMode(data[1])
         elif data[0] == "keys-file":
             img, score, answers, group, index = self.model.readKeysFromFile(data[1], data[2])
-            self.keyUpdateImage(img)
-            self.keyUpdateText(score, answers, group)
+            self.keyUpdateText(score, answers, group, index)
         elif data[0] == "answers-file":
             img, score, answers, group, index = self.model.readAnswersFromFile(data[1], data[2])
-            self.answerUpdateImage(img)
             self.answerUpdateText(score, answers, group, index)
         else:
             print("KONTROLLER - enterReadingMode unknown data: " + data[0])
@@ -83,26 +81,36 @@ class mainController:
     def getReadFromFileExtensions(self):
         return self.model.readFromFileExtensions
 
-    def keyUpdateImage(self, image):
+    def keyUpdateImage(self, image, group):
         img_base64 = self.model.omr.imageToBase64(image)
         self.view.tabs[1].updateImage(img_base64)
+        self.view.tabs[1].addImg(group)
 
-    def answerUpdateImage(self, image):
+    def answerUpdateImage(self, image, index):
         img_base64 = self.model.omr.imageToBase64(image)
         self.view.tabs[2].updateImage(img_base64)
+        self.view.tabs[2].addImg(index)
 
-    def keyUpdateText(self, text, answers, group):
+    def keyUpdateText(self, text, answers, group, index):
         txt = text
-        self.view.tabs[1].updateText(txt)
-        self.view.tabs[1].updateAnswers(num=60, answers=answers, group=group)
+        #self.view.tabs[1].updateText(txt)
+        #self.view.tabs[1].updateAnswers(num=60, answers=answers, group=group)
+        self.view.tabs[1].update_input_grid(answers)
+        self.view.tabs[1].update_index_group(group=group)
+        self.view.tabs[1].updateButton()
 
     def answerUpdateText(self, text, answers, group, index):
         txt = text
-        self.view.tabs[2].updateText(txt)
-        self.view.tabs[2].updateAnswers(num=60, answers=answers, group=group, index=index)
+        #self.view.tabs[2].updateText(txt)
+        #self.view.tabs[2].updateAnswers(num=60, answers=answers, group=group, index=index)
+        self.view.tabs[2].update_input_grid(answers, text)
+        self.view.tabs[2].update_index_group(group=group, index=index)
+        self.view.tabs[2].updateButton()
         
     def keyPageFinder(self, image):
-        self.keyUpdateImage(self.model.pageFinder(image))
+        result = self.model.pageFinder(image)
+        self.keyUpdateImage(self.model.pageFinder(image)[5], group=result[2])
 
     def answerPageFinder(self, image):
-        self.answerUpdateImage(self.model.pageFinder(image))
+        result = self.model.pageFinder(image)
+        self.answerUpdateImage(result[5], index=result[0])
