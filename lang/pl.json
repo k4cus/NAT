@@ -27,5 +27,10 @@
     "enter-password": "Wprowadź hasło",
     "pick-usos-file": "Wybierz listę studentów z USOSa",
     "choose-destination-dir": "Folder do zapisu:",
-    "choose-usos-file": "Lista studentów z USOSa (csv)"
+    "choose-usos-file": "Lista studentów z USOSa (CSV)",
+    "change-answers": "Zaktualizuj zapisane odpowiedzi",
+    "saved-usos-short": "Plik zapisano",
+    "saved-text": "Plik CSV został wyeksportowany do wybranego folderu.",
+    "manual-page": "Kliknij 4 rogi karty odpowiedzi by ręcznie ją przyciąć.",
+    "usos-instruction": "Wyeksportuj wyniki w formacie używanym przez system USOS. Przed zapisaniem nowego pliku wybierz listę studentów wyeksportowaną z USOSa oraz folder, do którego zapisany zostanie nowy plik."
 }

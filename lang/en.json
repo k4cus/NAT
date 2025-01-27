@@ -27,5 +27,10 @@
     "enter-password": "Enter the password",
     "pick-usos-file": "Pick a student list from USOS",
     "choose-destination-dir": "Destination directory:",
-    "choose-usos-file": "List of students from USOS (csv)"
+    "choose-usos-file": "List of students from USOS (CSV)",
+    "change-answers": "Update the saved answers",
+    "saved-usos-short": "File saved",
+    "saved-usos": "The CSV file was exported to the chosen folder.",
+    "manual-page": "Click on four corners of the page to manually crop it to size.",
+    "usos-instruction": "Save the results of the current exam by exporting them to a format used by USOS. To do that you need to first choose a list of students exported from USOS and a destination directory for the exported file."
 }

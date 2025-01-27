@@ -32,7 +32,7 @@ class loadAnswers:
         testing = True
         while testing:
             graded = 0
-            while graded < 10:
+            while graded < 1:
                 graded += 1
                 if cam_index is not None:
                     success, img = cap.read()
@@ -58,7 +58,7 @@ class loadAnswers:
                                 ans = f.readlines()
                             if ans == []:
                                 print("No answers to load. First scan the answer sheet or create the csv file manually.")
-                                return page_img_grid, "Brak klucza odpowiedzi dla grupy", answers, group, index
+                                score_string = "Brak klucza odpowiedzi dla grupy"
                                             
                         # save the read data to files
                         
@@ -69,7 +69,7 @@ class loadAnswers:
                         print("\nZczytane dpowiedzi:", answers)
                         graded += 1
 
-                        cv2.imwrite("exams-data/" + currentExamName + folders[type] + str(folders_2[type]) + "/page_img_" + str(graded) + ".png", page_img)
+                        cv2.imwrite("exams-data/" + currentExamName + folders[type] + str(folders_2[type]) + "/page_img.png", page_img_grid)
                         for im in range(len(images_warped)):
                             cv2.imwrite("exams-data/" + currentExamName + folders[type] + str(folders_2[type]) + "/answers_grid_" + str(im) + ".png", images_warped[im])
 
@@ -82,14 +82,15 @@ class loadAnswers:
                             i += 1
 
                         # grade if in student answers reading mode
-                        if type == 1:
-                            ans_list = ans[0].split(";")
-                            num_questions = 55
-                            score = omr.omr.score(self, ans_list[:num_questions], answers[:num_questions])
-                            cv2.imwrite("exams-data/" + currentExamName + "/student_answers/" + str(index) + "/result_img.png", transparent_img)
-                            score_string = str(round(score[1], 2)) + "%"
-                        else:
-                            score_string = ""
+                        if score_string != "Brak klucza odpowiedzi dla grupy":
+                            if type == 1:
+                                ans_list = ans[0].split(";")
+                                num_questions = 55
+                                score = omr.omr.score(self, ans_list[:num_questions], answers[:num_questions])
+                                cv2.imwrite("exams-data/" + currentExamName + "/student_answers/" + str(index) + "/result_img.png", transparent_img)
+                                score_string = str(round(score[1], 2)) + "%"
+                            else:
+                                score_string = ""
 
                         # save the answers
                         with open("exams-data/" + currentExamName + folders[type] + str(folders_2[type]) + "/answers.csv", "w") as f:

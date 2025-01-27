@@ -63,18 +63,23 @@ class omr:
                 if img_preprocessed is None:
                     return None, None, None, None, None, None
 
-        if not skip_shadows:
+        if not skip_shadows and not cropped:
             img_preprocessed = omr.remove_shadows(self, img)
 
         if coords is not None:
-            print(coords)
+            #print(coords)
             screenshot = np.array(ImageGrab.grab(bbox=(coords)))
+            screenshot = omr.preprocess_image(self, screenshot)
             img_preprocessed = omr.find_page(self, screenshot, coords)
             if img_preprocessed is None:
+                print("NO PAGE FOUND")
                 return None, None, None, None, None, screenshot
             page_img = img_preprocessed
             if len(img_preprocessed.shape)==3:
                 img_preprocessed = cv2.cvtColor(img_preprocessed, cv2.COLOR_BGR2GRAY)
+            print("PAGE FOUND")
+            img_preprocessed = omr.remove_shadows(self, img_preprocessed)
+            cv2.imwrite("debugging-opencv/7_new_preprocessed.png", img_preprocessed)
 
         # hardcoded positions of tables
         imgRectangles = [
@@ -112,7 +117,7 @@ class omr:
                                                    imgRectangle.getHeight()))
             tableWithoutMargin = utils.image_warping(cnt, tableWithMargin, imgRectangle.getWidth(), imgRectangle.getHeight())
             cv2.imwrite("debugging-opencv/3_table_without_margin.png", tableWithoutMargin)
-            print(tableWithoutMargin)
+            #print(tableWithoutMargin)
 
             images_warped.append(tableWithoutMargin)
 
@@ -237,11 +242,12 @@ class omr:
         return img
 
     def apply_threshold(self, img):
-        img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+        if len(img.shape)==3: 
+            img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
         img_flattened = [item for sublist in img for item in sublist]
         img_median = statistics.median(img_flattened)
 
-        print("Median:", img_median)
+        #print("Median:", img_median)
 
         cv2.imwrite("debugging-opencv/thresh_test.png", img)
         img_thresh = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
@@ -291,7 +297,7 @@ class omr:
 
                     matching_pixels = np.sum(crop_img == mask)
                     matching_pixels_negative = np.sum(crop_img == mask_negative)
-                    print(f"Matching Pixels: ", matching_pixels, matching_pixels_negative)
+                    #print(f"Matching Pixels: ", matching_pixels, matching_pixels_negative)
 
                     if matching_pixels_negative/(len(mask_negative)*len(mask_negative[0])) > 0.6:
                         print("wrong answer")
@@ -336,7 +342,7 @@ class omr:
                     matching_pixels = np.sum(crop_img == mask)
                     matching_pixels_negative = np.sum(crop_img == mask_negative)
                     #print(f"All pixels: ", len(mask_negative), matching_pixels_negative/(len(mask_negative)*len(mask_negative[0])))
-                    print(f"Matching Pixels: ", matching_pixels, matching_pixels_negative)                    
+                    #print(f"Matching Pixels: ", matching_pixels, matching_pixels_negative)                    
 
                     if matching_pixels_negative/(len(mask_negative)*len(mask_negative[0])) > 0.6:
                         print("wrong answer")
