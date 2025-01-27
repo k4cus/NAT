@@ -61,16 +61,20 @@ class omr:
 
                 page_img = img_preprocessed
                 if img_preprocessed is None:
-                    return None, None, None, None, None
+                    return None, None, None, None, None, None
 
         if not skip_shadows:
             img_preprocessed = omr.remove_shadows(self, img)
 
         if coords is not None:
-            screenshot = np.array(ImageGrab.grab(bbox=(None)))
+            print(coords)
+            screenshot = np.array(ImageGrab.grab(bbox=(coords)))
             img_preprocessed = omr.find_page(self, screenshot, coords)
+            if img_preprocessed is None:
+                return None, None, None, None, None, screenshot
             page_img = img_preprocessed
-            img_preprocessed = cv2.cvtColor(img_preprocessed, cv2.COLOR_BGR2GRAY)
+            if len(img_preprocessed.shape)==3:
+                img_preprocessed = cv2.cvtColor(img_preprocessed, cv2.COLOR_BGR2GRAY)
 
         # hardcoded positions of tables
         imgRectangles = [
