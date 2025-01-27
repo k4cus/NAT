@@ -98,8 +98,13 @@ class resultsTab:
                     with open(os.path.join(root, directory, "answers.csv")) as f:
                         line = f.readline().split(";")
                         p = line[3][:-3]
-                        percent = int(p)
-                        if percent < 50:
+                        try:
+                            percent = int(p)
+                        except:
+                            percent = -1
+                        if percent == -1:
+                            grade = ""
+                        elif percent < 50:
                             grade = 2
                         elif percent < 60:
                             grade = 3

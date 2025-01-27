@@ -37,7 +37,7 @@ class keysTab:
         self.groupTextField = ft.TextField(label="Grupa", value="", height=30, width=170, max_lines=1, disabled=True, content_padding=2)
 
         self.findPageButton = ft.ElevatedButton(text=self.t("manually-find-page"), on_click=self.findPage, disabled=False)
-        self.changeAnswersButton = ft.ElevatedButton(text=self.t("change-answers"), on_click=self.changeAnswers, disabled=True)
+        self.changeAnswersButton = ft.ElevatedButton(text=self.t("change-answers"), on_click=self.changeAnswers, disabled=False)
         self.leftButton = ft.ElevatedButton(text="<", on_click=self.changeImg, data=-1, disabled=True)
         self.rightButton = ft.ElevatedButton(text=">", on_click=self.changeImg, data=1, disabled=True)
         self.dialog = ft.AlertDialog(
