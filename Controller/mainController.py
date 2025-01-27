@@ -73,7 +73,7 @@ class mainController:
         elif data[0] == "answers-file":
             img, score, answers, group, index = self.model.readAnswersFromFile(data[1], data[2])
             self.answerUpdateImage(img)
-            self.answerUpdateText(score, answers, index)
+            self.answerUpdateText(score, answers, group, index)
         else:
             print("KONTROLLER - enterReadingMode unknown data: " + data[0])
 
@@ -96,10 +96,10 @@ class mainController:
         self.view.tabs[1].updateText(txt)
         self.view.tabs[1].updateAnswers(num=60, answers=answers, group=group)
 
-    def answerUpdateText(self, text, answers, index):
+    def answerUpdateText(self, text, answers, group, index):
         txt = text
         self.view.tabs[2].updateText(txt)
-        self.view.tabs[2].updateAnswers(num=60, answers=answers, index=index)
+        self.view.tabs[2].updateAnswers(num=60, answers=answers, group=group, index=index)
         
     def keyPageFinder(self, image):
         self.keyUpdateImage(self.model.pageFinder(image))

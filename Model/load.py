@@ -23,6 +23,7 @@ class loadAnswers:
         return ans
 
     def loadAnswers(self, type, currentExamName, cam_index=None, file_path=None, folder_path=None):
+        score_string = ""
         folders = ["/answer_keys/", "/student_answers/"]
 
         if cam_index is not None:
@@ -31,7 +32,8 @@ class loadAnswers:
         testing = True
         while testing:
             graded = 0
-            while graded < 1:
+            while graded < 10:
+                graded += 1
                 if cam_index is not None:
                     success, img = cap.read()
                 elif file_path is not None:
@@ -56,7 +58,7 @@ class loadAnswers:
                                 ans = f.readlines()
                             if ans == []:
                                 print("No answers to load. First scan the answer sheet or create the csv file manually.")
-                                return None
+                                return page_img_grid, "Brak klucza odpowiedzi dla grupy", answers, group, index
                                             
                         # save the read data to files
                         
@@ -102,5 +104,8 @@ class loadAnswers:
         print("Finished scanning")
         if cam_index is not None:
             cap.release()
-
+        if not score_string:
+            score_string = ""
+        if page_img_grid is None:
+            page_img_grid = img
         return page_img_grid, score_string, answers, group, index

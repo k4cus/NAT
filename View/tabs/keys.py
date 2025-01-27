@@ -120,23 +120,33 @@ class keysTab:
             template += "\n"
         return template
     
-    def updateAnswers(self, num, answers, index="000000", group="00"):
+    def updateAnswers(self, num, answers, index="______", group="0"):
         template = ""
-        template += index + "\n" + str(group) + "\n"
+        print(group)
+        group_dict = {1: "A", 2: "B", 3: "C", 4: "D"}
+
+        if group == None:
+            group_letter = "0"        
+        elif group in [1,2,3,4]:
+            group_letter = group_dict[group]
+        else:
+            group_letter = "0"
+        template += str(index) + "\n" + str(group_letter) + "\n"
         br = ". "
         br2 = "   "
-        for i in range(int(len(answers)/3)):
-            if i < 9:
-                template += "  "
-            template += str(i+1) + br + answers[i] + br2 + str(i+21) + br + answers[i+20] + br2 + str(i+41) + br + answers[i+40]
-            template += "\n"
+        if answers is not None:
+            for i in range(int(len(answers)/3)):
+                if i < 9:
+                    template += "  "
+                template += str(i+1) + br + answers[i] + br2 + str(i+21) + br + answers[i+20] + br2 + str(i+41) + br + answers[i+40]
+                template += "\n"
         
-        self.answers2 = template
-        self.index = index
-        self.group = group
-        self.ftTextField.value = self.answers2
-        self.ftTextField.disabled = False
-        self.ftTextField.update()
+            self.answers2 = template
+            self.index = index
+            self.group = group
+            self.ftTextField.value = self.answers2
+            self.ftTextField.disabled = False
+            self.ftTextField.update()
         #return template
 
 

@@ -145,9 +145,16 @@ class mainModel:
         #print(image)
         image = np.frombuffer(image, np.uint8)
 
+        coords_x = []
+        coords_y = []
+        for c in self.coords:
+            coords_x.append(c[0])
+            coords_y.append(c[1])
+        coords_2 = [min(coords_x), min(coords_y), max(coords_x), max(coords_y)]
+
         # Decode the numpy array to an image
         image = cv2.imdecode(image, cv2.IMREAD_GRAYSCALE)
-        res = self.omr.processOneSheet(image, cropped=True, coords=self.coords)[5]
+        res = self.omr.processOneSheet(image, cropped=True, coords=coords_2)[5]
         cv2.imwrite("debugging-opencv/new_img.png", res)
         return (res)
 

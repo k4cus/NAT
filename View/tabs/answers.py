@@ -22,7 +22,7 @@ class answersTab:
             height=1754,
             fit=ft.ImageFit.FIT_HEIGHT,
         )
-        self.ftText = ft.Text(value=self.text)
+        self.ftText = ft.Text(value=self.text, weight="bold")
         self.ftTextField= ft.TextField(value=self.answers2, on_change=self.updateTextBox, multiline=True, disabled=True,)
 
     def main(self):
@@ -119,22 +119,32 @@ class answersTab:
             template += "\n"
         return template
 
-    def updateAnswers(self, num, answers, index="000000", group="00"):
+    def updateAnswers(self, num, answers, index="", group="0"):
         template = ""
-        template += index + "\n" + str(group) + "\n"
+        print(group)
+        group_dict = {1: "A", 2: "B", 3: "C", 4: "D"}
+        print("Grupa:", group)
+        if group == None:
+            group_letter = "0"
+        elif int(group) in [1,2,3,4]:
+            group_letter = group_dict[group]
+        else:
+            group_letter = "0"
+        template += str(index) + "\n" + str(group_letter) + "\n"
         br = ". "
         br2 = "   "
-        for i in range(int(len(answers) / 3)):
-            if i < 9:
-                template += "  "
-            template += str(i + 1) + br + answers[i] + br2 + str(i + 21) + br + answers[i + 20] + br2 + str(
-                i + 41) + br + answers[i + 40]
-            template += "\n"
+        if answers is not None:
+            for i in range(int(len(answers) / 3)):
+                if i < 9:
+                    template += "  "
+                template += str(i + 1) + br + answers[i] + br2 + str(i + 21) + br + answers[i + 20] + br2 + str(
+                    i + 41) + br + answers[i + 40]
+                template += "\n"
 
-        self.answers2 = template
-        self.index = index
-        self.group = group
-        self.ftTextField.value = self.answers2
-        self.ftTextField.disabled = False
-        self.ftTextField.update()
+            self.answers2 = template
+            self.index = index
+            self.group = group
+            self.ftTextField.value = self.answers2
+            self.ftTextField.disabled = False
+            self.ftTextField.update()
         # return template
