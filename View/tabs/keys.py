@@ -91,20 +91,28 @@ class keysTab:
         self.ftText.update()
 
     def updateTextBox(self, e):
+        group_dict = {"A": 1, "B": 2, "C" : 3, "D": 4}
         if self.answers == self.ftTextField.value:
             pass
         else:
             exam_name = self.controller.getExamName()
             new_answers = self.ftTextField.value.split()
-            new_answers = [ x for x in new_answers if "." not in x ][2:]
+            new_answers_full = [ x for x in new_answers if "." not in x ]
+            new_answers = new_answers_full[2:]
+            if new_answers_full[1] not in ["A", "B", "C", "D"]:
+                group_number = "0"
+            else:
+                group_number = str(group_dict[new_answers_full[1]])
             if len(new_answers) == 60:
                 new_answers_2 = []
                 for i in range(3):
                     for j in range(0,60,3):
                         new_answers_2.append(new_answers[i+j])
-
-                with open("exams-data/" + exam_name + "/answer_keys/" + str(self.group) + "/answers.csv", "w") as f:
-                    f.write(';'.join(new_answers_2) + ";")
+                if not os.path.isdir("exams-data/" + exam_name + "/answer_keys/" + group_number):
+                    os.mkdir("exams-data/" + exam_name + "/answer_keys/" + group_number)
+                with open("exams-data/" + exam_name + "/answer_keys/" + group_number + "/answers.csv", "w") as f:
+                    print("Writing")
+                    f.write(';'.join(new_answers_2))
 
 
     def findPage(self, e):

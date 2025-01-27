@@ -91,19 +91,45 @@ class answersTab:
         self.ftText.update()
 
     def updateTextBox(self, e):
+        group_dict = {"A": 1, "B": 2, "C" : 3, "D": 4}
         if self.answers == self.ftTextField.value:
             pass
         else:
             exam_name = self.controller.getExamName()
             new_answers = self.ftTextField.value.split()
-            new_answers = [ x for x in new_answers if "." not in x ][2:]
-            if len(new_answers) == 60:
+            print(new_answers)
+            new_answers_full = [ x for x in new_answers if "." not in x ]
+            new_answers = new_answers_full[2:]
+            if new_answers_full[1] not in ["A", "B", "C", "D"]:
+                group_number = "0"
+            else:
+                group_number = str(group_dict[new_answers_full[1]])
+            if len(new_answers) == 60 and len(new_answers_full[0]) == 6:
                 new_answers_2 = []
                 for i in range(3):
                     for j in range(0,60,3):
                         new_answers_2.append(new_answers[i+j])
-                with open("exams-data/" + exam_name + "/student_answers/" + str(self.index) + "/answers.csv", "w") as f:
-                    f.write(';'.join(new_answers_2) + ";")
+                with open("exams-data/" + exam_name + "/answer_keys/" + group_number + "/answers.csv", "r") as f:
+                    answer_key = f.readline().split(";")
+                score = 0
+                for i in range(len(answer_key)):
+                    print(answer_key)
+                    if answer_key[i] == new_answers_2[i]:
+                        score += 1
+                l = len(answer_key)
+                if l == 0:
+                    l2 = 0
+                else:
+                    l2 = 100*score/len(answer_key)
+                score_string = str(round(l2, 2)) + "%"
+                if not os.path.isdir("exams-data/" + exam_name + "/student_answers/" + str(new_answers_full[0])):
+                    os.mkdir("exams-data/" + exam_name + "/student_answers/" + str(new_answers_full[0]))
+                with open("exams-data/" + exam_name + "/student_answers/" + str(new_answers_full[0]) + "/answers.csv", "w+") as f:
+                    f.write(str(new_answers_full[0]) + ";" + str(new_answers_2) + ";" +  str(group_dict[new_answers_full[1]]) + ";" + score_string)
+                self.text = score_string
+                self.ftText.value = self.text
+                self.ftText.update()
+
 
 
     def findPage(self, e):
