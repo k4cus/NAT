@@ -1,7 +1,7 @@
 class Student:
     _students = {}
 
-    def __init__(self, index, os_id, tested, grade0, name, surname, comment0, comment_student, grade1, comment1):
+    def __init__(self, index, os_id, tested, grade0, name, surname, comment0, comment_student, grade1, comment1, percentage):
         self.index = index  # key
         self.os_id = os_id
         self.tested = tested
@@ -12,15 +12,15 @@ class Student:
         self.comment_student = comment_student
         self.grade1 = grade1
         self.comment1 = comment1
-
+        self.percentage = percentage
 
     @classmethod
-    def add_student(cls, index, os_id="", tested=False, grade0="", name="", surname="", comment0="", comment_student="", grade1="", comment1=""):
+    def add_student(cls, index, os_id="", tested=False, grade0="", name="", surname="", comment0="", comment_student="", grade1="", comment1="", percentage=""):
         if not index in cls._students:
-            student = Student(index, os_id, tested, grade0, name, surname, comment0, comment_student, grade1, comment1)
+            student = Student(index, os_id, tested, grade0, name, surname, comment0, comment_student, grade1, comment1, percentage)
             cls._students[index] = student
         else:
-            cls.modify_student(index, os_id, tested, grade0, name, surname, comment0, comment_student, grade1, comment1)
+            cls.modify_student(index, os_id, tested, grade0, name, surname, comment0, comment_student, grade1, comment1, percentage)
 
         print("DONE ADDING STUDENT")
 
@@ -37,12 +37,12 @@ class Student:
             print(f"Student with index {index} not found.")
 
     @classmethod
-    def modify_student(cls, index, os_id="", tested=False, grade0="", name="", surname="", comment0="", comment_student="", grade1="", comment1=""):
+    def modify_student(cls, index, os_id="", tested=False, grade0="", name="", surname="", comment0="", comment_student="", grade1="", comment1="", percentage=None):
         student = cls._students.get(index)
         if student:
             if os_id != "":
                 student.os_id = os_id
-            if tested == True:
+            if tested:
                 student.tested = tested
             if grade0 != "":
                 student.grade0 = grade0
@@ -58,6 +58,8 @@ class Student:
                 student.grade1 = grade1
             if comment1 != "":
                 student.comment1 = comment1
+            if percentage is not None:
+                student.percentage = percentage
 
             print(f"Student with index {index} has been updated.")
         else:
@@ -66,10 +68,10 @@ class Student:
     @classmethod
     def get_all_students(cls):
         return [
-            [student.index, student.os_id, student.tested, student.name, student.surname, student.grade0, student.comment0, student.comment_student, student.grade1, student.comment1]
+            [
+                student.index, student.os_id, student.tested, student.name, student.surname, 
+                student.grade0, student.comment0, student.comment_student, student.grade1, 
+                student.comment1, student.percentage
+            ]
             for student in cls._students.values()
         ]
-
-students_dict = {}
-
-

@@ -50,6 +50,7 @@ class answersTab:
             actions=[
                 ft.TextButton("OK", on_click=lambda e: self.closeDialog()),
             ],)
+        self.grades = controller.getSettings()['grades']
 
     def main(self):
         t = self.t
@@ -161,26 +162,11 @@ class answersTab:
             percent = int(p.split(".")[0])
         except:
             percent = -1
-        if percent == -1:
-            grade = ""
-        elif percent < 50:
-            grade = 2
-        elif percent < 60:
-            grade = 3
-        elif percent < 70:
-            grade = 3.5
-        elif percent < 80:
-            grade = 4
-        elif percent < 90:
-            grade = 4.5
-        elif percent < 100:
-            grade = 5
-        else:
-            grade = 5.5
+        grade = self.assign_grade(percent)
 
         print("DATA", percent, str(grade))
 
-        Student.add_student(str(index), tested=True, grade0=str(grade))
+        Student.add_student(str(index), tested=True, grade0=str(grade), percentage=text)
 
     def changeAnswers(self, e):
         index = self.indexTextField.value
@@ -247,24 +233,9 @@ class answersTab:
             percent = int(p)
         except:
             percent = -1
-        if percent == -1:
-            grade = ""
-        elif percent < 50:
-            grade = 2
-        elif percent < 60:
-            grade = 3
-        elif percent < 70:
-            grade = 3.5
-        elif percent < 80:
-            grade = 4
-        elif percent < 90:
-            grade = 4.5
-        elif percent < 100:
-            grade = 5
-        else:
-            grade = 5.5
+        grade = self.assign_grade(percent)
 
-        Student.add_student(str(index), tested=True, grade0=str(grade))
+        Student.add_student(str(index), tested=True, grade0=str(grade), percentage=score_string)
         print("STUDENT ADDED")
 
     def updateButton(self):
@@ -285,7 +256,7 @@ class answersTab:
         if self.active_index_index < 0:
             self.active_index_index = len(self.indexes_this_session) - 1
         print(self.indexes_this_session)
-        img = cv2.imread("exams-data/" + self.controller.getExamName() + "/student_answers/" + str(self.indexes_this_session[self.active_index_index]) + "/page_img.png")
+        img = cv2.imread("exams-data/" + self.controller.getExamName() + "/student_answers/" + str(self.indexes_this_session[self.active_index_index]) + "/page_processed.png")
         _, buffer = cv2.imencode('.png', img)
         base64_image = base64.b64encode(buffer).decode('utf-8')
         
@@ -305,12 +276,14 @@ class answersTab:
 
     def addImg(self, index):
         self.indexes_this_session.append(index)
+        self.indexes_this_session = list(set(self.indexes_this_session))
         self.active_index_index = len(self.indexes_this_session) - 1
         print("add img")
 
 
     def pickDirectoryToRead(self, e):
-        self.filePicker.get_directory_path(initial_directory=".")
+        initial_directory = os.path.abspath(".")
+        self.filePicker.get_directory_path(initial_directory=initial_directory)
 
     def pickFileToRead(self, e):
         self.filePicker.pick_files(allow_multiple=True, allowed_extensions=self.fileExtensions, initial_directory=".")
@@ -433,3 +406,12 @@ class answersTab:
     def closeDialog(self):
         self.dialog.open = False
         self.dialog.update()
+
+    def assign_grade(self, p):
+        p = int(p)
+        if p < self.grades["3"]:
+            return 2
+        for grade, min_percent in sorted(self.grades.items()):
+            if p < min_percent:
+                return float(grade) - 0.5
+        return max(self.grades)

@@ -69,10 +69,8 @@ class loadAnswers:
                         print("\nZczytane dpowiedzi:", answers)
                         graded += 1
 
-                        cv2.imwrite("exams-data/" + currentExamName + folders[type] + str(folders_2[type]) + "/page_img.png", page_img_grid)
-                        for im in range(len(images_warped)):
-                            cv2.imwrite("exams-data/" + currentExamName + folders[type] + str(folders_2[type]) + "/answers_grid_" + str(im) + ".png", images_warped[im])
-
+                        cv2.imwrite("exams-data/" + currentExamName + folders[type] + str(folders_2[type]) + "/page_processed.png", page_img_grid)
+                        cv2.imwrite("exams-data/" + currentExamName + folders[type] + str(folders_2[type]) + "/page_raw.png", page_img)
                         transparent_img = np.ones((690, 490), dtype=np.uint8)
                         i = 0
                         for i in range(20):
@@ -87,7 +85,6 @@ class loadAnswers:
                                 ans_list = ans[0].split(";")
                                 num_questions = 60
                                 score = omr.omr.score(self, ans_list[:num_questions], answers[:num_questions])
-                                cv2.imwrite("exams-data/" + currentExamName + "/student_answers/" + str(index) + "/result_img.png", transparent_img)
                                 score_string = str(round(score[1], 2)) + "%"
                             else:
                                 score_string = ""
