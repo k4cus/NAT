@@ -43,7 +43,7 @@ class mainView:
         self.page.vertical_alignment = ft.MainAxisAlignment.CENTER
         self.page.theme_mode = ft.ThemeMode.LIGHT  # prevent dark mode as background colors are not themed properly yet
         self.page.window_center()
-        page.window_min_height = 830
+        page.window_min_height = 850
         page.window_min_width = 1500
         self.Update()
 

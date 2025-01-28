@@ -32,15 +32,15 @@ class answersTab:
             height=690,
             fit=ft.ImageFit.FIT_HEIGHT,
         )
-        self.ftText = ft.Text(value=self.text, weight="bold")
+        self.ftText = ft.Text(value=self.text, weight="bold", size=30)
         self.ftTextField = ft.TextField(value=self.answers2, on_change=self.updateTextBox, multiline=True, disabled=True)
 
         self.input_grid = self.create_input_grid()
-        self.indexTextField = ft.TextField(label="Indeks", value="", height=30, width=170, max_lines=1, disabled=True, content_padding=2)
-        self.groupTextField = ft.TextField(label="Grupa", value="", height=30, width=170, max_lines=1, disabled=True, content_padding=2)
+        self.indexTextField = ft.TextField(label="Indeks", value="", height=30, width=252, max_lines=1, disabled=True, content_padding=2)
+        self.groupTextField = ft.TextField(label="Grupa", value="", height=30, width=252, max_lines=1, disabled=True, content_padding=2)
 
         self.findPageButton = ft.ElevatedButton(text=self.t("manually-find-page"), on_click=self.findPage, disabled=True)
-        self.changeAnswersButton = ft.ElevatedButton(text=self.t("change-answers"), on_click=self.changeAnswers, disabled=True)
+        self.changeAnswersButton = ft.ElevatedButton(text=self.t("change-answers"), on_click=self.changeAnswers, disabled=True, bgcolor=ft.colors.RED_300, color=ft.colors.WHITE)
         self.leftButton = ft.ElevatedButton(text="<", on_click=self.changeImg, data=-1, disabled=True)
         self.rightButton = ft.ElevatedButton(text=">", on_click=self.changeImg, data=1, disabled=True)
         self.dialog = ft.AlertDialog(
@@ -62,7 +62,7 @@ class answersTab:
                     ft.ElevatedButton(text=t("answers-reading-files"), on_click=self.pickFileToRead),
                     ft.ElevatedButton(text=t("answers-reading-directory"), on_click=self.pickDirectoryToRead),
                     self.findPageButton,
-                    self.changeAnswersButton
+                    
                 ]),
                 ft.Row([
                     ft.Column([
@@ -70,6 +70,7 @@ class answersTab:
                         ft.Row([
                             self.leftButton,
                             self.rightButton,
+                            self.ftText,
                             
                         ],
                         alignment = ft.MainAxisAlignment.CENTER,
@@ -79,10 +80,10 @@ class answersTab:
                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                     ),
                     ft.Column([
-                        self.ftText,
                         self.indexTextField,
                         self.groupTextField,
-                        self.input_grid
+                        self.input_grid,
+                        self.changeAnswersButton
                     ])
                 ],
                     expand=1,
@@ -99,25 +100,23 @@ class answersTab:
     def create_input_grid(self):
         input_fields = []
         for i in range(60):  # Total of 60 fields
-            input_field = ft.TextField(label=str(i+1), value="", on_change=self.updateTextBox, height=25, width=50, max_lines=1, disabled=True, content_padding=2)
+            input_field = ft.TextField(label=str(i+1), value="", on_change=self.updateTextBox, height=25, width=55, max_lines=1, disabled=True, content_padding=2)
             input_fields.append(input_field)
 
-        # Organizing input fields into 3 rows of 20 fields each
         cols = []
         for i in range(0, 60, 20):
             col = ft.Column(
-                input_fields[i:i+20],  # Selects a slice of 20 fields for each row
+                input_fields[i:i+20], 
                 alignment=ft.MainAxisAlignment.START,
                 spacing = 7
             )
             cols.append(col)
 
         # Returning the complete grid structure as a column of rows
-        return ft.Row(cols)
+        return ft.Row(cols, spacing = 44)
         
     def update_input_grid(self, data, text=""):
-        print("UPDATING", text)
-        data_full = data
+
         if len(data) == 4:
             data = data[1]
             data = ast.literal_eval(data)
@@ -125,8 +124,7 @@ class answersTab:
 
         data = ["" if element == "0" else element for element in data]
 
-        idx = 0  # Index to keep track of position in the data list
-        # Iterate over the columns and update each input field
+        idx = 0
         for column in self.input_grid.controls:
             
             for input_field in column.controls:
@@ -179,7 +177,8 @@ class answersTab:
                 if answer_key_2[i] == answers[i]:
                     score += 1
                 else:
-                    print("WRONG",answer_key[i], answers[i] )
+                    #print("WRONG",answer_key[i], answers[i] )
+                    score = score
             l = len(answer_key)
             if l == 0:
                 l2 = 0
@@ -188,14 +187,13 @@ class answersTab:
             score_string = str(round(l2, 2)) + "%"
         else:
             score_string = "Brak klucza odpowiedzi dla grupy"
-        print(score_string)
+        print(score_string,score)
 
         if not os.path.isdir("exams-data/" + exam_name + "/student_answers/" + str(index)):
             os.mkdir("exams-data/" + exam_name + "/student_answers/" + str(index))
             image_data = base64.b64decode(self.image)
             nparr = np.frombuffer(image_data, np.uint8)
             img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-            print("AA")
             cv2.imwrite("exams-data/" + exam_name + "/student_answers/" + str(index) + "/page_img.png", img)
             self.indexes_this_session[self.active_index_index] = str(index)
         with open("exams-data/" + exam_name + "/student_answers/" + str(index) + "/answers.csv", "w") as f:

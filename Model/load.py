@@ -85,7 +85,7 @@ class loadAnswers:
                         if score_string != "Brak klucza odpowiedzi dla grupy":
                             if type == 1:
                                 ans_list = ans[0].split(";")
-                                num_questions = 55
+                                num_questions = 60
                                 score = omr.omr.score(self, ans_list[:num_questions], answers[:num_questions])
                                 cv2.imwrite("exams-data/" + currentExamName + "/student_answers/" + str(index) + "/result_img.png", transparent_img)
                                 score_string = str(round(score[1], 2)) + "%"

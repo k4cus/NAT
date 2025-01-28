@@ -109,8 +109,14 @@ class mainController:
         
     def keyPageFinder(self, image):
         result = self.model.pageFinder(image)
+        print(result)
+        self.view.tabs[1].update_index_group(group=result[2])
+        self.view.tabs[2].update_input_grid(result[2])
         self.keyUpdateImage(self.model.pageFinder(image)[5], group=result[2])
 
     def answerPageFinder(self, image):
         result = self.model.pageFinder(image)
+        print(result)
+        self.view.tabs[2].update_index_group(group=result[2], index=result[0])
+        self.view.tabs[2].update_input_grid(result[1])
         self.answerUpdateImage(result[5], index=result[0])
