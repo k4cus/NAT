@@ -86,9 +86,10 @@ class mainController:
         self.view.tabs[1].updateImage(img_base64)
         self.view.tabs[1].addImg(group)
 
-    def answerUpdateImage(self, image, index):
+    def answerUpdateImage(self, image, index, score_string):
         img_base64 = self.model.omr.imageToBase64(image)
         self.view.tabs[2].updateImage(img_base64)
+        self.view.tabs[2].update_students(group="", index=index, tested=True, text=score_string)
         self.view.tabs[2].addImg(index)
 
     def keyUpdateText(self, text, answers, group, index):
@@ -116,7 +117,8 @@ class mainController:
 
     def answerPageFinder(self, image):
         result = self.model.pageFinder(image)
-        print(result)
+        print("RES", result)
         self.view.tabs[2].update_index_group(group=result[2], index=result[0])
         self.view.tabs[2].update_input_grid(result[1])
+        self.view.tabs[2].update_students(group=result[2], index=result[0], tested=True, text="")
         self.answerUpdateImage(result[5], index=result[0])
