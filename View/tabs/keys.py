@@ -33,11 +33,11 @@ class keysTab:
         self.ftTextField = ft.TextField(value=self.answers2, on_change=self.updateTextBox, multiline=True, disabled=True)
 
         self.input_grid = self.create_input_grid()
-        self.indexTextField = ft.TextField(label="Indeks", value="", height=30, width=170, max_lines=1, disabled=True, content_padding=2)
-        self.groupTextField = ft.TextField(label="Grupa", value="", height=30, width=170, max_lines=1, disabled=True, content_padding=2)
+        self.indexTextField = ft.TextField(label="Indeks", value="", height=30, width=252, max_lines=1, disabled=True, content_padding=2)
+        self.groupTextField = ft.TextField(label="Grupa", value="", height=30, width=252, max_lines=1, disabled=True, content_padding=2)
 
-        self.findPageButton = ft.ElevatedButton(text=self.t("manually-find-page"), on_click=self.findPage, disabled=False)
-        self.changeAnswersButton = ft.ElevatedButton(text=self.t("change-answers"), on_click=self.changeAnswers, disabled=False)
+        self.findPageButton = ft.ElevatedButton(text=self.t("manually-find-page"), on_click=self.findPage, disabled=True)
+        self.changeAnswersButton = ft.ElevatedButton(text=self.t("change-answers"), on_click=self.changeAnswers, disabled=True, bgcolor=ft.colors.RED_300, color=ft.colors.WHITE)
         self.leftButton = ft.ElevatedButton(text="<", on_click=self.changeImg, data=-1, disabled=True)
         self.rightButton = ft.ElevatedButton(text=">", on_click=self.changeImg, data=1, disabled=True)
         self.dialog = ft.AlertDialog(
@@ -60,7 +60,7 @@ class keysTab:
                     ft.ElevatedButton(text=t("keys-reading-files"), on_click=self.pickFileToRead),
                     ft.ElevatedButton(text=t("keys-reading-directory"), on_click=self.pickDirectoryToRead),
                     self.findPageButton,
-                    self.changeAnswersButton
+                    
                 ]),
                 ft.Row([
                     ft.Column([
@@ -77,10 +77,10 @@ class keysTab:
                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                     ),
                     ft.Column([
-                        self.ftText,
                         self.indexTextField,
                         self.groupTextField,
-                        self.input_grid
+                        self.input_grid,
+                        self.changeAnswersButton
                     ])
                 ],
                     expand=1,
@@ -96,7 +96,7 @@ class keysTab:
     def create_input_grid(self):
         input_fields = []
         for i in range(60):  # Total of 60 fields
-            input_field = ft.TextField(label=str(i+1), value="", on_change=self.updateTextBox, height=25, width=50, max_lines=1, disabled=True, content_padding=2)
+            input_field = ft.TextField(label=str(i+1), value="", on_change=self.updateTextBox, height=25, width=52, max_lines=1, disabled=True, content_padding=2)
             input_fields.append(input_field)
 
         # Organizing input fields into 3 rows of 20 fields each
@@ -110,7 +110,7 @@ class keysTab:
             cols.append(col)
 
         # Returning the complete grid structure as a column of rows
-        return ft.Row(cols)
+        return ft.Row(cols, spacing = 44)
         
     def update_input_grid(self, data):
         data = ["" if element == "0" else element for element in data]
