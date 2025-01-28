@@ -201,7 +201,8 @@ class keysTab:
         print("add img")
 
     def pickDirectoryToRead(self, e):
-        self.filePicker.get_directory_path(initial_directory=".")
+        initial_directory = os.path.abspath(".")
+        self.filePicker.get_directory_path(initial_directory=initial_directory)
 
     def pickFileToRead(self, e):
         self.filePicker.pick_files(allow_multiple=True, allowed_extensions=self.fileExtensions, initial_directory=".")

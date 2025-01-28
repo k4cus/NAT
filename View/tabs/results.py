@@ -2,6 +2,7 @@ import flet as ft
 import os
 from Model.usos import import_data
 from Model.student import Student
+import shutil
 
 class resultsTab:
     def __init__(self, controller, mainView):
@@ -10,12 +11,15 @@ class resultsTab:
         self.controller = controller
         self.text = "/"
         self.filePicker = ft.FilePicker(on_result=self.onFilePickResult)
+        self.usosExportDirPicker = ft.FilePicker(on_result=self.saveExportedUsos)
+        self.exportDirPicker = ft.FilePicker(on_result=self.saveExported)
         self.filePickerUsos = ft.FilePicker(on_result=self.onFilePickResultUsos)
         self.fileExtensions = self.controller.getReadFromFileExtensions()
         self.ftTextField = ft.TextField(value=self.text, disabled=True, width=787)
         self.ftTextFieldImport = ft.TextField(value=self.text, disabled=True, width=700)
         self.usosFilePath = ""
-        self.saveButton = ft.ElevatedButton(text=self.t("save-to-dir"), on_click=self.saveExported, disabled=True)
+        self.saveButton = ft.ElevatedButton(text=self.t("save-to-dir"), on_click=self.saveExportedDirPicker, disabled=True)
+        self.saveButtonUsos = ft.ElevatedButton(text=self.t("save-to-dir-usos"), on_click=self.saveExportedUsosDirPicker, disabled=True)
         self.filePicked = False
         self.resultText = ft.Text(value=self.t("saved-usos"), color="blue", size=20)
         self.dialog = ft.AlertDialog(
@@ -26,11 +30,12 @@ class resultsTab:
             ],
         )
         self.csv_list = []
-        self.updateButton = ft.ElevatedButton(text=self.t("Zaktualizuj"), on_click=self.addGrid, disabled=False)
-        self.updateGridButton = ft.ElevatedButton(text=self.t("Zapisz zmiany"), on_click=self.saveGrid, disabled=False)
+        self.updateButton = ft.ElevatedButton(text=self.t("update-results"), on_click=self.addGrid, disabled=False)
+        self.updateGridButton = ft.ElevatedButton(text=self.t("save-results"), on_click=self.saveGrid, disabled=False)
         
         # Grid components
-        self.grid_container = ft.Column(scroll=ft.ScrollMode.AUTO,height=500,spacing=0)
+        self.grid_container = ft.Column(scroll=ft.ScrollMode.AUTO,height=500,spacing=0, expand=True,)
+        self.grades = controller.getSettings()['grades']
 
     def main(self):
         t = self.view.t
@@ -43,14 +48,13 @@ class resultsTab:
                 ft.Row([
                     ft.ElevatedButton(text=t("pick-usos-file"), on_click=self.pickFileToRead),
                     self.saveButton,
+                    self.saveButtonUsos
                 ]),
                 self.filePicker,
+                self.usosExportDirPicker,
+                self.exportDirPicker,
                 self.filePickerUsos,
                 self.dialog,
-                ft.Row([
-                    ft.Text(t("choose-usos-file")),
-                    self.ftTextFieldImport,
-                ]),
                 ft.Row([
                     self.updateButton,
                     self.updateGridButton
@@ -62,81 +66,46 @@ class resultsTab:
         return content
     
 
-    def pickDirectoryToRead(self, e):
-        self.filePicker.get_directory_path(initial_directory=".")
+    def saveExportedDirPicker(self, e):
+        self.exportDirPicker.get_directory_path(initial_directory=".")
+
+    def saveExportedUsosDirPicker(self, e):
+        self.usosExportDirPicker.get_directory_path(initial_directory=".")
 
     def pickFileToRead(self, e):
-        self.filePickerUsos.pick_files(allow_multiple=False, allowed_extensions=["csv"], initial_directory=".")
+        exam_name = self.controller.getExamName()
+        if os.path.exists("exams-data/" + exam_name + "/studentListFile.csv"):
+            self.onFilePickResultUsos("exams-data/" + exam_name + "/studentListFile.csv")
+        else:
+            self.filePickerUsos.pick_files(allow_multiple=False, allowed_extensions=["csv"], initial_directory=".")
 
     def unlockSave(self):
         self.saveButton.disabled = False
         self.saveButton.update()
+        self.saveButtonUsos.disabled = False
+        self.saveButtonUsos.update()
 
     def onFilePickResult(self, e: ft.FilePickerResultEvent):
         self.text = e.path
         self.dirPicked = True
-        self.downloadCSVButton.disabled = False
-        self.downloadCSVButton.update()
         self.saveExported()
 
     def onFilePickResultUsos(self, e: ft.FilePickerResultEvent):
-        self.usosFilePath = e.files[0].path
-        self.ftTextFieldImport.value = self.usosFilePath
-        self.ftTextFieldImport.disabled = False
-        self.ftTextFieldImport.update()
+        exam_name = self.controller.getExamName()
+        if isinstance(e, str):
+            self.usosFilePath = e
+        else:
+            if e.files == None:
+                return 0
+            self.usosFilePath = e.files[0].path
+            print(self.usosFilePath)
+            shutil.copy(self.usosFilePath, "exams-data/" + exam_name + "/studentListFile.csv")
         self.filePicked = True
         self.addStudents()
         self.addGrid("")
         self.unlockSave()
 
-    def saveToDirectory(self, e):
-        t = self.view.t
-        os_dict_index = import_data(self.usosFilePath)
-        exam_name = self.controller.getExamName()
-
-        base_directory = os.path.join(os.getcwd(), "exams-data", exam_name, "student_answers")
-        csv_list = []
-        csv_list.append("os_id;imie;nazwisko;zerówka;komentarz;komentarz dla studenta;pierwszy termin;kolejny komentarz")
-        for root, dirs, files in os.walk(base_directory):
-            for directory in dirs:
-                try:
-                    os_dict = os_dict_index[directory]
-                    os_id = os_dict[0]
-                    with open(os.path.join(root, directory, "answers.csv")) as f:
-                        line = f.readline().split(";")
-                        p = line[3][:-3]
-                        try:
-                            percent = int(p)
-                        except:
-                            percent = -1
-                        if percent == -1:
-                            grade = ""
-                        elif percent < 50:
-                            grade = 2
-                        elif percent < 60:
-                            grade = 3
-                        elif percent < 70:
-                            grade = 3.5
-                        elif percent < 80:
-                            grade = 4
-                        elif percent < 90:
-                            grade = 4.5
-                        elif percent < 100:
-                            grade = 5
-                        else:
-                            grade = 5.5
-                        line2 = str(os_id) + ";" + os_dict[1] + ";" + os_dict[2] + ";" + str(grade) + ";;;;;"
-                        csv_list.append(line2)
-                        line3 = directory + ";" + line2
-                        csv_line = []
-                        self.csv_list.append(line3.split(";"))
-                except:
-                    pass
-        #self.downloadCSVButton.disabled = False
-        #self.downloadCSVButton.update()
-        self.addGrid("")
-
-    def saveExported(self, e):
+    def saveExportedUsos(self, e: ft.FilePickerResultEvent):
         exam_name = self.controller.getExamName()
         grid_values = []
         # Iterate through each row in the grid container
@@ -150,6 +119,33 @@ class resultsTab:
                 if isinstance(cell, ft.TextField):  # Ensure it's a TextField
                     row_values.append(cell.value)  # Add the value of the TextField to the row list
             
+            row_values = row_values[1:-1]
+            grid_values.append(row_values)
+
+        if not os.path.isdir("exams-data/" + exam_name + "/usos/"):
+            os.mkdir("exams-data/" + exam_name + "/usos/")
+        with open("exams-data/" + exam_name + "/usos/" + "exportedUSOS.csv", "w") as file:
+            for row in grid_values:
+                file.write(";".join(row) + "\n")
+        if e.path != None:
+            with open(e.path + "/exportedUSOS.csv", "w") as file:
+                for row in grid_values:
+                    file.write(";".join(row) + "\n")
+
+    def saveExported(self, e):
+        exam_name = self.controller.getExamName()
+        grid_values = []
+
+        for row in self.grid_container.controls:
+            row_values = []
+            
+            for col_index in range(2, len(row.controls)):
+                cell = row.controls[col_index]
+                
+                if isinstance(cell, ft.TextField):
+                    row_values.append(cell.value)
+            
+            row_values = [row_values[0], row_values[2], row_values[3], row_values[4], row_values[9]]
             grid_values.append(row_values)
 
         if not os.path.isdir("exams-data/" + exam_name + "/usos/"):
@@ -157,11 +153,14 @@ class resultsTab:
         with open("exams-data/" + exam_name + "/usos/" + "exported.csv", "w") as file:
             for row in grid_values:
                 file.write(";".join(row) + "\n")
+        if e.path != None:
+            with open(e.path + "/exported.csv", "w") as file:
+                for row in grid_values:
+                    file.write(";".join(row) + "\n")
                     
 
         
     def saveGrid(self, e):
-
         grid_values = []
         # Iterate through each row in the grid container
         for row in self.grid_container.controls:
@@ -174,7 +173,8 @@ class resultsTab:
                 if isinstance(cell, ft.TextField):  # Ensure it's a TextField
                     row_values.append(cell.value)  # Add the value of the TextField to the row list
                 else:
-                    if cell.src != "empty.png": #[0] - tested
+                    if isinstance(cell.content, ft.Image) and cell.content.src != "empty.png": #[0] - tested
+                        print("AAAAA", isinstance(cell.content, ft.Image))
                         row_values.append(True)
                     else:
                         row_values.append(False)
@@ -196,9 +196,6 @@ class resultsTab:
                 Student.delete_student(student[0])
         self.addGrid("")
 
-        
-
-
     def closeDialog(self):
         self.dialog.open = False
         self.dialog.update()
@@ -207,7 +204,7 @@ class resultsTab:
         print("STUDENT")
         students = Student.get_all_students()
         print("STUDENT", students)
-        widths = [60, 60, 100, 100, 150, 150, 100, 150, 150, 100, 150]
+        widths = [70, 70, 100, 100, 100, 100, 100, 150, 150, 100, 150, 100]
         print(self.csv_list)
         num_rows = len(students)
         if num_rows <= 0:
@@ -218,17 +215,18 @@ class resultsTab:
 
         row0 = ft.Row(
                 controls=[
-                    ft.TextField(value=f"Test", width=widths[0], disabled=True, border_radius=0),
-                    ft.TextField(value=f"USOS", width=widths[1], disabled=True, border_radius=0),
-                    ft.TextField(value=f"indeks", width=widths[2], disabled=True, border_radius=0),
-                    ft.TextField(value=f"os_id", width=widths[3], disabled=True, border_radius=0),
-                    ft.TextField(value=f"imie", width=widths[4], disabled=True, border_radius=0),
-                    ft.TextField(value=f"nazwisko", width=widths[5], disabled=True, border_radius=0),
-                    ft.TextField(value=f"zerówka", width=widths[6], disabled=True, border_radius=0),
-                    ft.TextField(value=f"komentarz", width=widths[7], disabled=True, border_radius=0),
-                    ft.TextField(value=f"komentarz dla studenta", width=widths[8], disabled=True, border_radius=0),
-                    ft.TextField(value=f"pierwszy termin", width=widths[9], disabled=True, border_radius=0),
-                    ft.TextField(value=f"kolejny komentarz", width=widths[10], disabled=True, border_radius=0),
+                    ft.TextField(value=f"Test", width=widths[0], disabled=True, border_radius=0, bgcolor="lightgray", color="black"),
+                    ft.TextField(value=f"USOS", width=widths[1], disabled=True, border_radius=0, bgcolor="lightgray", color="black"),
+                    ft.TextField(value=f"indeks", width=widths[2], disabled=True, border_radius=0, bgcolor="lightgray", color="black"),
+                    ft.TextField(value=f"os_id", width=widths[3], disabled=True, border_radius=0, bgcolor="lightgray", color="black"),
+                    ft.TextField(value=f"imie", width=widths[4], disabled=True, border_radius=0, bgcolor="lightgray", color="black"),
+                    ft.TextField(value=f"nazwisko", width=widths[5], disabled=True, border_radius=0, bgcolor="lightgray", color="black"),
+                    ft.TextField(value=f"zerówka", width=widths[6], disabled=True, border_radius=0, bgcolor="lightgray", color="black"),
+                    ft.TextField(value=f"komentarz", width=widths[7], disabled=True, border_radius=0, bgcolor="lightgray", color="black"),
+                    ft.TextField(value=f"komentarz dla studenta", width=widths[8], disabled=True, border_radius=0, bgcolor="lightgray", color="black"),
+                    ft.TextField(value=f"pierwszy termin", width=widths[9], disabled=True, border_radius=0, bgcolor="lightgray", color="black"),
+                    ft.TextField(value=f"kolejny komentarz", width=widths[10], disabled=True, border_radius=0, bgcolor="lightgray", color="black"),
+                    ft.TextField(value=f"procent", width=widths[11], disabled=True, border_radius=0, bgcolor="lightgray", color="black"),
                 ],
                 spacing=0,
                 alignment=ft.MainAxisAlignment.START,
@@ -241,13 +239,12 @@ class resultsTab:
             image_src_tested = "answerSheetIcon.png" if students[row_index][2] else "empty.png"
             image_src_usos = "usosIcon.png" if students[row_index][1] else "empty.png"
             students[row_index].pop(2)
-            print("BBB", students[row_index])
             row = ft.Row(
                 controls=[
-                    ft.Container(content=ft.Image(src=image_src_tested), width=60, padding=8),
-                    ft.Container(content=ft.Image(src=image_src_usos), width=60, padding=8),
+                    ft.Container(content=ft.Image(src=image_src_tested), width=70, height=50, padding=8),
+                    ft.Container(content=ft.Image(src=image_src_usos), width=70, height=50, padding=8),
                     *[
-                        ft.TextField(value=students[row_index][col], width=widths[col+2], border_radius=0) for col in range(9)
+                        ft.TextField(value=students[row_index][col], width=widths[col+2], border_radius=0) for col in range(10)
                     ]
                 ],
                 alignment=ft.MainAxisAlignment.START,
@@ -257,7 +254,7 @@ class resultsTab:
             for col in range(5):  # Check cells 0-4
                 text_field = row.controls[col+2]
                 if text_field.value == "":  # If value is missing
-                    text_field.bgcolor = "red"  # Set the background color to red
+                    text_field.bgcolor = ft.colors.RED_300  # Set the background color to red
                 else:
                     text_field.bgcolor = "white" 
 
@@ -265,26 +262,6 @@ class resultsTab:
 
             self.grid_container.update()
             self.unlockSave()
-
-    def downloadCSV(self, e):
-        grid_values = []
-        
-        # Iterate through each row in the grid container
-        for row in self.grid_container.controls:
-            row_values = []
-            
-            # Iterate through each TextField in the row
-            for cell in row.controls:
-                if isinstance(cell, ft.TextField):
-                    row_values.append(cell.value)  # Get the value of each TextField
-            
-            grid_values.append(row_values)
-        
-        # Example: Print all the values
-        for row in grid_values:
-            print(row)
-
-        self.pickDirectoryToRead("")
         
     def addStudents(self):
         os_dict_index = import_data(self.usosFilePath)

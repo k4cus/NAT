@@ -10,7 +10,15 @@ class storage:
         self.__settings = {
             "language": 'pl',
             "cameraIndex": 0,
-        }  # defaults
+            "grades": {
+                "3": 50,
+                "3.5": 60,
+                "4": 70,    
+                "4.5": 80,
+                "5": 90,    
+                "5.5": 100
+            }
+        } # defaults
 
     @property
     def settings(self):
