@@ -55,11 +55,10 @@ class keysTab:
                 self.filePicker,
                 self.dialog,
                 ft.Row([
-                    ft.ElevatedButton(text=t("keys-reading-mode"), on_click=self.controller.enterReadingMode,
-                                      data=["keys", self.controller.getExamName()]),
                     ft.ElevatedButton(text=t("keys-reading-files"), on_click=self.pickFileToRead),
                     ft.ElevatedButton(text=t("keys-reading-directory"), on_click=self.pickDirectoryToRead),
-                    self.findPageButton,
+                    ft.ElevatedButton(text=t("keys-reading-mode"), on_click=self.controller.enterReadingMode,
+                                      data=["keys", self.controller.getExamName()], disabled=True),
                     
                 ]),
                 ft.Row([
@@ -166,11 +165,9 @@ class keysTab:
 
     def updateButton(self):
         self.changeAnswersButton.disabled = False
-        self.findPageButton.disabled = False
         self.leftButton.disabled = False
         self.rightButton.disabled = False
         self.changeAnswersButton.update()
-        self.findPageButton.update()
         self.rightButton.update()
         self.leftButton.update()
 

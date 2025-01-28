@@ -6,6 +6,7 @@ import ast
 import numpy as np
 
 from Model.utils import base64_empty_image
+from Model.student import Student
 
 
 class answersTab:
@@ -57,11 +58,10 @@ class answersTab:
                 self.filePicker,
                 self.dialog,
                 ft.Row([
-                    ft.ElevatedButton(text=t("answers-reading-mode"), on_click=self.controller.enterReadingMode,
-                                      data=["answers", self.controller.getExamName()]),
                     ft.ElevatedButton(text=t("answers-reading-files"), on_click=self.pickFileToRead),
                     ft.ElevatedButton(text=t("answers-reading-directory"), on_click=self.pickDirectoryToRead),
-                    self.findPageButton,
+                    ft.ElevatedButton(text=t("answers-reading-mode"), on_click=self.controller.enterReadingMode,
+                                      data=["answers", self.controller.getExamName()], disabled=True),
                     
                 ]),
                 ft.Row([
@@ -152,6 +152,36 @@ class answersTab:
         self.indexTextField.update()
         self.groupTextField.update()
 
+    def update_students(self, index="", group="", tested=False, text=""):
+        print("UPDTAING STUDENT LIST")
+        print("GRADE:", index, text)
+
+        p = text
+        try:
+            percent = int(p.split(".")[0])
+        except:
+            percent = -1
+        if percent == -1:
+            grade = ""
+        elif percent < 50:
+            grade = 2
+        elif percent < 60:
+            grade = 3
+        elif percent < 70:
+            grade = 3.5
+        elif percent < 80:
+            grade = 4
+        elif percent < 90:
+            grade = 4.5
+        elif percent < 100:
+            grade = 5
+        else:
+            grade = 5.5
+
+        print("DATA", percent, str(grade))
+
+        Student.add_student(str(index), tested=True, grade0=str(grade))
+
     def changeAnswers(self, e):
         index = self.indexTextField.value
         group_number = str(self.group_dict_reverse[self.groupTextField.value])
@@ -165,6 +195,11 @@ class answersTab:
                 input_field.fill_color = ft.colors.RED_200 if input_field.value == "" else ft.colors.WHITE
         
         self.input_grid.update()
+        if not os.path.isdir("exams-data/" + exam_name + "/answer_keys/" + group_number):
+            os.mkdir("exams-data/" + exam_name + "/answer_keys/" + group_number)
+            with open("exams-data/" + exam_name + "/answer_keys/" + group_number + "/answers.csv", "w") as file:
+                file.write("")
+            
 
         with open("exams-data/" + exam_name + "/answer_keys/" + group_number + "/answers.csv", "r") as f:
             answer_key = f.readline().split(";")
@@ -188,14 +223,17 @@ class answersTab:
         else:
             score_string = "Brak klucza odpowiedzi dla grupy"
         print(score_string,score)
-
-        if not os.path.isdir("exams-data/" + exam_name + "/student_answers/" + str(index)):
-            os.mkdir("exams-data/" + exam_name + "/student_answers/" + str(index))
-            image_data = base64.b64decode(self.image)
-            nparr = np.frombuffer(image_data, np.uint8)
-            img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-            cv2.imwrite("exams-data/" + exam_name + "/student_answers/" + str(index) + "/page_img.png", img)
-            self.indexes_this_session[self.active_index_index] = str(index)
+        if self.indexTextField.value != self.indexes_this_session[self.active_index_index]:
+            if not os.path.isdir("exams-data/" + exam_name + "/student_answers/" + str(index)):
+                os.mkdir("exams-data/" + exam_name + "/student_answers/" + str(index))
+        image_data = base64.b64decode(self.image)
+        nparr = np.frombuffer(image_data, np.uint8)
+        img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        cv2.imwrite("exams-data/" + exam_name + "/student_answers/" + str(index) + "/page_img.png", img)
+        Student.add_student(str(index), tested=True, grade0=str(Student.get_student(self.indexes_this_session[self.active_index_index]).grade0))
+        Student.delete_student(self.indexes_this_session[self.active_index_index])
+        print("STUDENT CHANGED INDEX")
+        self.indexes_this_session[self.active_index_index] = str(index)
         with open("exams-data/" + exam_name + "/student_answers/" + str(index) + "/answers.csv", "w") as f:
             print("Writing")
             f.write(str(index) + ";" + str(answers) + ";" +  group_number + ";" + score_string)
@@ -204,13 +242,36 @@ class answersTab:
         self.ftText.value = self.text
         self.ftText.update()
 
+        p = score_string[:-3]
+        try:
+            percent = int(p)
+        except:
+            percent = -1
+        if percent == -1:
+            grade = ""
+        elif percent < 50:
+            grade = 2
+        elif percent < 60:
+            grade = 3
+        elif percent < 70:
+            grade = 3.5
+        elif percent < 80:
+            grade = 4
+        elif percent < 90:
+            grade = 4.5
+        elif percent < 100:
+            grade = 5
+        else:
+            grade = 5.5
+
+        Student.add_student(str(index), tested=True, grade0=str(grade))
+        print("STUDENT ADDED")
+
     def updateButton(self):
         self.changeAnswersButton.disabled = False
-        self.findPageButton.disabled = False
         self.leftButton.disabled = False
         self.rightButton.disabled = False
         self.changeAnswersButton.update()
-        self.findPageButton.update()
         self.rightButton.update()
         self.leftButton.update()
         

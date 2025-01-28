@@ -125,7 +125,7 @@ class mainModel:
 
         for file in filePathList:
             img = self.loadAnswers.loadAnswers(self, 1, exam_name, file_path=file)
-            self.controller.answerUpdateImage(img[0], img[4])
+            self.controller.answerUpdateImage(img[0], img[4], img[1])
         return img
 
     def getResultsImgPath(self, exam_name):
