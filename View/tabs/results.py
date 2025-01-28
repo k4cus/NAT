@@ -244,8 +244,8 @@ class resultsTab:
             print("BBB", students[row_index])
             row = ft.Row(
                 controls=[
-                    ft.Image(src=image_src_tested, width=60,),
-                    ft.Image(src=image_src_usos, width=60,),
+                    ft.Container(content=ft.Image(src=image_src_tested), width=60, padding=8),
+                    ft.Container(content=ft.Image(src=image_src_usos), width=60, padding=8),
                     *[
                         ft.TextField(value=students[row_index][col], width=widths[col+2], border_radius=0) for col in range(9)
                     ]
