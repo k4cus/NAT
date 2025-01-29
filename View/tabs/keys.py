@@ -157,7 +157,7 @@ class keysTab:
             image_data = base64.b64decode(self.image)
             nparr = np.frombuffer(image_data, np.uint8)
             img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-            cv2.imwrite("exams-data/" + exam_name + "/answer_keys/" + group_number + "/page_img.png", img)
+            cv2.imwrite("exams-data/" + exam_name + "/answer_keys/" + group_number + "/page_processed.png", img)
             self.groups_this_session[self.active_group_index] = group_number
         with open("exams-data/" + exam_name + "/answer_keys/" + str(self.groups_this_session[self.active_group_index]) + "/answers.csv", "w") as f:
             print("Writing")
@@ -180,7 +180,7 @@ class keysTab:
         if self.active_group_index < 0:
             self.active_group_index = len(self.groups_this_session) - 1
         print(self.groups_this_session)
-        img = cv2.imread("exams-data/" + self.controller.getExamName() + "/answer_keys/" + str(self.groups_this_session[self.active_group_index]) + "/page_img.png")
+        img = cv2.imread("exams-data/" + self.controller.getExamName() + "/answer_keys/" + str(self.groups_this_session[self.active_group_index]) + "/page_processed.png")
         #print(img)
         _, buffer = cv2.imencode('.png', img)
         base64_image = base64.b64encode(buffer).decode('utf-8')
