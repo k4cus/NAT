@@ -36,7 +36,7 @@ class Student:
             print(f"Student with index {index} not found.")
 
     @classmethod
-    def modify_student(cls, index, os_id="", tested=False, grade0="", name="", surname="", comment0="", comment_student="", grade1="", comment1="", percentage=None):
+    def modify_student(cls, index, os_id="", tested=False, grade0="", name="", surname="", comment0="", comment_student="", grade1="", comment1="", percentage=""):
         student = cls._students.get(index)
         print("MODIFYING")
         if student:
@@ -58,7 +58,7 @@ class Student:
                 student.grade1 = grade1
             if comment1 != "":
                 student.comment1 = comment1
-            if percentage is not None:
+            if percentage is not "":
                 student.percentage = percentage
 
             print(f"Student with index {index} has been updated.")
