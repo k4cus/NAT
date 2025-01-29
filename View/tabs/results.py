@@ -201,9 +201,7 @@ class resultsTab:
         self.dialog.update()
 
     def addGrid(self, e):
-        print("STUDENT")
         students = Student.get_all_students()
-        print("STUDENT", students)
         widths = [70, 70, 100, 100, 100, 100, 100, 150, 150, 100, 150, 100]
         print(self.csv_list)
         num_rows = len(students)

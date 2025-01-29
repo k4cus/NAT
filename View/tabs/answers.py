@@ -217,7 +217,8 @@ class answersTab:
         img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
         cv2.imwrite("exams-data/" + exam_name + "/student_answers/" + str(index) + "/page_img.png", img)
         Student.add_student(str(index), tested=True, grade0=str(Student.get_student(self.indexes_this_session[self.active_index_index]).grade0))
-        Student.delete_student(self.indexes_this_session[self.active_index_index])
+        if str(index) != self.indexes_this_session[self.active_index_index]:
+            Student.delete_student(self.indexes_this_session[self.active_index_index])
         print("STUDENT CHANGED INDEX")
         self.indexes_this_session[self.active_index_index] = str(index)
         with open("exams-data/" + exam_name + "/student_answers/" + str(index) + "/answers.csv", "w") as f:
@@ -227,8 +228,8 @@ class answersTab:
         self.text = score_string
         self.ftText.value = self.text
         self.ftText.update()
-
-        p = score_string[:-3]
+        
+        p = score_string.split(".")[0]
         try:
             percent = int(p)
         except:
@@ -409,7 +410,7 @@ class answersTab:
 
     def assign_grade(self, p):
         p = int(p)
-        
+        print("GRADE", p)
         if p < float(self.grades["3"]):
             return 2
         elif p < float(self.grades["3.5"]):
