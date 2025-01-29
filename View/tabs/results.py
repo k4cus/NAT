@@ -120,7 +120,8 @@ class resultsTab:
                     row_values.append(cell.value)  # Add the value of the TextField to the row list
             
             row_values = row_values[1:-1]
-            grid_values.append(row_values)
+            if row_values[0] != "" and row_values[0] != "":
+                grid_values.append(row_values)
 
         if not os.path.isdir("exams-data/" + exam_name + "/usos/"):
             os.mkdir("exams-data/" + exam_name + "/usos/")
@@ -161,6 +162,7 @@ class resultsTab:
 
         
     def saveGrid(self, e):
+        window_width = self.view.page.window_width
         grid_values = []
         # Iterate through each row in the grid container
         for row in self.grid_container.controls:
@@ -202,8 +204,18 @@ class resultsTab:
 
     def addGrid(self, e):
         students = Student.get_all_students()
-        widths = [70, 70, 100, 100, 100, 100, 100, 150, 150, 100, 150, 100]
-        print(self.csv_list)
+        window_width = self.view.page.window_width - 35
+
+        fixed_widths = [70, 70]  
+        fixed_total = sum(fixed_widths)  
+
+        original_widths = [100, 100, 100, 100, 100, 100, 150, 150, 100, 150, 100]  
+        total_original_width = sum(original_widths)
+
+        available_width = window_width - fixed_total  
+
+        widths = fixed_widths + [(w / total_original_width) * available_width for w in original_widths]
+
         num_rows = len(students)
         if num_rows <= 0:
             return
@@ -242,24 +254,33 @@ class resultsTab:
                     ft.Container(content=ft.Image(src=image_src_tested), width=70, height=50, padding=8),
                     ft.Container(content=ft.Image(src=image_src_usos), width=70, height=50, padding=8),
                     *[
-                        ft.TextField(value=students[row_index][col], width=widths[col+2], border_radius=0) for col in range(10)
+                        ft.TextField(value=students[row_index][col], width=widths[col+2], border_radius=0, border_color="#aaaaaa") for col in range(10)
                     ]
                 ],
                 alignment=ft.MainAxisAlignment.START,
-                spacing=0
+                spacing=0,
             )
-
-            for col in range(5):  # Check cells 0-4
-                text_field = row.controls[col+2]
-                if text_field.value == "":  # If value is missing
-                    text_field.bgcolor = ft.colors.RED_300  # Set the background color to red
-                else:
-                    text_field.bgcolor = "white" 
+            print(row.controls[3].value, row.controls[6].value)
+            # Check if the 4th (index 3) and 7th (index 6) columns are filled
+            if row.controls[3].value != "" and row.controls[6].value != "":
+                print(" GREEN")
+                # If both columns are filled, set all TextFields to green
+                for text_field in row.controls[2:]:
+                    text_field.bgcolor = ft.colors.GREEN_50
+            else:
+                for col in range(5):  # Check cells 0-4
+                    text_field = row.controls[col+2]
+                    if text_field.value == "":  # If value is missing
+                        text_field.bgcolor = ft.colors.RED_50  # Set the background color to red
+                    else:
+                        text_field.bgcolor = "white" 
 
             self.grid_container.controls.append(row)
 
-            self.grid_container.update()
-            self.unlockSave()
+        self.grid_container.update()
+        self.unlockSave()
+
+
         
     def addStudents(self):
         os_dict_index = import_data(self.usosFilePath)
