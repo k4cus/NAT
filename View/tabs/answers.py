@@ -409,9 +409,18 @@ class answersTab:
 
     def assign_grade(self, p):
         p = int(p)
-        if p < self.grades["3"]:
+        
+        if p < float(self.grades["3"]):
             return 2
-        for grade, min_percent in sorted(self.grades.items()):
-            if p < min_percent:
-                return float(grade) - 0.5
-        return max(self.grades)
+        elif p < float(self.grades["3.5"]):
+            return 3
+        elif p < float(self.grades["4"]):
+            return 3.5
+        elif p < float(self.grades["4.5"]):
+            return 4
+        elif p < float(self.grades["5"]):
+            return 4.5
+        elif p < float(self.grades["5.5"]):
+            return 5
+        else:
+            return 5.5
