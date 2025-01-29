@@ -1,6 +1,8 @@
 import base64
+import os, shutil
 from Model.mainModel import mainModel
 from View.mainView import mainView
+from Model.crypto import encrypt_folder
 
 
 class mainController:
@@ -122,3 +124,15 @@ class mainController:
         self.view.tabs[2].update_input_grid(result[1])
         self.view.tabs[2].update_students(group=result[2], index=result[0], tested=True, text="")
         self.answerUpdateImage(result[5], index=result[0])
+
+    def cleanTempData(self):
+        with open("key.bin", "rb") as key_file:
+            key = key_file.read()
+        os.remove("key.bin")
+        if os.path.exists("exams-data"):
+            shutil.rmtree("exams-data-saved")
+            os.rename("exams-data", "exams-data-saved")
+            os.makedirs("exams-data")
+        encrypt_folder(key, "exams-data-saved")
+        print("Program finished")
+        return 0
