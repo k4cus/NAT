@@ -92,12 +92,12 @@ class settingsTab:
         # Second row with input fields for the minimal percentage required for each grade
         input_fields_row = ft.Row(
             [
-                ft.TextField(value=str(self.grades_data["3"]), on_change=self.updateGrade, data=3, width=100, border_radius=0),
-                ft.TextField(value=str(self.grades_data["3.5"]), on_change=self.updateGrade, data=3.5, width=100, border_radius=0),
-                ft.TextField(value=str(self.grades_data["4"]), on_change=self.updateGrade, data=4, width=100, border_radius=0),
-                ft.TextField(value=str(self.grades_data["4.5"]), on_change=self.updateGrade, data=4.5, width=100, border_radius=0),
-                ft.TextField(value=str(self.grades_data["5"]), on_change=self.updateGrade, data=5, width=100, border_radius=0),
-                ft.TextField(value=str(self.grades_data["5.5"]), on_change=self.updateGrade, data=5.5, width=100, border_radius=0),
+                ft.TextField(value=str(self.grades_data["3"]), on_change=self.updateGrade, data="3", width=100, border_radius=0),
+                ft.TextField(value=str(self.grades_data["3.5"]), on_change=self.updateGrade, data="3.5", width=100, border_radius=0),
+                ft.TextField(value=str(self.grades_data["4"]), on_change=self.updateGrade, data="4", width=100, border_radius=0),
+                ft.TextField(value=str(self.grades_data["4.5"]), on_change=self.updateGrade, data="4.5", width=100, border_radius=0),
+                ft.TextField(value=str(self.grades_data["5"]), on_change=self.updateGrade, data="5", width=100, border_radius=0),
+                ft.TextField(value=str(self.grades_data["5.5"]), on_change=self.updateGrade, data="5.5", width=100, border_radius=0),
             ],
             alignment=ft.MainAxisAlignment.START,
             expand=False,
@@ -119,7 +119,7 @@ class settingsTab:
 
     def updateGrade(self, e):
         # Update the grade value in the dictionary based on user input
-        grade = float(e.control.data)
+        grade = (e.control.data)
         new_value = e.control.value
         try:
             new_percentage = float(new_value)
