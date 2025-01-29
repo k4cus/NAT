@@ -22,7 +22,6 @@ class Student:
         else:
             cls.modify_student(index, os_id, tested, grade0, name, surname, comment0, comment_student, grade1, comment1, percentage)
 
-        print("DONE ADDING STUDENT")
 
     @classmethod
     def get_student(cls, index):
@@ -39,6 +38,7 @@ class Student:
     @classmethod
     def modify_student(cls, index, os_id="", tested=False, grade0="", name="", surname="", comment0="", comment_student="", grade1="", comment1="", percentage=None):
         student = cls._students.get(index)
+        print("MODIFYING")
         if student:
             if os_id != "":
                 student.os_id = os_id
