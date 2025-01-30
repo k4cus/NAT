@@ -58,7 +58,7 @@ class Student:
                 student.grade1 = grade1
             if comment1 != "":
                 student.comment1 = comment1
-            if percentage is not "":
+            if percentage != "":
                 student.percentage = percentage
 
             print(f"Student with index {index} has been updated.")

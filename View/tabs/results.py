@@ -120,7 +120,8 @@ class resultsTab:
                     row_values.append(cell.value)  # Add the value of the TextField to the row list
             
             row_values = row_values[1:-1]
-            if row_values[0] != "" and row_values[0] != "":
+            print("AAAA", row_values)
+            if row_values[0] != "" and row_values[3] != "":
                 grid_values.append(row_values)
 
         if not os.path.isdir("exams-data/" + exam_name + "/usos/"):
@@ -176,7 +177,6 @@ class resultsTab:
                     row_values.append(cell.value)  # Add the value of the TextField to the row list
                 else:
                     if isinstance(cell.content, ft.Image) and cell.content.src != "empty.png": #[0] - tested
-                        print("AAAAA", isinstance(cell.content, ft.Image))
                         row_values.append(True)
                     else:
                         row_values.append(False)
