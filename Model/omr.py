@@ -1,4 +1,5 @@
 import base64
+import os
 
 import cv2
 import numpy as np
@@ -191,7 +192,17 @@ class omr:
         return index_txt, full_answers, group, page_img, images_warped, page_img_grid
 
     def loadImageFromFile(self, path):
-        img = cv2.imread(path)
+        # work around reading from folders with local capitals
+        current_dir = os.getcwd()
+        try:
+            directory = os.path.dirname(path)
+            filename = os.path.basename(path)
+            os.chdir(directory)
+            img = cv2.imread(filename)
+        except:
+            print("Error reading image from file:", path)
+        finally:
+            os.chdir(current_dir)
         return img
 
     def remove_shadows(self, img):
