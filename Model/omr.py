@@ -47,7 +47,7 @@ class omr:
             try:
                 cv2.imwrite("debugging-opencv/2_found-page-1.png", img)
             except:
-                print("No page found")
+                print("No page found1")
 
             if img is None:
                 skip_shadows = True
@@ -58,7 +58,7 @@ class omr:
                 try:
                     cv2.imwrite("debugging-opencv/2_found-page-2.png", img_preprocessed)
                 except:
-                    print("No page found")
+                    print("No page found2")
 
                 page_img = img_preprocessed
                 if img_preprocessed is None:
@@ -73,12 +73,12 @@ class omr:
             screenshot = omr.preprocess_image(self, screenshot)
             img_preprocessed = omr.find_page(self, screenshot, coords)
             if img_preprocessed is None:
-                print("NO PAGE FOUND")
+                print("NO PAGE FOUND3")
                 return None, None, None, None, None, screenshot
             page_img = img_preprocessed
             if len(img_preprocessed.shape)==3:
                 img_preprocessed = cv2.cvtColor(img_preprocessed, cv2.COLOR_BGR2GRAY)
-            print("PAGE FOUND")
+            print("PAGE FOUND4")
             img_preprocessed = omr.remove_shadows(self, img_preprocessed)
             cv2.imwrite("debugging-opencv/7_new_preprocessed.png", img_preprocessed)
 

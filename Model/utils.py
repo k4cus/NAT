@@ -155,32 +155,10 @@ def find_contours_page(img, num_rectangles):
     # Utwórz detektor znaczników ArUco
     detector = cv2.aruco.ArucoDetector(aruco_dict, parameters)
 
-    def detectAruco(arucoDetector, image, image2warp):
-        # Wykryj znaczniki ArUco
-        corners, ids, rejected = arucoDetector.detectMarkers(image)
-
-        # Sprawdź, czy wykryto znaczniki
-        if ids is not None and len(ids) >= 4:
-            # Posortuj wykryte znaczniki na podstawie ich ID
-            ids = ids.flatten()
-            sorted_indices = np.argsort(ids)
-            corners = [corners[j] for j in sorted_indices]
-
-            # Pobierz cztery znaczniki (lewy górny, prawy górny, prawy dolny, lewy dolny)
-            selected_corners = [corners[0][0][0], corners[1][0][1], corners[2][0][3], corners[3][0][2]]
-            #print(sorted_indices, ids, selected_corners)
-            # Utwórz macierz perspektywy
-            src_points = np.float32(selected_corners)  # Wykryte punkty znaczników
-            dst_points = np.float32([[0, 0], [600, 0], [0, 800], [600, 800]])  # Prostokąt docelowy
-            matrix = cv2.getPerspectiveTransform(src_points, dst_points)
-
-            # Przekształcenie perspektywy (wycięcie obszaru strony) ale z oryginalnego obrazu
-            return cv2.warpPerspective(image2warp, matrix, (600, 800))
-        else:
-            return
 
     # if aruco detector fails to detect markers, try to do adaptive thresholding
     warped_image = detectAruco(detector, gray, img)
+
     for i in range(51, 152, 10):
         if warped_image is not None:
             break
@@ -188,6 +166,46 @@ def find_contours_page(img, num_rectangles):
         imgThresholded = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, i, 5)
         warped_image = detectAruco(detector, imgThresholded, img)
     return warped_image
+
+def detectAruco(arucoDetector, image, image2warp):
+    # Wykryj znaczniki ArUco
+    corners, ids, rejected = arucoDetector.detectMarkers(image)
+
+    # Sprawdź, czy wykryto znaczniki
+    if ids is not None and len(ids) >= 4:
+        # Posortuj wykryte znaczniki na podstawie ich ID
+        ids = ids.flatten()
+        sorted_indices = np.argsort(ids)
+        corners = [corners[j] for j in sorted_indices]
+
+        # Pobierz cztery znaczniki (lewy górny, prawy górny, prawy dolny, lewy dolny)
+        selected_corners = [corners[0][0][0], corners[1][0][1], corners[2][0][3], corners[3][0][2]]
+        print(sorted_indices, ids, selected_corners)
+        # Utwórz macierz perspektywy
+        src_points = np.float32(selected_corners)  # Wykryte punkty znaczników
+        dst_points = np.float32([[0, 0], [600, 0], [0, 800], [600, 800]])  # Prostokąt docelowy
+        matrix = cv2.getPerspectiveTransform(src_points, dst_points)
+
+        # Przekształcenie perspektywy (wycięcie obszaru strony) ale z oryginalnego obrazu
+        return cv2.warpPerspective(image2warp, matrix, (600, 800))
+    elif ids is not None and len(ids) == 3:
+        # Posortuj wykryte znaczniki na podstawie ich ID
+        ids = ids.flatten()
+        sorted_indices = np.argsort(ids)
+        corners = [corners[j] for j in sorted_indices]
+        print("sorted indices: " +  str(sorted_indices), "ids: " + str(ids))
+        # Pobierz cztery znaczniki (lewy górny, prawy górny, prawy dolny, lewy dolny)
+        selected_corners = [corners[0][0][0], corners[1][0][1], corners[2][0][3], corners[3][0][2]]
+        print(sorted_indices, ids, selected_corners)
+        # Utwórz macierz perspektywy
+        src_points = np.float32(selected_corners)  # Wykryte punkty znaczników
+        dst_points = np.float32([[0, 0], [600, 0], [0, 800], [600, 800]])  # Prostokąt docelowy
+        matrix = cv2.getPerspectiveTransform(src_points, dst_points)
+
+        # Przekształcenie perspektywy (wycięcie obszaru strony) ale z oryginalnego obrazu
+        return cv2.warpPerspective(image2warp, matrix, (600, 800))
+    else:
+        return None
 
 
 def createRectangleImage(height, width):
