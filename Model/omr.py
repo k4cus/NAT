@@ -1,4 +1,6 @@
 import base64
+import hashlib
+import os
 
 import cv2
 import numpy as np
@@ -46,7 +48,9 @@ class omr:
             try:
                 cv2.imwrite("debugging-opencv/2_found-page-1.png", img)
             except:
-                print("No page found")
+                # TODO storing to exam folder pages that are not found correctly
+                print("No page found1")
+                cv2.imwrite("debugging-opencv/9_no_page_found_"+str(hashlib.md5(img_preprocessed).hexdigest())+".png", img_preprocessed)
 
             if img is None:
                 skip_shadows = True
@@ -57,7 +61,7 @@ class omr:
                 try:
                     cv2.imwrite("debugging-opencv/2_found-page-2.png", img_preprocessed)
                 except:
-                    print("No page found")
+                    print("No page found2")
 
                 page_img = img_preprocessed
                 if img_preprocessed is None:
@@ -72,12 +76,12 @@ class omr:
             screenshot = omr.preprocess_image(self, screenshot)
             img_preprocessed = omr.find_page(self, screenshot, coords)
             if img_preprocessed is None:
-                print("NO PAGE FOUND")
+                print("NO PAGE FOUND3")
                 return None, None, None, None, None, screenshot
             page_img = img_preprocessed
             if len(img_preprocessed.shape)==3:
                 img_preprocessed = cv2.cvtColor(img_preprocessed, cv2.COLOR_BGR2GRAY)
-            print("PAGE FOUND")
+            print("PAGE FOUND4")
             img_preprocessed = omr.remove_shadows(self, img_preprocessed)
             cv2.imwrite("debugging-opencv/7_new_preprocessed.png", img_preprocessed)
 
@@ -191,7 +195,17 @@ class omr:
         return index_txt, full_answers, group, page_img, images_warped, page_img_grid
 
     def loadImageFromFile(self, path):
-        img = cv2.imread(path)
+        # work around reading from folders with local capitals
+        current_dir = os.getcwd()
+        try:
+            directory = os.path.dirname(path)
+            filename = os.path.basename(path)
+            os.chdir(directory)
+            img = cv2.imread(filename)
+        except:
+            print("Error reading image from file:", path)
+        finally:
+            os.chdir(current_dir)
         return img
 
     def remove_shadows(self, img):
@@ -213,7 +227,7 @@ class omr:
     def preprocess_image(self, img):
         normalized_img = np.zeros((800, 800))
         img = cv2.normalize(img, normalized_img, 0, 255, cv2.NORM_MINMAX)
-        img = cv2.GaussianBlur(img, (3, 3), 1)
+        # img = cv2.GaussianBlur(img, (3, 3), 1)  # gausian blur psuje detekcje aruco znacznikow?
         return img
 
     def find_page(self, img, coords=None):
