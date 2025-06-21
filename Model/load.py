@@ -40,7 +40,13 @@ class loadAnswers:
                     img = omr.omr.loadImageFromFile(self, file_path)
 
                 cv2.imwrite("debugging-opencv/camera-test.png", img)
+                # Sprawdź liczbę kanałów w obrazie
+                if len(img.shape) == 2:  # Obraz w skali szarości
+                    img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+                elif img.shape[2] == 4:  # Obraz RGBA
+                    img = cv2.cvtColor(img, cv2.COLOR_RGBA2BGR)
 
+                # Konwertuj obraz do skali szarości
                 img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
                 index, answers, group, page_img, images_warped, page_img_grid = omr.omr.processOneSheet(self, img)
