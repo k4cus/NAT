@@ -1,4 +1,5 @@
 import base64
+import hashlib
 import os
 
 import cv2
@@ -47,7 +48,9 @@ class omr:
             try:
                 cv2.imwrite("debugging-opencv/2_found-page-1.png", img)
             except:
+                # TODO storing to exam folder pages that are not found correctly
                 print("No page found1")
+                cv2.imwrite("debugging-opencv/9_no_page_found_"+str(hashlib.md5(img_preprocessed).hexdigest())+".png", img_preprocessed)
 
             if img is None:
                 skip_shadows = True
@@ -224,7 +227,7 @@ class omr:
     def preprocess_image(self, img):
         normalized_img = np.zeros((800, 800))
         img = cv2.normalize(img, normalized_img, 0, 255, cv2.NORM_MINMAX)
-        img = cv2.GaussianBlur(img, (3, 3), 1)
+        # img = cv2.GaussianBlur(img, (3, 3), 1)  # gausian blur psuje detekcje aruco znacznikow?
         return img
 
     def find_page(self, img, coords=None):

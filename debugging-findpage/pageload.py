@@ -15,7 +15,7 @@ def change_brightness(input_image, contrast = 1.0, brightness=30):
     return img
 
 # Wczytaj obraz
-image = cv2.imread("img_8.png")
+image = cv2.imread("img3.png")
 
 # Create the sharpening kernel
 # kernel = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]])
@@ -41,7 +41,7 @@ elif image.shape[2] == 4:  # Obraz RGBA
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
 # Zastosuj progowanie adaptacyjne - znacząco poprawia detekcję markerów
-gray = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 91, 5)
+gray = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 241, 3)
 
 cv2.imshow('Gray Image', gray)
 
@@ -81,6 +81,15 @@ if ids is not None and len(ids) >= 4:
     cv2.imshow('Warped Image', warped_image)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+elif ids is not None and len(ids) == 3:
+    # Posortuj wykryte znaczniki na podstawie ich ID
+    ids = ids.flatten()
+    sorted_indices = np.argsort(ids)
+    corners = [corners[i] for i in sorted_indices]
+    print(sorted_indices, ids)
+    image = cv2.resize(image, (600, 800))
+    cv2.imshow('Original Image', image)
+    cv2.waitKey(0)
 else:
     image = cv2.resize(image, (600, 800))
     cv2.imshow('Original Image', image)

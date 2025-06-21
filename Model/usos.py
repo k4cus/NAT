@@ -1,5 +1,5 @@
 import csv
-
+import chardet
 # 0. needs a list of nr_albumu, points and grading system
 # 1. export data from USOS (input a file)
 # 2. choose an exam type ("zerówka" or "pierwszy termin")
@@ -25,7 +25,11 @@ example_results = {
 
 #results = example_results
 def import_data(file):
-    with open(file) as csv_file:
+    with open(file, 'rb') as f:
+        rawdata = f.read(10000)
+        result = chardet.detect(rawdata)
+        encoding = result['encoding']
+    with open(file, encoding=encoding) as csv_file:
         imported_USOS_file = csv.reader(csv_file, delimiter=";")
         data = {}
         line_count = 0
