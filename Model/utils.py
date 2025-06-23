@@ -151,6 +151,19 @@ def find_contours_page(img, num_rectangles):
     # Zdefiniuj słownik ArUco i parametry detekcji
     aruco_dict = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_250)
     parameters = cv2.aruco.DetectorParameters()
+    # parameters.adaptiveThreshWinSizeMin = 5
+    # parameters.adaptiveThreshWinSizeMax = 55
+    # parameters.adaptiveThreshWinSizeStep = 5
+    # parameters.adaptiveThreshConstant = 7
+
+    # parameters.minMarkerPerimeterRate = 0.03
+    # parameters.maxMarkerPerimeterRate = 4.0
+
+    # parameters.polygonalApproxAccuracyRate = 0.03
+    # parameters.minCornerDistanceRate = 0.05
+
+    parameters.minDistanceToBorder = 0
+    # parameters.markerBorderBits = 1
 
     # Utwórz detektor znaczników ArUco
     detector = cv2.aruco.ArucoDetector(aruco_dict, parameters)
@@ -160,7 +173,7 @@ def find_contours_page(img, num_rectangles):
     warped_image = detectAruco(detector, gray, img)
 
     for c in range(1, 5, 2):
-        for i in range(51, 292, 10):
+        for i in range(51, 322, 10):
             print("c: " + str(c) + " i: " + str(i))
             # Zastosuj progowanie adaptacyjne - znacząco poprawia detekcję markerów
             imgThresholded = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, i, c)

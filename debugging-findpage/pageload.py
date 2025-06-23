@@ -15,7 +15,7 @@ def change_brightness(input_image, contrast = 1.0, brightness=30):
     return img
 
 # Wczytaj obraz
-image = cv2.imread("img3.png")
+image = cv2.imread("img4.png")
 
 # Create the sharpening kernel
 # kernel = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]])
@@ -41,7 +41,7 @@ elif image.shape[2] == 4:  # Obraz RGBA
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
 # Zastosuj progowanie adaptacyjne - znacząco poprawia detekcję markerów
-gray = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 241, 3)
+gray = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 291, 1)
 
 cv2.imshow('Gray Image', gray)
 
