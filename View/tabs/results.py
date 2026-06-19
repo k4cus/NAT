@@ -1,3 +1,4 @@
+import csv
 import flet as ft
 import os
 from Model.usos import import_data
@@ -19,7 +20,7 @@ class resultsTab:
         self.ftTextFieldImport = ft.TextField(value=self.text, disabled=True, width=700)
         self.usosFilePath = ""
         self.saveButton = ft.ElevatedButton(text=self.t("save-to-dir"), on_click=self.saveExportedDirPicker, disabled=True)
-        self.saveButtonUsos = ft.ElevatedButton(text=self.t("save-to-dir-usos"), on_click=self.saveExportedUsosDirPicker, disabled=True)
+        self.saveButtonUsos = ft.ElevatedButton(text=self.t("save-to-dir-usos"), on_click=self.saveExportedUsos, disabled=True)
         self.filePicked = False
         self.resultText = ft.Text(value=self.t("saved-usos"), color="blue", size=20)
         self.dialog = ft.AlertDialog(
@@ -67,9 +68,11 @@ class resultsTab:
     
 
     def saveExportedDirPicker(self, e):
+        print("saveExportedDirPicker")
         self.exportDirPicker.get_directory_path(initial_directory=".")
 
     def saveExportedUsosDirPicker(self, e):
+        print("saveExportedUsosDirPicker")
         self.usosExportDirPicker.get_directory_path(initial_directory=".")
 
     def pickFileToRead(self, e):
@@ -91,6 +94,7 @@ class resultsTab:
         self.saveExported()
 
     def onFilePickResultUsos(self, e: ft.FilePickerResultEvent):
+        print("onFilePickResultUsos")
         exam_name = self.controller.getExamName()
         if isinstance(e, str):
             self.usosFilePath = e
@@ -106,6 +110,7 @@ class resultsTab:
         self.unlockSave()
 
     def saveExportedUsos(self, e: ft.FilePickerResultEvent):
+        print("saveExportedUsos")
         exam_name = self.controller.getExamName()
         grid_values = []
         # Iterate through each row in the grid container
@@ -116,25 +121,38 @@ class resultsTab:
             for col_index in range(2, len(row.controls)):
                 cell = row.controls[col_index]
                 
-                if isinstance(cell, ft.TextField):  # Ensure it's a TextField
-                    row_values.append(cell.value)  # Add the value of the TextField to the row list
+                if isinstance(cell, ft.TextField):
+                    if self.is_number(cell.value) and (float(cell.value) < 6.0):# Ensure it's a grade not id or indexs number
+                        row_values.append("{:.1f}".format(float(cell.value)).replace(".", ","))  # one digit decimal place and comma as separator is required by usos in 2206
+                    else:
+                        row_values.append(cell.value)  # Add the value of the TextField to the row list
             
             row_values = row_values[1:-1]
-            print("AAAA", row_values)
+            # print("Export: ", row_values)
             if row_values[0] != "" and row_values[3] != "":
                 grid_values.append(row_values)
 
         if not os.path.isdir("exams-data/" + exam_name + "/usos/"):
             os.mkdir("exams-data/" + exam_name + "/usos/")
-        with open("exams-data/" + exam_name + "/usos/" + "exportedUSOS.csv", "w") as file:
-            for row in grid_values:
-                file.write(";".join(row) + "\n")
-        if e.path != None:
-            with open(e.path + "/exportedUSOS.csv", "w") as file:
-                for row in grid_values:
-                    file.write(";".join(row) + "\n")
+        # with open("exams-data/" + exam_name + "/usos/" + "exportedUSOS.csv", "w", encoding="utf-8") as file:
+        #     for row in grid_values:
+        #         file.write(";".join(row) + "\n")
+        with open(
+                f"exams-data/{exam_name}/usos/exportedUSOS.csv",
+                "w",
+                encoding="utf-8",
+                newline=""
+        ) as file:
+            writer = csv.writer(file, delimiter=";")
+            writer.writerows(grid_values)
+
+        # if e.path != None:
+        #     with open(e.path + "/exportedUSOS.csv", "w") as file:
+        #         for row in grid_values:
+        #             file.write(";".join(row) + "\n")
 
     def saveExported(self, e):
+        print("saveExported")
         exam_name = self.controller.getExamName()
         grid_values = []
 
@@ -209,7 +227,7 @@ class resultsTab:
         fixed_widths = [70, 70]  
         fixed_total = sum(fixed_widths)  
 
-        original_widths = [100, 100, 100, 100, 100, 100, 150, 150, 100, 150, 100]  
+        original_widths = [100, 100, 150, 100, 100, 100, 150, 150, 100, 150, 100]
         total_original_width = sum(original_widths)
 
         available_width = window_width - fixed_total  
@@ -229,8 +247,8 @@ class resultsTab:
                     ft.TextField(value=f"USOS", width=widths[1], disabled=True, border_radius=0, bgcolor="lightgray", color="black"),
                     ft.TextField(value=f"indeks", width=widths[2], disabled=True, border_radius=0, bgcolor="lightgray", color="black"),
                     ft.TextField(value=f"os_id", width=widths[3], disabled=True, border_radius=0, bgcolor="lightgray", color="black"),
-                    ft.TextField(value=f"imie", width=widths[4], disabled=True, border_radius=0, bgcolor="lightgray", color="black"),
-                    ft.TextField(value=f"nazwisko", width=widths[5], disabled=True, border_radius=0, bgcolor="lightgray", color="black"),
+                    ft.TextField(value=f"nazwisko", width=widths[4], disabled=True, border_radius=0, bgcolor="lightgray", color="black"),
+                    ft.TextField(value=f"imie", width=widths[5], disabled=True, border_radius=0, bgcolor="lightgray", color="black"),
                     ft.TextField(value=f"zerówka", width=widths[6], disabled=True, border_radius=0, bgcolor="lightgray", color="black"),
                     ft.TextField(value=f"komentarz", width=widths[7], disabled=True, border_radius=0, bgcolor="lightgray", color="black"),
                     ft.TextField(value=f"komentarz dla studenta", width=widths[8], disabled=True, border_radius=0, bgcolor="lightgray", color="black"),
@@ -287,3 +305,10 @@ class resultsTab:
         for index in os_dict_index.keys():
             Student.add_student(index, os_id=os_dict_index[index][0], name=os_dict_index[index][1], surname=os_dict_index[index][2])
         print("OS DICT", os_dict_index)
+
+    def is_number(self, s):
+        try:
+            float(s)
+            return True
+        except ValueError:
+            return False

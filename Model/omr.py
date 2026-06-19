@@ -167,10 +167,12 @@ class omr:
         all_answers = []
         for answer in images_answers[:-1]:
             answers = []
+            print("Answer: ", answer)
             for question in answer:
-                if 2 * statistics.median(question) < max(question) and max(question) > 100:
+                if 2 * statistics.median(question) < max(question) and max(question) > (round(max(max(answer)) * 0.3)):  # here is a threashold that classifies in this is marked answer
                     answers.append(ans_array[question.index(max(question))])
                 else:
+                    print("Question answer not recognized: ", question, "Median: ", statistics.median(question), "Max question: ", max(question), "Max answer: ", max(max(answer)))
                     answers.append("0")
             all_answers.append(answers)
         full_answers = []
@@ -270,6 +272,7 @@ class omr:
         return img_thresh
 
     def get_answers(self, img, img_answers_data, is_index=False):
+        # function returns how many pixels are black inside the cirle
         # search for all grid areas, find the most colored ones, add threshold
 
         height_answer = img_answers_data[1]
@@ -285,6 +288,8 @@ class omr:
 
                 for col in range(columns):
                     # 0 - black, 255 - white
+                    cv2.imwrite("debugging-opencv/5_img.png", img) # whole image
+                    # we cut out one answer
                     crop_img = img[round(start_height):round(start_height + height_answer), round(start_width):round(start_width + width_answer)]
                     
                     crop_img_size = [crop_img.shape[0], crop_img.shape[1]]
@@ -312,10 +317,9 @@ class omr:
 
                     matching_pixels = np.sum(crop_img == mask)
                     matching_pixels_negative = np.sum(crop_img == mask_negative)
-                    #print(f"Matching Pixels: ", matching_pixels, matching_pixels_negative)
-
-                    if matching_pixels_negative/(len(mask_negative)*len(mask_negative[0])) > 0.6:
-                        print("wrong answer")
+                    print(f"Matching and Matching Negative Pixels: ", matching_pixels, matching_pixels_negative)
+                    if matching_pixels_negative/(len(mask_negative)*len(mask_negative[0])) > 0.4: # fully colored should be marked as student change answer - here should be sth. more dynamic threshold not 0.4
+                        print("Wrong answer marked - pixels negative: ",    matching_pixels_negative, "pixels: ", matching_pixels, "len mask_negative: ", len(mask_negative), "len max_negative[0]: ", len(mask_negative[0]))
                         matching_pixels = 0
 
                     answers_array_row.append(matching_pixels)

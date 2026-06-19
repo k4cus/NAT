@@ -7,4 +7,3 @@ aenum
 pynput
 flet_core
 chardet
-

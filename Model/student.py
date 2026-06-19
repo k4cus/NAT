@@ -67,7 +67,7 @@ class Student:
 
     @classmethod
     def get_all_students(cls):
-        return [
+        all_students = [
             [
                 student.index, student.os_id, student.tested, student.name, student.surname, 
                 student.grade0, student.comment0, student.comment_student, student.grade1, 
@@ -75,3 +75,4 @@ class Student:
             ]
             for student in cls._students.values()
         ]
+        return sorted(all_students, key=lambda student: student[5]) # sort by surname
